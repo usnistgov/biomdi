@@ -19,7 +19,7 @@
 #include <string.h>
 
 #include <fmr.h>
-#include <m1io.h>
+#include <biomdimacro.h>
 
 // Define a constant for the size of the Extended Data Header, in bytes, which
 // is comprised of the Extended Area Type ID and Extended Data Length

@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fmr.h>
-#include <m1io.h>
+#include <biomdimacro.h>
 
 #include "fmrprune.h"
 

@@ -24,7 +24,7 @@
 #include <sys/types.h>
 
 #include <fmr.h>
-#include <m1io.h>
+#include <biomdimacro.h>
 
 /* Global option indicators */
 static int v_opt;

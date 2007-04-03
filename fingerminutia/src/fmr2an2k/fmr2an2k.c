@@ -47,7 +47,7 @@
 #include <unistd.h>
 
 #include <fmr.h>
-#include <m1io.h>
+#include <biomdimacro.h>
 
 /******************************************************************************/
 /* Print a how-to-use the program message.                                    */

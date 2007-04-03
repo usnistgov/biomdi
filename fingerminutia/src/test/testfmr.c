@@ -16,7 +16,7 @@
 #include <string.h>
 
 #include <fmr.h>
-#include <m1io.h>
+#include <biomdimacro.h>
 
 // Test program to exercise some of the FMR library functions.
 

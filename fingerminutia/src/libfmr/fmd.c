@@ -18,7 +18,7 @@
 #include <string.h>
 
 #include <fmr.h>
-#include <m1io.h>
+#include <biomdimacro.h>
 
 int
 new_fmd(struct finger_minutiae_data **fmd)

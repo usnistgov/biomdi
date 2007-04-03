@@ -28,7 +28,7 @@
 #include <unistd.h>
 
 #include <fmr.h>
-#include <m1io.h>
+#include <biomdimacro.h>
 
 #define MAX_REC_LEN	4500
 #define MAX_RIDGE_COUNT	15

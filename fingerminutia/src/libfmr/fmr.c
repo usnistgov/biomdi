@@ -24,8 +24,8 @@
 #include <string.h>
 
 #include <fmr.h>
-#include <m1.h>
-#include <m1io.h>
+#include <biomdi.h>
+#include <biomdimacro.h>
 
 /******************************************************************************/
 /* Implement the interface for allocating and freeing minutiae records        */

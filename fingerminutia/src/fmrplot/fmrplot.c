@@ -29,7 +29,7 @@
 #include <sys/types.h>
 
 #include <fmr.h>
-#include <m1io.h>
+#include <biomdimacro.h>
 
 #define PLOTDIAM	8	// Minutiae circle plot diamter, in pixels
 #define PLOTLENGTH	12	// Minutiae tail plot length, in pixels

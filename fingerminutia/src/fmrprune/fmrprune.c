@@ -25,7 +25,7 @@
 #include <sys/types.h>
 
 #include <fmr.h>
-#include <m1io.h>
+#include <biomdimacro.h>
 
 #include "fmrprune.h"
 
