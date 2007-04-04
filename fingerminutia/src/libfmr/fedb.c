@@ -81,7 +81,7 @@ add_cddb_to_fed(struct core_delta_data_block *cddb,
 /* Process the Finger Extended Data Block record.                             */
 /******************************************************************************/
 int
-new_fedb(struct finger_extended_data_block **fedb)
+new_fedb(unsigned int format_std, struct finger_extended_data_block **fedb)
 {
 	struct finger_extended_data_block *lfedb;
 
@@ -93,6 +93,7 @@ new_fedb(struct finger_extended_data_block **fedb)
 	}
 	memset((void *)lfedb, 0, sizeof(struct finger_extended_data_block));
 	lfedb->partial = FALSE;
+	lfedb->format_std = format_std;
 	TAILQ_INIT(&lfedb->extended_data);
 	*fedb = lfedb;
 	return (0);
@@ -149,7 +150,7 @@ read_fedb(FILE *fp, struct finger_extended_data_block *fedb)
 		if (sval2 > block_length) 
 			ERR_OUT("Extended data length %d is larger than remaining block length of %u", sval2, block_length);
 
-		if (new_fed(&fed, sval1, sval2) < 0)
+		if (new_fed(fedb->format_std, &fed, sval1, sval2) < 0)
 			ERR_OUT("Cannot create new extended data block");
 
 		ret = read_fed(fp, fed);
@@ -269,8 +270,8 @@ add_fed_to_fedb(struct finger_extended_data *fed,
 }
 
 int 
-new_fed(struct finger_extended_data **fed, unsigned short type_id,
-	unsigned short length)
+new_fed(unsigned int format_std, struct finger_extended_data **fed,
+	unsigned short type_id, unsigned short length)
 {
 	struct finger_extended_data *lfed;
 	struct ridge_count_data_block *rcdb;
@@ -285,6 +286,7 @@ new_fed(struct finger_extended_data **fed, unsigned short type_id,
 	}
 	memset((void *)lfed, 0, sizeof(struct finger_extended_data));
 
+	lfed->format_std = format_std;
 	lfed->type_id = type_id;
 	lfed->length = length;
 	lfed->partial = FALSE;
@@ -298,7 +300,7 @@ new_fed(struct finger_extended_data **fed, unsigned short type_id,
 		break;
 
 	case FED_CORE_AND_DELTA :
-		ret = new_cddb(&cddb);
+		ret = new_cddb(format_std, &cddb);
 		if (ret != 0)
 			ERR_OUT("Could not create new core/delta block");
 		add_cddb_to_fed(cddb, lfed);
@@ -700,7 +702,7 @@ validate_rcd(struct ridge_count_data *rcd)
 /* Process the Core and Delta Data Format block and records.                  */
 /******************************************************************************/
 int
-new_cddb(struct core_delta_data_block **cddb)
+new_cddb(unsigned int format_std, struct core_delta_data_block **cddb)
 {
 	struct core_delta_data_block *lcddb;
 
@@ -711,6 +713,7 @@ new_cddb(struct core_delta_data_block **cddb)
 		return (-1);
 	}
 	memset((void *)lcddb, 0, sizeof(struct core_delta_data_block));
+	lcddb->format_std = format_std;
 	TAILQ_INIT(&lcddb->cores);
 	TAILQ_INIT(&lcddb->deltas);
 
@@ -756,7 +759,7 @@ add_dd_to_cddb(struct delta_data *dd, struct core_delta_data_block *cddb)
 }
 
 int
-new_cd(struct core_data **cd)
+new_cd(unsigned int format_std, struct core_data **cd)
 {
 	struct core_data *lcd;
 
@@ -766,6 +769,7 @@ new_cd(struct core_data **cd)
 		return (-1);
 	}
 	memset((void *)lcd, 0, sizeof(struct core_data));
+	lcd->format_std = format_std;
 
 	*cd = lcd;
 	return (0);
@@ -778,7 +782,7 @@ free_cd(struct core_data *cd)
 }
 
 int
-new_dd(struct delta_data **dd)
+new_dd(unsigned int format_std, struct delta_data **dd)
 {
 	struct delta_data *ldd;
 
@@ -788,6 +792,7 @@ new_dd(struct delta_data **dd)
 		return (-1);
 	}
 	memset((void *)ldd, 0, sizeof(struct delta_data));
+	ldd->format_std = format_std;
 
 	*dd = ldd;
 	return (0);
@@ -814,7 +819,7 @@ read_cddb(FILE *fp, struct core_delta_data_block *cddb)
 
 	// Read each Core Data record
 	for (i = 0; i < cddb->num_cores; i++) {
-		ret = new_cd(&cd);
+		ret = new_cd(cddb->format_std, &cd);
 		if (ret != 0)
 			ERR_OUT("Could not allocate core data record");
 
@@ -833,7 +838,7 @@ read_cddb(FILE *fp, struct core_delta_data_block *cddb)
 
 	// Read each Delta Data record
 	for (i = 0; i < cddb->num_deltas; i++) {
-		ret = new_dd(&dd);
+		ret = new_dd(cddb->format_std, &dd);
 		if (ret != 0)
 			ERR_OUT("Could not allocate delta data record");
 

@@ -169,7 +169,7 @@ main(int argc, char *argv[])
 	get_options(argc, argv);
 
 	// Allocate the FMR record in memory
-	if (new_fmr(&ifmr) < 0)
+	if (new_fmr(FMR_STD_ANSI, &ifmr) < 0)
 		ALLOC_ERR_OUT("Input FMR");
 
 	// Read the FMR

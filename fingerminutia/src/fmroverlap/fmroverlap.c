@@ -321,9 +321,9 @@ main(int argc, char *argv[])
 
 	get_options(argc, argv);
 
-	if (new_fmr(&fmrs[0]) < 0)
+	if (new_fmr(FMR_STD_ANSI, &fmrs[0]) < 0)
 		ALLOC_ERR_OUT("Input FMR");
-	if (new_fmr(&fmrs[1]) < 0)
+	if (new_fmr(FMR_STD_ANSI, &fmrs[1]) < 0)
 		ALLOC_ERR_OUT("Input FMR");
 
 	if (read_fmr(in_fp[0], fmrs[0]) != READ_OK) {

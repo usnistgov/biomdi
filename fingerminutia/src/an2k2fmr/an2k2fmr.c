@@ -379,7 +379,7 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 	/* Add the core records */
 	if (lookup_ANSI_NIST_field(&field, &idx, CRP_ID, anrecord) == TRUE) {
 		 if (have_fedb == 0) {
-			if (new_fedb(&fedb) != 0)
+			if (new_fedb(FMR_STD_ANSI, &fedb) != 0)
 				ALLOC_ERR_OUT("Extended Data Block");
 			have_fedb = 1;
 		}
@@ -388,7 +388,7 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 		 * the new core/delta data block length only.
 		 */
 		if (have_cddb == 0) {
-			if (new_fed(&fed, FED_CORE_AND_DELTA,
+			if (new_fed(FMR_STD_ANSI, &fed, FED_CORE_AND_DELTA,
 			    FED_HEADER_LENGTH) != 0)
 				ALLOC_ERR_EXIT("Extended Data record");
 			have_cddb = 1;
@@ -397,7 +397,7 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 
 		for (subfield = 0; subfield < field->num_subfields;
 		    subfield++) {
-			if (new_cd(&cd) != 0)
+			if (new_cd(FMR_STD_ANSI, &cd) != 0)
 				ALLOC_ERR_EXIT("Core Data");
 			/* The x,y coordinates are strung together; 
 			 * separate them. */
@@ -420,7 +420,7 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 	/* Add the delta records */
 	if (lookup_ANSI_NIST_field(&field, &idx, DLT_ID, anrecord) == TRUE) {
 		 if (have_fedb == 0) {
-			if (new_fedb(&fedb) != 0)
+			if (new_fedb(FMR_STD_ANSI, &fedb) != 0)
 				ALLOC_ERR_OUT("Extended Data Block");
 			have_fedb = 1;
 		}
@@ -429,7 +429,7 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 		 * the new core/delta data block length only.
 		 */
 		if (have_cddb == 0) {
-			if (new_fed(&fed, FED_CORE_AND_DELTA,
+			if (new_fed(FMR_STD_ANSI, &fed, FED_CORE_AND_DELTA,
 			    FED_HEADER_LENGTH) != 0)
 				ALLOC_ERR_EXIT("Extended Data record");
 			have_cddb = 1;
@@ -438,7 +438,7 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 
 		for (subfield = 0; subfield < field->num_subfields;
 		    subfield++) {
-			if (new_dd(&dd) != 0)
+			if (new_dd(FMR_STD_ANSI, &dd) != 0)
 				ALLOC_ERR_EXIT("Delta Data");
 			memcpy(buf, 
 			    field->subfields[subfield]->items[0]->value, 4);
@@ -478,7 +478,7 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 
 	/* For each minutiae index number, create the minutiae data records */
 	for (subfield = 0; subfield < fvmr->number_of_minutiae; subfield++) {
-		if (new_fmd(&fmd) != 0)
+		if (new_fmd(FMR_STD_ANSI, &fmd) != 0)
 			ALLOC_ERR_OUT("finger minutiae data record");
 
 		/* The x,y,theta values are in the second item,
@@ -515,7 +515,7 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 		 */
 		if (field->subfields[subfield]->num_items > 4) {
 		   	if (have_fedb == 0) {
-				if (new_fedb(&fedb) != 0)
+				if (new_fedb(FMR_STD_ANSI, &fedb) != 0)
 					ALLOC_ERR_OUT("Extended Data Block");
 				have_fedb = 1;
 			}
@@ -524,7 +524,7 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 			 * the new ridge count data block length only.
 			 */
 			if (have_rcdb == 0) {
-				if (new_fed(&fed, FED_RIDGE_COUNT,
+				if (new_fed(FMR_STD_ANSI, &fed, FED_RIDGE_COUNT,
 				    FED_HEADER_LENGTH) != 0)
 					ALLOC_ERR_EXIT("Extended Data record");
 				have_rcdb = 1;
@@ -674,13 +674,13 @@ main(int argc, char *argv[])
 			idc = strtol(field->subfields[0]->items[0]->value, 
 			    NULL, 10);
 
-			if (new_fmr(&fmr) != 0)
+			if (new_fmr(FMR_STD_ANSI, &fmr) != 0)
 				ALLOC_ERR_EXIT("FMR");
 
 			if (init_fmr(fmr, ansi_nist, idc) != 0)
 				ERR_OUT("Initializing FMR");
 
-			if (new_fvmr(&fvmr) != 0)
+			if (new_fvmr(FMR_STD_ANSI, &fvmr) != 0)
 				ALLOC_ERR_EXIT("FVMR");
 			add_fvmr_to_fmr(fvmr, fmr);
 

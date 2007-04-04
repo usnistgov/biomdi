@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	if (new_fmr(&fmr) < 0)
+	if (new_fmr(FMR_STD_ANSI, &fmr) < 0)
 		ALLOC_ERR_EXIT("Could not allocate FMR\n");
 
 	total_length = 0;
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
 		free_fmr(fmr);
 
-		if (new_fmr(&fmr) < 0)
+		if (new_fmr(FMR_STD_ANSI, &fmr) < 0)
 			ALLOC_ERR_EXIT("Could not allocate FMR\n");
 	}
 	if (ret != READ_OK)

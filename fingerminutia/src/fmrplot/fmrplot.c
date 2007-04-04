@@ -315,7 +315,7 @@ main(int argc, char *argv[])
 	for (i = 0; i < infilecount; i++) {
 	
 		// Allocate the FMR record in memory
-		if (new_fmr(&fmrs[i]) < 0)
+		if (new_fmr(FMR_STD_ANSI, &fmrs[i]) < 0)
 			ALLOC_ERR_EXIT("FMR");
 
 		fmr = fmrs[i];

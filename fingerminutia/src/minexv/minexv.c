@@ -230,7 +230,7 @@ main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	if (new_fmr(&fmr) < 0) {
+	if (new_fmr(FMR_STD_ANSI, &fmr) < 0) {
 		fprintf(stderr, "could not allocate FMR\n");
 		exit(EXIT_FAILURE);
 	}
@@ -262,7 +262,7 @@ main(int argc, char *argv[])
 		// Free the entire FMR
 		free_fmr(fmr);
 
-		if (new_fmr(&fmr) < 0) {
+		if (new_fmr(FMR_STD_ANSI, &fmr) < 0) {
 			fprintf(stderr, "could not allocate FMR\n");
 			exit(EXIT_FAILURE);
 		}

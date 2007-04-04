@@ -84,7 +84,7 @@ load_fvmr(FILE *fp, struct finger_minutiae_record *fmr)
 	struct finger_view_minutiae_record *fvmr;
 	unsigned char cval;
 
-	if (new_fvmr(&fvmr) < 0)
+	if (new_fvmr(FMR_STD_ANSI, &fvmr) < 0)
 		ALLOC_ERR_RETURN("FVMR");
 
 	if (fscanf(fp, "%hhu %hhx %hhu %hhu",
@@ -112,7 +112,7 @@ load_fmds(FILE *fp, struct finger_view_minutiae_record *fvmr)
 	// index x y theta type
 	//
 	for (i = 0; i < fvmr->number_of_minutiae; i++) {
-		if (new_fmd(&fmd) < 0)
+		if (new_fmd(FMR_STD_ANSI, &fmd) < 0)
 			ALLOC_ERR_RETURN("FMD for XYT data");
 
 		if (fscanf(fp, "%u %hu %hu %hhu %hhu",
@@ -144,11 +144,11 @@ load_rcs(FILE *fp, struct finger_view_minutiae_record *fvmr)
 	if (fvmr->extended != NULL)
 		fedb = fvmr->extended;
 	else
-		if (new_fedb(&fedb) != 0)
+		if (new_fedb(FMR_STD_ANSI, &fedb) != 0)
 			ALLOC_ERR_RETURN("Extended Data block");
 
 	// Will set length of the FED to 0, for now; will set later
-	if (new_fed(&fed, FED_RIDGE_COUNT, 0) != 0)
+	if (new_fed(FMR_STD_ANSI, &fed, FED_RIDGE_COUNT, 0) != 0)
 		ALLOC_ERR_RETURN("Extended Data record");
 
 	if (fscanf(fp, "%hhu %u", &fed->rcdb->method, &rcount) < 0)
@@ -203,11 +203,11 @@ load_cds(FILE *fp, struct finger_view_minutiae_record *fvmr)
 	if (fvmr->extended != NULL)
 		fedb = fvmr->extended;
 	else
-		if (new_fedb(&fedb) != 0)
+		if (new_fedb(FMR_STD_ANSI, &fedb) != 0)
 			ALLOC_ERR_RETURN("Extended Data block");
 
 	// Will set length of the FED to 0, for now; will set later
-	if (new_fed(&fed, FED_CORE_AND_DELTA, 0) != 0)
+	if (new_fed(FMR_STD_ANSI, &fed, FED_CORE_AND_DELTA, 0) != 0)
 		ALLOC_ERR_RETURN("Extended Data record");
 
 	// Read the Cores first
@@ -217,7 +217,7 @@ load_cds(FILE *fp, struct finger_view_minutiae_record *fvmr)
 
 	length = CORE_DATA_HEADER_LENGTH;
 	for (i = 0; i < fed->cddb->num_cores; i++) {
-		if (new_cd(&cd) != 0)
+		if (new_cd(FMR_STD_ANSI, &cd) != 0)
 			ALLOC_ERR_RETURN("Core record");
 		// Read the proper number of bytes, based on type of core data
 		if (fed->cddb->core_type != CORE_TYPE_NONANGULAR)
@@ -246,7 +246,7 @@ load_cds(FILE *fp, struct finger_view_minutiae_record *fvmr)
 
 	length += DELTA_DATA_HEADER_LENGTH;
 	for (i = 0; i < fed->cddb->num_deltas; i++) {
-		if (new_dd(&dd) != 0)
+		if (new_dd(FMR_STD_ANSI, &dd) != 0)
 			ALLOC_ERR_RETURN("Delta record");
 		// Read the proper number of bytes, based on type of delta data
 		if (fed->cddb->delta_type != DELTA_TYPE_NONANGULAR)
@@ -368,7 +368,7 @@ main(int argc, char *argv[])
 	}
 
 	// Read in the file containing the header information
-	if (new_fmr(&fmr) < 0)
+	if (new_fmr(FMR_STD_ANSI, &fmr) < 0)
 		ALLOC_ERR_EXIT("FMR");
 
 	if (load_hdr(hdr_fp, fmr) != 0) {

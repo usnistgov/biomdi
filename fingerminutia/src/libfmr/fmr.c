@@ -31,7 +31,7 @@
 /* Implement the interface for allocating and freeing minutiae records        */
 /******************************************************************************/
 int
-new_fmr(struct finger_minutiae_record **fmr)
+new_fmr(unsigned int format_std, struct finger_minutiae_record **fmr)
 {
 	struct finger_minutiae_record *lfmr;
 	lfmr = (struct finger_minutiae_record *)malloc(
@@ -42,6 +42,7 @@ new_fmr(struct finger_minutiae_record **fmr)
 	}
 	memset((void *)lfmr, 0, sizeof(struct finger_minutiae_record));
 	TAILQ_INIT(&lfmr->finger_views);
+	lfmr->format_std = format_std;
 	*fmr = lfmr;
 	return 0;
 }
@@ -132,7 +133,7 @@ read_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 
 	// Read the finger views
         for (i = 1; i <= fmr->num_views; i++) {
-		if (new_fvmr(&fvmr) < 0)
+		if (new_fvmr(fmr->format_std, &fvmr) < 0)
 			ERR_OUT("Could not allocate FVMR %d", i);
 
 		ret = read_fvmr(fp, fvmr);

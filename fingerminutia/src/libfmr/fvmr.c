@@ -28,7 +28,7 @@
 /* Records                                                                    */
 /******************************************************************************/
 int
-new_fvmr(struct finger_view_minutiae_record **fvmr)
+new_fvmr(unsigned int format_std, struct finger_view_minutiae_record **fvmr)
 {
 	struct finger_view_minutiae_record *lfvmr;
 
@@ -39,6 +39,7 @@ new_fvmr(struct finger_view_minutiae_record **fvmr)
 		return -1;
 	}
 	memset((void *)lfvmr, 0, sizeof(struct finger_view_minutiae_record));
+	lfvmr->format_std = format_std;
 	lfvmr->extended = NULL;
 	lfvmr->partial = FALSE;
 	TAILQ_INIT(&lfvmr->minutiae_data);
@@ -99,7 +100,7 @@ read_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 
 	// Finger minutiae data
 	for (i = 0; i < fvmr->number_of_minutiae; i++) {
-		if (new_fmd(&fmd) < 0)
+		if (new_fmd(fvmr->format_std, &fmd) < 0)
 			ERR_OUT("Could not allocate FMD %d", i);
 
 		ret = read_fmd(fp, fmd);
@@ -112,7 +113,7 @@ read_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 	}
 
 	// Read the extended data block, if it exists
-	if (new_fedb(&fedb) < 0)
+	if (new_fedb(fvmr->format_std, &fedb) < 0)
 		ERR_OUT("Could not allocate extended data block");
 
 	ret = read_fedb(fp, fedb);

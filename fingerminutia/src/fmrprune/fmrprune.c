@@ -328,7 +328,7 @@ copy_and_select_fvmr(FVMR *src, FVMR *dst, int mcount)
 	}
 
 	for (m = 0; m < mcount; m++) {
-		if (new_fmd(&ofmd) < 0)
+		if (new_fmd(FMR_STD_ANSI, &ofmd) < 0)
 			ALLOC_ERR_EXIT("Output FMD");
 		copy_fmd(fmds[m], ofmd);
 		fmr_length += FMD_DATA_LENGTH;
@@ -356,7 +356,7 @@ main(int argc, char *argv[])
 	get_options(argc, argv);
 
 	// Allocate the FMR record in memory
-	if (new_fmr(&ifmr) < 0)
+	if (new_fmr(FMR_STD_ANSI, &ifmr) < 0)
 		ALLOC_ERR_OUT("Input FMR");
 
 	// Read the FMR
@@ -365,7 +365,7 @@ main(int argc, char *argv[])
 		goto err_out;
 	}
 
-	if (new_fmr(&ofmr) < 0)
+	if (new_fmr(FMR_STD_ANSI, &ofmr) < 0)
 		ALLOC_ERR_OUT("Output FMR");
 	fmr_length = ifmr->record_length_type;
 	copy_fmr(ifmr, ofmr);
@@ -380,7 +380,7 @@ main(int argc, char *argv[])
 			ERR_OUT("getting FVMRs from FMR");
 
 		for (r = 0; r < rcount; r++) {
-			if (new_fvmr(&ofvmr) < 0)
+			if (new_fvmr(FMR_STD_ANSI, &ofvmr) < 0)
 				ALLOC_ERR_OUT("Output FVMR");
 			if (copy_and_select_fvmr(fvmrs[r], ofvmr,
 			    selected_minutiae_count) < 0)

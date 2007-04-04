@@ -21,15 +21,18 @@
 #include <biomdimacro.h>
 
 int
-new_fmd(struct finger_minutiae_data **fmd)
+new_fmd(unsigned int format_std, struct finger_minutiae_data **fmd)
 {
-	*fmd = (struct finger_minutiae_data *)malloc(
+	struct finger_minutiae_data *lfmd;
+	lfmd = (struct finger_minutiae_data *)malloc(
 		sizeof(struct finger_minutiae_data));
-	if (*fmd == NULL) {
+	if (lfmd == NULL) {
 		perror("Failed to allocate Finger Minutiae Data record");
-		return -1;
+		return (-1);
 	}
-	memset((void *)*fmd, 0, sizeof(struct finger_minutiae_data));
+	memset((void *)lfmd, 0, sizeof(struct finger_minutiae_data));
+	lfmd->format_std = format_std;
+	*fmd = lfmd;
 	return 0;
 }
 

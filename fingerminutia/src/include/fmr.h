@@ -7,8 +7,9 @@
  * its use by other parties, and makes no guarantees, expressed or implied,
  * about its quality, reliability, or any other characteristic.
  */
-/******************************************************************************
-/* Header file for the Finger Minutia Record format, as specified in          *//* ANSI/INCITS 378-2004.                                                      */
+/******************************************************************************/
+/* Header file for the Finger Minutia Record format, as specified in          */
+/* ANSI/INCITS 378-2004 and ISO/IEC 19794-2.                                  */
 /*                                                                            */
 /*                                                                            */
 /* Expected layout of the entire finger minutiae record in memory:            */
@@ -60,6 +61,10 @@
 #endif
 
 #define _POSIX_C_SOURCE	1
+
+#define FMR_STD_ANSI		1
+#define FMR_STD_ISO		2
+#define FMR_STD_ISOCOMPACT	3
 
 // The identifier that must appear at the beginning of the record header
 #define FMR_FORMAT_ID 		"FMR"
@@ -138,7 +143,8 @@
 // Representation of a single finger minutiae data record
 #define FMD_DATA_LENGTH		6
 struct finger_minutiae_data {
-#define	fmd_startcopy				type
+#define	fmd_startcopy				format_std
+	unsigned int				format_std;
 	unsigned char				type;
 	unsigned short				x_coord;
 	unsigned char				reserved;
@@ -179,7 +185,8 @@ typedef struct ridge_count_data_block RCDB;
 #define CORE_DATA_HEADER_LENGTH		1
 #define CORE_ANGLE_LENGTH		1
 struct core_data {
-#define	cd_startcopy			x_coord
+#define	cd_startcopy			format_std
+	unsigned int			format_std;
 	unsigned short			x_coord;
 	unsigned short			y_coord;
 	unsigned char			angle;
@@ -194,7 +201,8 @@ typedef struct core_data CD;
 #define DELTA_DATA_HEADER_LENGTH	1
 #define DELTA_ANGLE_LENGTH		1
 struct delta_data {
-#define	dd_startcopy			x_coord
+#define	dd_startcopy			format_std
+	unsigned int			format_std;
 	unsigned short			x_coord;
 	unsigned short			y_coord;
 	unsigned char			angle1;
@@ -208,7 +216,8 @@ typedef struct delta_data DD;
 
 #define CORE_DATA_HEADER_LENGTH		1
 struct core_delta_data_block {
-#define	cddb_startcopy			core_type
+#define	cddb_startcopy			format_std
+	unsigned int			format_std;
 	unsigned char			core_type;
 	unsigned char			num_cores;
 	TAILQ_HEAD(, core_data)		cores;
@@ -225,6 +234,8 @@ typedef struct core_delta_data_block CDDB;
 // When the FED is allocated, it's type is fixed at that point. 
 #define FED_HEADER_LENGTH		4
 struct finger_extended_data {
+#define fed_startcopy				format_std
+	unsigned int				format_std;
 	unsigned short				type_id;
 	unsigned short				length;
 	union {
@@ -244,6 +255,8 @@ typedef struct finger_extended_data FED;
 // is comprised of multiple extended data items
 #define FEDB_HEADER_LENGTH		2
 struct finger_extended_data_block {
+#define fedb_startcopy					format_std
+	unsigned int					format_std;
 	unsigned short					block_length;
 	// Flag to indicate whether a partial EDB was read
 	unsigned int 					partial;
@@ -258,7 +271,8 @@ typedef struct finger_extended_data_block FEDB;
 
 // XXX The field names of this struct should be prefixed with fvmr_
 struct finger_view_minutiae_record {
-#define fvmr_startcopy				finger_number
+#define fvmr_startcopy				format_std
+	unsigned int				format_std;
 	unsigned char				finger_number;
 	unsigned char				view_number;
 	unsigned char				impression_type;
@@ -286,7 +300,8 @@ typedef struct finger_view_minutiae_record FVMR;
 // XXX The field names of this struct should be prefixed with fmr_
 struct finger_minutiae_record {
 	// Representation of the FMR header
-#define fmr_startcopy				format_id
+#define fmr_startcopy				format_std
+	unsigned int				format_std;
 	char					format_id[4];
 	char					spec_version[4];
 	unsigned int				record_length;
@@ -323,7 +338,8 @@ typedef struct finger_minutiae_record FMR;
 /* view list will be initialized to empty.                                    */
 /*                                                                            */
 /* Parameters:                                                                */
-/*   fmr    Address of the pointer to the FMR that will be allocated.         */
+/*   format_std The standard for record (ANSI, ISO, etc.)                     */
+/*   fmr        Address of the pointer to the FMR that will be allocated.     */
 /*                                                                            */
 /* Returns:                                                                   */
 /*   0      Success                                                           */
@@ -331,7 +347,7 @@ typedef struct finger_minutiae_record FMR;
 /*                                                                            */
 /******************************************************************************/
 int
-new_fmr(struct finger_minutiae_record **fmr);
+new_fmr(unsigned int format_std, struct finger_minutiae_record **fmr);
 
 /******************************************************************************/
 /* Free the storage for a Finger Minutiae Record.                             */
@@ -364,6 +380,7 @@ add_fvmr_to_fmr(struct finger_view_minutiae_record *fvmr,
 /* Minutiae Record data list list will be initialized to empty.               */
 /*                                                                            */
 /* Parameters:                                                                */
+/*   format_std The standard for record (ANSI, ISO, etc.)                     */
 /*   fvmr   Address of the pointer to the FVMR structure that will be         */
 /*          allocated.                                                        */
 /*                                                                            */
@@ -373,7 +390,7 @@ add_fvmr_to_fmr(struct finger_view_minutiae_record *fvmr,
 /*                                                                            */
 /******************************************************************************/
 int
-new_fvmr(struct finger_view_minutiae_record **fvmr);
+new_fvmr(unsigned int format_std, struct finger_view_minutiae_record **fvmr);
 
 /******************************************************************************/
 /* Free the storage for a single Finger View Record.                          */
@@ -419,6 +436,7 @@ add_fedb_to_fvmr(struct finger_extended_data_block *fedb,
 /* The record will be initialized to 'NULL' values.                           */
 /*                                                                            */
 /* Parameters:                                                                */
+/*   format_std The standard for record (ANSI, ISO, etc.)                     */
 /*   fmd    Address of the pointer to the FV structure that will be allocated.*/
 /*                                                                            */
 /* Returns:                                                                   */
@@ -427,7 +445,7 @@ add_fedb_to_fvmr(struct finger_extended_data_block *fedb,
 /*                                                                            */
 /******************************************************************************/
 int
-new_fmd(struct finger_minutiae_data **fmd);
+new_fmd(unsigned int format_std, struct finger_minutiae_data **fmd);
 
 /******************************************************************************/
 /* Free the storage for a single Finger Minutiae Data Record.                 */
@@ -457,6 +475,7 @@ find_center_of_minutiae_mass(FMD **fmds, int mcount, int *x, int *y);
 /* The record will be initialized to 'NULL' values.                           */
 /*                                                                            */
 /* Parameters:                                                                */
+/*   format_std The standard for record (ANSI, ISO, etc.)                     */
 /*   fedb   Address of the pointer to the Extended Data block that will       */
 /*          be allocated.                                                     */
 /*                                                                            */
@@ -466,7 +485,7 @@ find_center_of_minutiae_mass(FMD **fmds, int mcount, int *x, int *y);
 /*                                                                            */
 /******************************************************************************/
 int
-new_fedb(struct finger_extended_data_block **fedb);
+new_fedb(unsigned int format_std, struct finger_extended_data_block **fedb);
 
 /******************************************************************************/
 /* Free the storage for a single Finger Extended Data Block.                  */
@@ -502,6 +521,7 @@ add_fed_to_fedb(struct finger_extended_data *fed,
 /* The record will be initialized to 'NULL' values.                           */
 /*                                                                            */
 /* Parameters:                                                                */
+/*   format_std The standard for record (ANSI, ISO, etc.)                     */
 /*   fed       Address of the pointer to the Extended Data record that will   */
 /*             be allocated.                                                  */
 /*   type_id   Type of extended data.                                         */
@@ -513,8 +533,8 @@ add_fed_to_fedb(struct finger_extended_data *fed,
 /*                                                                            */
 /******************************************************************************/
 int
-new_fed(struct finger_extended_data **fed, unsigned short type_id,
-	unsigned short length);
+new_fed(unsigned int format_std, struct finger_extended_data **fed,
+	unsigned short type_id, unsigned short length);
 
 /******************************************************************************/
 /* Free the storage for a single Finger Extended Data record.                 */
@@ -595,6 +615,7 @@ free_rcd(struct ridge_count_data *rcd);
 /* The record will be initialized to 'NULL' values.                           */
 /*                                                                            */
 /* Parameters:                                                                */
+/*   format_std The standard for record (ANSI, ISO, etc.)                     */
 /*   cddb   Address of the pointer to the Core and Delta Data Block that      */
 /*          will be allocated.                                                */
 /*                                                                            */
@@ -604,7 +625,7 @@ free_rcd(struct ridge_count_data *rcd);
 /*                                                                            */
 /******************************************************************************/
 int
-new_cddb(struct core_delta_data_block **cddb);
+new_cddb(unsigned int format_std, struct core_delta_data_block **cddb);
 
 /******************************************************************************/
 /* Free the storage for a single Core and Delta Data Block.                   */
@@ -645,12 +666,13 @@ add_dd_to_cddb(struct delta_data *dd, struct core_delta_data_block *ddb);
 /* Allocate the storage for a single Core Data record.                        */
 /*                                                                            */
 /* Parameters:                                                                */
+/*   format_std The standard for record (ANSI, ISO, etc.)                     */
 /*   cd     Address of the pointer to the Core Data structure that will be    */
 /*          allocated.                                                        */
 /*                                                                            */
 /******************************************************************************/
 int
-new_cd(struct core_data **cd);
+new_cd(unsigned int format_std, struct core_data **cd);
 
 /******************************************************************************/
 /* Free the storage for a single Core Data record.                            */
@@ -666,12 +688,13 @@ free_cd(struct core_data *cd);
 /* Allocate the storage for a single Delta Data record.                       */
 /*                                                                            */
 /* Parameters:                                                                */
+/*   format_std The standard for record (ANSI, ISO, etc.)                     */
 /*   dd     Address of the pointer to the Delta Data structure that will be   */
 /*          allocated.                                                        */
 /*                                                                            */
 /******************************************************************************/
 int
-new_dd(struct delta_data **dd);
+new_dd(unsigned int format_std, struct delta_data **dd);
 
 /******************************************************************************/
 /* Free the storage for a single Delta Data record.                           */
