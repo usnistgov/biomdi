@@ -367,8 +367,11 @@ main(int argc, char *argv[])
 
 	if (new_fmr(FMR_STD_ANSI, &ofmr) < 0)
 		ALLOC_ERR_OUT("Output FMR");
-	fmr_length = ifmr->record_length_type;
 	copy_fmr(ifmr, ofmr);
+	if (ifmr->record_length_type == FMR_ANSI_SMALL_HEADER_TYPE)
+		fmr_length = FMR_ANSI_SMALL_HEADER_LENGTH;
+	else
+		fmr_length = FMR_ANSI_LARGE_HEADER_LENGTH;
 
 	// Get all of the finger view records
 	rcount = get_fvmr_count(ifmr);

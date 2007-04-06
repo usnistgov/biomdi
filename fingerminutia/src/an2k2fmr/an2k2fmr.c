@@ -296,8 +296,8 @@ init_fmr(struct finger_minutiae_record *fmr, ANSI_NIST *ansi_nist, int idc)
 
 	strcpy(fmr->format_id, FMR_FORMAT_ID);
 	strcpy(fmr->spec_version, FMR_SPEC_VERSION);
-	fmr->record_length = FMR_SMALL_HEADER_LENGTH;
-	fmr->record_length_type = FMR_SMALL_HEADER_LENGTH;
+	fmr->record_length = FMR_ANSI_SMALL_HEADER_LENGTH;
+	fmr->record_length_type = FMR_ANSI_SMALL_HEADER_TYPE;
 	fmr->product_identifier_owner = 0; // XXX: replace with something valid?
 	fmr->product_identifier_type = 0; // XXX: replace with something valid?
 	fmr->scanner_id = 0;

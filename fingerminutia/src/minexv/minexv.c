@@ -60,7 +60,7 @@ minex04_verify(FILE *fp, struct finger_minutiae_record *fmr)
 		ret = VALIDATE_ERROR;
 	}
 
-	if (fmr->record_length_type != FMR_SMALL_HEADER_LENGTH) {
+	if (fmr->record_length_type != FMR_ANSI_SMALL_HEADER_TYPE) {
 		ERRP("FMR header length is incorrect");
 		ret = VALIDATE_ERROR;
 	}

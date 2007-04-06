@@ -72,7 +72,7 @@ load_hdr(FILE *fp, struct finger_minutiae_record *fmr)
 	fmr->spec_version[0] = ' ';
 	fmr->reserved = 0;
 
-	total_length += FMR_SMALL_HEADER_LENGTH;
+	total_length += FMR_ANSI_SMALL_HEADER_LENGTH;
 	return 0;
 }
 
