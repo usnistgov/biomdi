@@ -812,10 +812,16 @@ read_cddb(FILE *fp, struct core_delta_data_block *cddb)
 	unsigned char cval;
 	int ret, i;
 
-	// Core Type, Number of Cores
+	// ANSI Core Type, Number of Cores
 	CREAD(&cval, fp);
-	cddb->core_type = (cval & CORE_TYPE_MASK) >> CORE_TYPE_SHIFT;
-	cddb->num_cores = cval & CORE_NUM_CORES_MASK;
+	if (dd->format_std == FMR_STD_ANSI) {
+		cddb->core_type = (cval & ANSI_CORE_TYPE_MASK) >>
+		    ANSI_CORE_TYPE_SHIFT;
+		cddb->num_cores = cval & ANSI_CORE_NUM_CORES_MASK;
+	} else {
+		// Core type is stored with each core data element
+		cddb->num_cores = cval & ISO_CORE_NUM_CORES_MASK;
+	}
 
 	// Read each Core Data record
 	for (i = 0; i < cddb->num_cores; i++) {
@@ -833,7 +839,10 @@ read_cddb(FILE *fp, struct core_delta_data_block *cddb)
 
 	// Delta Type, Number of Deltas
 	CREAD(&cval, fp);
-	cddb->delta_type = (cval & DELTA_TYPE_MASK) >> DELTA_TYPE_SHIFT;
+	if (dd->format_std == FMR_STD_ANSI) {
+		cddb->delta_type = (cval & ANSI_DELTA_TYPE_MASK) >>
+		    ANSI_DELTA_TYPE_SHIFT;
+	}
 	cddb->num_deltas = cval & DELTA_NUM_DELTAS_MASK;
 
 	// Read each Delta Data record
@@ -868,6 +877,14 @@ read_cd(FILE *fp, struct core_data *cd, unsigned char core_type)
 	SREAD(&sval, fp);
 	cd->x_coord = sval & CORE_X_COORD_MASK;
 
+	// ISO type
+	if ((cd->format_std == FMR_STD_ISO) ||
+	    (cd->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (cd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
+		cd->type = (unsigned char) ((sval & ISO_CORE_TYPE_MASK) >>
+		    ISO_CORE_TYPE_SHIFT);
+	}
+
 	// Y Coordinate
 	SREAD(&sval, fp);
 	cd->y_coord = sval & CORE_Y_COORD_MASK;
@@ -897,6 +914,14 @@ read_dd(FILE *fp, struct delta_data *dd, unsigned char delta_type)
 	// X Coordinate
 	SREAD(&sval, fp);
 	dd->x_coord = sval & DELTA_X_COORD_MASK;
+
+	// ISO type
+	if ((dd->format_std == FMR_STD_ISO) ||
+	    (dd->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (dd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
+		dd->type = (unsigned char) ((sval & ISO_DELTA_TYPE_MASK) >>
+		    ISO_DELTA_TYPE_SHIFT);
+	}
 
 	// Y Coordinate
 	SREAD(&sval, fp);
@@ -933,7 +958,14 @@ write_cddb(FILE *fp, struct core_delta_data_block *cddb)
 	struct delta_data *dd;
 	unsigned char cval = 0;
 
-	cval = (cddb->core_type << CORE_TYPE_SHIFT) | cddb->num_cores;
+	if ((cd->format_std == FMR_STD_ISO) ||
+	    (cd->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (cd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
+		cval = cddb->num_cores;
+	} else {
+		cval = (cddb->core_type << ANSI_CORE_TYPE_SHIFT) |
+		    cddb->num_cores;
+	}
 	CWRITE(&cval, fp);
 
 	TAILQ_FOREACH(cd, &cddb->cores, list) {
@@ -941,7 +973,14 @@ write_cddb(FILE *fp, struct core_delta_data_block *cddb)
 			ERR_OUT("Could not write core data record");
 	}
 
-	cval = (cddb->delta_type << DELTA_TYPE_SHIFT) | cddb->num_deltas;
+	if ((cd->format_std == FMR_STD_ISO) ||
+	    (cd->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (cd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
+		cval = cddb->num_deltas;
+	} else {
+		cval = (cddb->delta_type << ANSI_DELTA_TYPE_SHIFT) |
+		    cddb->num_deltas;
+	}
 	CWRITE(&cval, fp);
 
 	TAILQ_FOREACH(dd, &cddb->deltas, list) {
@@ -957,7 +996,18 @@ err_out:
 int
 write_cd(FILE *fp, struct core_data *cd)
 {
-	SWRITE(&cd->x_coord, fp);
+	unsigned short sval;
+
+	// X coord and ISO type
+	if ((cd->format_std == FMR_STD_ISO) ||
+	    (cd->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (cd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
+		sval = (unsigned short)(cd->type << ISO_CORE_TYPE_SHIFT);
+		sval = sval | cd->x_coord;
+	} else {
+		sval = cd->x_coord;
+	}
+	SWRITE(&sval, fp);
 	SWRITE(&cd->y_coord, fp);
 	if (cd->cddb->core_type != CORE_TYPE_ANGULAR)
 		return (WRITE_OK);
@@ -972,7 +1022,18 @@ err_out:
 int
 write_dd(FILE *fp, struct delta_data *dd)
 {
-	SWRITE(&dd->x_coord, fp);
+	unsigned short sval;
+
+	// X coord and ISO type
+	if ((dd->format_std == FMR_STD_ISO) ||
+	    (dd->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (dd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
+		sval = (unsigned short)(dd->type << ISO_DELTA_TYPE_SHIFT);
+		sval = sval | dd->x_coord;
+	} else {
+		sval = dd->x_coord;
+	}
+	SWRITE(&sval, fp);
 	SWRITE(&dd->y_coord, fp);
 	if (dd->cddb->delta_type != DELTA_TYPE_ANGULAR)
 		return (WRITE_OK);
@@ -986,6 +1047,38 @@ err_out:
 	return (WRITE_ERROR);
 }
 
+static inline int
+print_core_type(FILE *fp, unsigned char type)
+{
+	FPRINTF(fp, "Type is ");
+	if (type == CORE_TYPE_ANGULAR) 
+		FPRINTF(fp, "angular, ");
+	else if (type == CORE_TYPE_NONANGULAR)
+		FPRINTF(fp, "non-angular, ");
+	else
+		FPRINTF(fp, "unknown (%u), ", type);
+	return (PRINT_OK);
+
+err_out:
+	return (PRINT_ERROR);
+}
+
+static inline int
+print_delta_type(FILE *fp, unsigned char type)
+{
+	FPRINTF(fp, "Type is ");
+	if (type == DELTA_TYPE_ANGULAR) 
+		FPRINTF(fp, "angular, ");
+	else if (type == DELTA_TYPE_NONANGULAR)
+		FPRINTF(fp, "non-angular, ");
+	else
+		FPRINTF(fp, "unknown (%u), ", type);
+	return (PRINT_OK);
+
+err_out:
+	return (PRINT_ERROR);
+}
+
 int
 print_cddb(FILE *fp, struct core_delta_data_block *cddb)
 {
@@ -993,14 +1086,11 @@ print_cddb(FILE *fp, struct core_delta_data_block *cddb)
 	struct delta_data *dd;
 
 	if (!TAILQ_EMPTY(&cddb->cores)) {
-		FPRINTF(fp, "\tCore information: Type is ");
-		if (cddb->core_type == CORE_TYPE_ANGULAR) 
-			FPRINTF(fp, "angular, ");
-		else if (cddb->core_type == CORE_TYPE_NONANGULAR)
-			FPRINTF(fp, "non-angular, ");
-		else
-			FPRINTF(fp, "unknown (%u), ", cddb->core_type);
 	
+		FPRINTF(fp, "\tCore information: ");
+		if (cddb->format_std == FMR_STD_ANSI)
+			if (print_core_type(fp, cddb->core_type) != PRINT_OK)
+				goto err_out;
 		FPRINTF(fp, "number of cores is %u\n", cddb->num_cores);
 
 		TAILQ_FOREACH(cd, &cddb->cores, list) {
@@ -1010,14 +1100,10 @@ print_cddb(FILE *fp, struct core_delta_data_block *cddb)
 	}
 
 	if (!TAILQ_EMPTY(&cddb->deltas)) {
-		FPRINTF(fp, "\tDelta information: Type is ");
-		if (cddb->delta_type == DELTA_TYPE_ANGULAR)
-			FPRINTF(fp, "angular, ");
-		else if (cddb->delta_type == DELTA_TYPE_NONANGULAR)
-			FPRINTF(fp, "non-angular, ");
-		else
-			FPRINTF(fp, "unknown (%u), ", cddb->delta_type);
-	
+		FPRINTF(fp, "\tDelta information: ");
+		if (cddb->format_std == FMR_STD_ANSI)
+			if (print_delta_type(fp, cddb->delta_type) != PRINT_OK)
+				goto err_out;
 		FPRINTF(fp, "number of deltas is %u\n", cddb->num_deltas);
 
 		TAILQ_FOREACH(dd, &cddb->deltas, list) {
@@ -1035,9 +1121,21 @@ err_out:
 int
 print_cd(FILE *fp, struct core_data *cd)
 {
+	unsigned char type;
+
+	if ((cd->format_std == FMR_STD_ISO) ||
+	    (cd->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (cd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
+		if (print_core_type(fp, cd->type) != PRINT_OK)
+			goto err_out;
+		type = cd->type;
+	} else {
+		type = cd->cddb->core_type;
+	}
+		
 	FPRINTF(fp, "\t\tCoordinate = (%u,%u), ", cd->x_coord, cd->y_coord);
 
-	if (cd->cddb->core_type == CORE_TYPE_ANGULAR)
+	if (type == CORE_TYPE_ANGULAR)
 		FPRINTF(fp, "angle is %u\n", cd->angle);
 	else
 		FPRINTF(fp, "no angle\n");
@@ -1051,6 +1149,18 @@ err_out:
 int
 print_dd(FILE *fp, struct delta_data *dd)
 {
+	unsigned char type;
+
+	if ((dd->format_std == FMR_STD_ISO) ||
+	    (dd->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (dd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
+		if (print_core_type(fp, dd->type) != PRINT_OK)
+			goto err_out;
+		type = dd->type;
+	} else {
+		type = dd->cddb->delta_type;
+	}
+		
 	FPRINTF(fp, "\t\tCoordinate = (%u,%u), ", dd->x_coord, dd->y_coord);
 
 	if (dd->cddb->delta_type == DELTA_TYPE_ANGULAR)

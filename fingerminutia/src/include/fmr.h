@@ -62,9 +62,10 @@
 
 #define _POSIX_C_SOURCE	1
 
-#define FMR_STD_ANSI		1
-#define FMR_STD_ISO		2
-#define FMR_STD_ISOCOMPACT	3
+#define FMR_STD_ANSI			1
+#define FMR_STD_ISO			2
+#define FMR_STD_ISO_NORMAL_CARD		3
+#define FMR_STD_ISO_COMPACT_CARD	4
 
 // The identifier that must appear at the beginning of the record header
 #define FMR_FORMAT_ID 		"FMR"
@@ -93,6 +94,11 @@
 #define FMD_X_COORD_MASK	0x3FFF
 #define FMD_Y_COORD_MASK	0x3FFF
 
+// The ISO Compact FMD record has type encoded with the angle value
+#define FMD_ISOCOMPACT_MINUTIA_TYPE_MASK	0xC0
+#define FMD_ISOCOMPACT_MINUTIA_TYPE_SHIFT	6
+#define FMD_ISOCOMPACT_MINUTIA_ANGLE_MASK	0x3F
+
 // Range of the Minutia Quality values
 #define MIN_MINUTIA_QUALITY	0
 #define MAX_MINUTIA_QUALITY	100
@@ -110,6 +116,8 @@
 #define FMR_MIN_FINGER_QUALITY	0
 #define FMR_MAX_FINGER_QUALITY	100
 
+#define ISO_UNKNOWN_FINGER_QUALITY	0
+
 // Extended Data Area Type Codes
 #define FED_RESERVED		0x0000
 #define FED_RIDGE_COUNT		0x0001
@@ -121,24 +129,29 @@
 #define RCE_EIGHT_NEIGHBOR	0x02
 
 // Core masks and shift values, etc.
-#define CORE_TYPE_MASK		0xC0
-#define CORE_TYPE_SHIFT		6
-#define CORE_TYPE_ANGULAR	0x01
-#define CORE_TYPE_NONANGULAR	0x00
-#define CORE_NUM_CORES_MASK	0x0F
-#define CORE_X_COORD_MASK	0x3FFF
-#define CORE_Y_COORD_MASK	0x3FFF
-#define CORE_MIN_NUM		0
+#define ANSI_CORE_TYPE_MASK		0xC0
+#define ANSI_CORE_TYPE_SHIFT		6
+#define ISO_CORE_TYPE_MASK		0xC000
+#define ISO_CORE_TYPE_SHIFT		14
+#define CORE_TYPE_ANGULAR		0x01
+#define CORE_TYPE_NONANGULAR		0x00
+#define ANSI_CORE_NUM_CORES_MASK	0x0F
+#define ISO_CORE_NUM_CORES_MASK		0x3F
+#define CORE_X_COORD_MASK		0x3FFF
+#define CORE_Y_COORD_MASK		0x3FFF
+#define CORE_MIN_NUM			0
 
 // Delta masks and shift values, etc.
-#define DELTA_TYPE_MASK		0xC0
-#define DELTA_TYPE_SHIFT	6
-#define DELTA_TYPE_NONANGULAR	0x00
-#define DELTA_TYPE_ANGULAR	0x01
-#define DELTA_NUM_DELTAS_MASK	0x3F
-#define DELTA_X_COORD_MASK	0x3FFF
-#define DELTA_Y_COORD_MASK	0x3FFF
-#define DELTA_MIN_NUM		0
+#define ANSI_DELTA_TYPE_MASK		0xC0
+#define ANSI_DELTA_TYPE_SHIFT		6
+#define ISO_DELTA_TYPE_MASK		0xC000
+#define ISO_DELTA_TYPE_SHIFT		14
+#define DELTA_TYPE_NONANGULAR		0x00
+#define DELTA_TYPE_ANGULAR		0x01
+#define DELTA_NUM_DELTAS_MASK		0x3F
+#define DELTA_X_COORD_MASK		0x3FFF
+#define DELTA_Y_COORD_MASK		0x3FFF
+#define DELTA_MIN_NUM			0
 
 // Representation of a single finger minutiae data record
 #define FMD_DATA_LENGTH		6
@@ -187,6 +200,7 @@ typedef struct ridge_count_data_block RCDB;
 struct core_data {
 #define	cd_startcopy			format_std
 	unsigned int			format_std;
+	unsigned char			type;	// Only for ISO
 	unsigned short			x_coord;
 	unsigned short			y_coord;
 	unsigned char			angle;
@@ -203,6 +217,7 @@ typedef struct core_data CD;
 struct delta_data {
 #define	dd_startcopy			format_std
 	unsigned int			format_std;
+	unsigned char			type;	// Only for ISO
 	unsigned short			x_coord;
 	unsigned short			y_coord;
 	unsigned char			angle1;
@@ -218,7 +233,7 @@ typedef struct delta_data DD;
 struct core_delta_data_block {
 #define	cddb_startcopy			format_std
 	unsigned int			format_std;
-	unsigned char			core_type;
+	unsigned char			core_type;	// Only for ANSI
 	unsigned char			num_cores;
 	TAILQ_HEAD(, core_data)		cores;
 	unsigned char			delta_type;
@@ -291,11 +306,18 @@ struct finger_view_minutiae_record {
 typedef struct finger_view_minutiae_record FVMR;
 
 // Representation of an entire Finger Minutiae Record
-#define FMR_SMALL_HEADER_LENGTH		26
-#define FMR_LARGE_HEADER_LENGTH		30
-#define FMR_MIN_RECORD_LENGTH		FMR_SMALL_HEADER_LENGTH
-// The max length that will fit in the first length field of the header
-#define FMR_MAX_SHORT_LENGTH		65535
+#define	FMR_ANSI_SMALL_HEADER_TYPE		1
+#define	FMR_ANSI_LARGE_HEADER_TYPE		2
+#define	FMR_ISO_HEADER_TYPE			3
+
+#define FMR_ANSI_SMALL_HEADER_LENGTH		26
+#define FMR_ANSI_LARGE_HEADER_LENGTH		30
+#define FMR_ANSI_MIN_RECORD_LENGTH		FMR_ANSI_SMALL_HEADER_LENGTH
+// The max length that will fit in the first length field of the ANSI header
+#define FMR_ANSI_MAX_SHORT_LENGTH		65535
+
+#define FMR_ISO_HEADER_LENGTH			24
+#define FMR_ISO_MIN_RECORD_LENGTH		FMR_ISO_HEADER_LENGTH
 
 // XXX The field names of this struct should be prefixed with fmr_
 struct finger_minutiae_record {

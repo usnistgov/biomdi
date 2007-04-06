@@ -85,21 +85,30 @@ read_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 	// Spec Version
 	OREAD(fmr->spec_version, 1, FMR_SPEC_VERSION_LEN, fp);
 
-	// Record Length; read two bytes, and if that is not 0, that is the
-	// length; otherwise, the length is in the next 4 bytes
-	SREAD(&sval, fp);
-	if (sval == 0) {
+	if ((fmr->format_std == FMR_STD_ISO) ||
+	    (fmr->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (fmr->format_std == FMR_STD_ISO_COMPACT_CARD)) {
 		LREAD(&lval, fp);
 		fmr->record_length = lval;
-		fmr->record_length_type = FMR_LARGE_HEADER_LENGTH;
+		fmr->record_length_type = FMR_ISO_HEADER_TYPE;
 	} else {
-		fmr->record_length = sval;
-		fmr->record_length_type = FMR_SMALL_HEADER_LENGTH;
-	}
+		// ANSI Record Length; read two bytes, and if that is not 0,
+		// that is the length; otherwise, the length is in the next
+		// 4 bytes
+		SREAD(&sval, fp);
+		if (sval == 0) {
+			LREAD(&lval, fp);
+			fmr->record_length = lval;
+			fmr->record_length_type = FMR_ANSI_LARGE_HEADER_TYPE;
+		} else {
+			fmr->record_length = sval;
+			fmr->record_length_type = FMR_ANSI_SMALL_HEADER_TYPE;
+		}
 
-	// CBEFF Product ID
-	SREAD(&fmr->product_identifier_owner, fp);
-	SREAD(&fmr->product_identifier_type, fp);
+		// CBEFF Product ID
+		SREAD(&fmr->product_identifier_owner, fp);
+		SREAD(&fmr->product_identifier_type, fp);
+	}
 
 	// Capture Eqpt Compliance/Scanner ID
 	SREAD(&sval, fp);
@@ -174,19 +183,25 @@ write_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 	// Spec Version
 	OWRITE(fmr->spec_version, 1, FMR_SPEC_VERSION_LEN, fp);
 
-	// Record Length; if the length is greater than what will 
-	// fit in two bytes, store it in the next four bytes
-	if (fmr->record_length > FMR_MAX_SHORT_LENGTH) {
-		sval = 0;
-		SWRITE(&sval, fp);
+	if ((fmr->format_std == FMR_STD_ISO) ||
+	    (fmr->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (fmr->format_std == FMR_STD_ISO_COMPACT_CARD)) {
 		LWRITE(&fmr->record_length, fp);
 	} else {
-		SWRITE(&fmr->record_length, fp);
-	}
+		// ANSI Record Length; if the length is greater than what will 
+		// fit in two bytes, store it in the next four bytes
+		if (fmr->record_length > FMR_ANSI_MAX_SHORT_LENGTH) {
+			sval = 0;
+			SWRITE(&sval, fp);
+			LWRITE(&fmr->record_length, fp);
+		} else {
+			SWRITE(&fmr->record_length, fp);
+		}
 
-	// CBEFF Product ID
-	SWRITE(&fmr->product_identifier_owner, fp);
-	SWRITE(&fmr->product_identifier_type, fp);
+		// CBEFF Product ID
+		SWRITE(&fmr->product_identifier_owner, fp);
+		SWRITE(&fmr->product_identifier_type, fp);
+	}
 
 	// Capture Eqpt Compliance/Scanner ID
 	sval = (fmr->compliance << HDR_COMPLIANCE_SHIFT) | fmr->scanner_id;
@@ -281,6 +296,7 @@ validate_fmr(struct finger_minutiae_record *fmr)
 	struct finger_view_minutiae_record *fvmr;
 	int ret = VALIDATE_OK;
 	int error;
+	int val;
 
 	// Validate the header
 	if (strncmp(fmr->format_id, FMR_FORMAT_ID, FMR_FORMAT_ID_LEN) != 0) {
@@ -297,19 +313,27 @@ validate_fmr(struct finger_minutiae_record *fmr)
 		ret = VALIDATE_ERROR;
 	}
 
+	if ((fmr->format_std == FMR_STD_ISO) ||
+	    (fmr->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (fmr->format_std == FMR_STD_ISO_COMPACT_CARD))
+		val = FMR_ISO_MIN_RECORD_LENGTH;
+	else
+		val = FMR_ANSI_MIN_RECORD_LENGTH;
+
 	// Record length must be at least as long as the header
-	if (fmr->record_length < FMR_MIN_RECORD_LENGTH) {
-		ERRP("Record length is too short, minimum is %d",
-		    FMR_MIN_RECORD_LENGTH);
+	if (fmr->record_length < val) {
+		ERRP("Record length is too short, minimum is %d", val);
 		ret = VALIDATE_ERROR;
 	}
 
 	// CBEFF ID Owner must not be zero
 	// This check is taken out for the MINEX tests.
 #if !defined(MINEX)
-	if (fmr->product_identifier_owner == 0) {
-		ERRP("Product ID Owner is zero");
-		ret = VALIDATE_ERROR;
+	if (fmr->format_std == FMR_STD_ANSI) {
+		if (fmr->product_identifier_owner == 0) {
+			ERRP("Product ID Owner is zero");
+			ret = VALIDATE_ERROR;
+		}
 	}
 #endif
 

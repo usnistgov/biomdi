@@ -42,8 +42,46 @@ free_fmd(struct finger_minutiae_data *fmd)
 	free(fmd);
 }
 
-int
-read_fmd(FILE *fp, struct finger_minutiae_data *fmd)
+/*
+ * Read ISO compact card finger minutiae.
+ */
+static int
+read_iso_compact_fmd(FILE *fp, struct finger_minutiae_data *fmd)
+{
+	unsigned char cval;
+
+	// X Coord
+	CREAD(&cval, fp);
+	fmd->x_coord = (unsigned short)cval;
+
+	// Y Coord
+	CREAD(&cval, fp);
+	fmd->y_coord = (unsigned short)cval;
+
+	// Type/angle
+	CREAD(&cval, fp);
+	fmd->type = (unsigned char)
+	    ((cval & FMD_ISOCOMPACT_MINUTIA_TYPE_MASK) >>
+		FMD_ISOCOMPACT_MINUTIA_TYPE_SHIFT);
+	fmd->angle = (unsigned char)(cval & FMD_ISOCOMPACT_MINUTIA_ANGLE_MASK);
+
+	fmd->reserved = 0;
+
+	// There is no quality value in the ISO compact record
+	fmd->quality = ISO_UNKNOWN_FINGER_QUALITY;
+
+eof_out:
+	ERRP("EOF encountered in %s", __FUNCTION__);
+	return READ_EOF;
+err_out:
+	return READ_ERROR;
+}
+
+/*
+ * Read ANSI, ISO, and ISO normal card finger minutiae.
+ */
+static int
+read_ansi_iso_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 {
 	unsigned short sval;
 	unsigned char cval;
@@ -68,9 +106,10 @@ read_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 	CREAD(&cval, fp);
 	fmd->angle = cval;
 
-	// Minutia quality
-	CREAD(&cval, fp);
-	fmd->quality = cval;
+	if (fmd->format_std != FMR_STD_ISO_NORMAL_CARD) {
+		CREAD(&cval, fp);
+		fmd->quality = cval;
+	}
 
 	return READ_OK;
 
@@ -82,14 +121,53 @@ err_out:
 }
 
 int
-write_fmd(FILE *fp, struct finger_minutiae_data *fmd)
+read_fmd(FILE *fp, struct finger_minutiae_data *fmd)
+{
+	if (fmd->format_std == FMR_STD_ISO_COMPACT_CARD)
+		return (read_iso_compact_fmd(fp, fmd));
+	else
+		return (read_ansi_iso_fmd(fp, fmd));
+}
+
+/*
+ * Write ISO compact card finger minutiae.
+ */
+static int
+write_iso_compact_fmd(FILE *fp, struct finger_minutiae_data *fmd)
+{
+	unsigned char cval;
+
+	// X Coord
+	cval = fmd->x_coord;
+	CWRITE(&cval, fp);
+
+	// Y Coord
+	cval = fmd->y_coord;
+	CWRITE(&cval, fp);
+
+	// Type/angle
+	cval = fmd->type << FMD_ISOCOMPACT_MINUTIA_TYPE_SHIFT;
+	cval = cval | (fmd->angle & FMD_ISOCOMPACT_MINUTIA_ANGLE_MASK);
+	CWRITE(&cval, fp);
+
+	return WRITE_OK;
+
+err_out:
+	return WRITE_ERROR;
+}
+
+/*
+ * Write ANSI, ISO, and ISO normal card finger minutiae.
+ */
+static int
+write_ansi_iso_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 {
 	unsigned short sval;
 	unsigned char cval;
 
 	// Type/X Coord
 	sval = (unsigned short)(fmd->type << FMD_MINUTIA_TYPE_SHIFT);
-	sval = sval | (fmd->x_coord  & FMD_X_COORD_MASK);
+	sval = sval | (fmd->x_coord & FMD_X_COORD_MASK);
 	SWRITE(&sval, fp);
 
 	// Y Coord/Reserved
@@ -101,13 +179,25 @@ write_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 	CWRITE(&cval, fp);
 
 	// Minutia quality
-	cval = fmd->quality;
-	CWRITE(&cval, fp);
+	if (fmd->format_std != FMR_STD_ISO_NORMAL_CARD) {
+		cval = fmd->quality;
+		CWRITE(&cval, fp);
+	}
 
 	return WRITE_OK;
 
 err_out:
 	return WRITE_ERROR;
+}
+
+
+int
+write_fmd(FILE *fp, struct finger_minutiae_data *fmd)
+{
+	if (fmd->format_std == FMR_STD_ISO_COMPACT_CARD)
+		return (write_iso_compact_fmd(fp, fmd));
+	else
+		return (write_ansi_iso_fmd(fp, fmd));
 }
 
 int
@@ -117,7 +207,10 @@ print_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 	fprintf(fp, "\tType\t\t: 0x%01x\n", fmd->type);
 	fprintf(fp, "\tCoordinate\t: (%u,%u)\n", fmd->x_coord, fmd->y_coord);
 	fprintf(fp, "\tAngle\t\t: %u\n", fmd->angle);
-	fprintf(fp, "\tQuality\t\t: %u\n", fmd->quality);
+	if ((fmd->type == FMR_STD_ANSI) ||
+	    (fmd->type == FMR_STD_ISO))
+		fprintf(fp, "\tQuality\t\t: %u\n", fmd->quality);
+
 	return 0;
 }
 
