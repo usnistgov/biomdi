@@ -248,22 +248,6 @@ err_out:
 	exit(EXIT_FAILURE);
 }
 
-static void
-copy_fmr(FMR *src, FMR *dst)
-{
-	bcopy(&src->fmr_startcopy, &dst->fmr_startcopy,
-            (unsigned) ((caddr_t)&dst->fmr_endcopy -
-		(caddr_t)&dst->fmr_startcopy));
-}
-
-static void
-copy_fmd(FMD *src, FMD *dst)
-{
-	bcopy(&src->fmd_startcopy, &dst->fmd_startcopy,
-            (unsigned) ((caddr_t)&dst->fmd_endcopy -
-		(caddr_t)&dst->fmd_startcopy));
-}
-
 /*
  * Copy one FVMR's header information to another, then selectively copy
  * the minutiae. Parameter mcount is the requested number of minutiae.
@@ -330,7 +314,7 @@ copy_and_select_fvmr(FVMR *src, FVMR *dst, int mcount)
 	for (m = 0; m < mcount; m++) {
 		if (new_fmd(FMR_STD_ANSI, &ofmd) < 0)
 			ALLOC_ERR_EXIT("Output FMD");
-		copy_fmd(fmds[m], ofmd);
+		COPY_FMD(fmds[m], ofmd);
 		fmr_length += FMD_DATA_LENGTH;
 		add_fmd_to_fvmr(ofmd, dst);
 		dst->number_of_minutiae++;
@@ -367,7 +351,7 @@ main(int argc, char *argv[])
 
 	if (new_fmr(FMR_STD_ANSI, &ofmr) < 0)
 		ALLOC_ERR_OUT("Output FMR");
-	copy_fmr(ifmr, ofmr);
+	COPY_FMR(ifmr, ofmr);
 	if (ifmr->record_length_type == FMR_ANSI_SMALL_HEADER_TYPE)
 		fmr_length = FMR_ANSI_SMALL_HEADER_LENGTH;
 	else
