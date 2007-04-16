@@ -153,11 +153,18 @@
 #define DELTA_Y_COORD_MASK		0x3FFF
 #define DELTA_MIN_NUM			0
 
+/*
+ * Each element of a finger minutiae record is represented as a stucture
+ * in memory. Each element has a COPY_XXX macro defined that can be used
+ * to copy the essential fields of the record, those fields that represent
+ * actual finger minutiae information, and not accidental fields that are
+ * used to internally manage the record.
+ */
 // Representation of a single finger minutiae data record
 #define FMD_DATA_LENGTH		6
 struct finger_minutiae_data {
-#define	fmd_startcopy				format_std
 	unsigned int				format_std;
+#define	fmd_startcopy				type
 	unsigned char				type;
 	unsigned short				x_coord;
 	unsigned char				reserved;
@@ -206,8 +213,8 @@ typedef struct ridge_count_data_block RCDB;
 #define CORE_DATA_HEADER_LENGTH		1
 #define CORE_ANGLE_LENGTH		1
 struct core_data {
-#define	cd_startcopy			format_std
 	unsigned int			format_std;
+#define	cd_startcopy			type
 	unsigned char			type;	// Only for ISO
 	unsigned short			x_coord;
 	unsigned short			y_coord;
@@ -227,8 +234,8 @@ typedef struct core_data CD;
 #define DELTA_DATA_HEADER_LENGTH	1
 #define DELTA_ANGLE_LENGTH		1
 struct delta_data {
-#define	dd_startcopy			format_std
 	unsigned int			format_std;
+#define	dd_startcopy			type
 	unsigned char			type;	// Only for ISO
 	unsigned short			x_coord;
 	unsigned short			y_coord;
@@ -247,8 +254,8 @@ typedef struct delta_data DD;
 
 #define CORE_DATA_HEADER_LENGTH		1
 struct core_delta_data_block {
-#define	cddb_startcopy			format_std
 	unsigned int			format_std;
+#define	cddb_startcopy			core_type
 	unsigned char			core_type;	// Only for ANSI
 	unsigned char			num_cores;
 	TAILQ_HEAD(, core_data)		cores;
@@ -269,8 +276,8 @@ typedef struct core_delta_data_block CDDB;
 // When the FED is allocated, it's type is fixed at that point. 
 #define FED_HEADER_LENGTH		4
 struct finger_extended_data {
-#define fed_startcopy				format_std
 	unsigned int				format_std;
+#define fed_startcopy				type_id
 	unsigned short				type_id;
 	unsigned short				length;
 	union {
@@ -294,8 +301,8 @@ typedef struct finger_extended_data FED;
 // is comprised of multiple extended data items
 #define FEDB_HEADER_LENGTH		2
 struct finger_extended_data_block {
-#define fedb_startcopy					format_std
 	unsigned int					format_std;
+#define fedb_startcopy					block_length
 	unsigned short					block_length;
 	// Flag to indicate whether a partial EDB was read
 	unsigned int 					partial;
@@ -314,8 +321,8 @@ typedef struct finger_extended_data_block FEDB;
 
 // XXX The field names of this struct should be prefixed with fvmr_
 struct finger_view_minutiae_record {
-#define fvmr_startcopy				format_std
 	unsigned int				format_std;
+#define fvmr_startcopy				finger_number
 	unsigned char				finger_number;
 	unsigned char				view_number;
 	unsigned char				impression_type;
@@ -354,8 +361,8 @@ typedef struct finger_view_minutiae_record FVMR;
 // XXX The field names of this struct should be prefixed with fmr_
 struct finger_minutiae_record {
 	// Representation of the FMR header
-#define fmr_startcopy				format_std
 	unsigned int				format_std;
+#define fmr_startcopy				format_id
 	char					format_id[4];
 	char					spec_version[4];
 	unsigned int				record_length;
