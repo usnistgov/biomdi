@@ -4,7 +4,7 @@
 .Os Mac OS X       
 .Sh NAME
 .Nm prfmr
-.Nd Prints an ANSI-378 M1 Fingerprint Minutiae Record in human-readable form.
+.Nd Prints Fingerprint Minutiae Record in human-readable form.
 .Sh SYNOPSIS
 .Nm
 .Ar m1file
@@ -13,13 +13,18 @@
 .Sh DESCRIPTION
 The
 .Nm
-command is used to print an ANSI/ICITS 378-2004 compliant M1 minutiae record 
+command is used to print Finger Minutiae Records
 in human-readable form. The output is sent to stdout, while error messages
-are sent to stderr.
+are sent to stderr. The FMR library is used to read the file, but
+.Nm
+will attempt to read an ANSI/INCITS 378-2004 format record. If that read
+fails, attempts are then made to read in the ISO 19794-2 format: ISO, ISO
+Normal Card, and ISO Standard Card. Therefore, error messages may be generated
+while the attempt is made to read based on the incorrect format.
 .Pp
-The M1 record can be optionally verified, which means the certain fields 
+The minutiae record can be optionally verified, which means the certain fields 
 in the record are checked against constraints given in the ANSI/INCITS 378-2004
-specification.
+or ISO 19794-2 specifications.
 .Pp
 .Bd -literal
 prfmr m1.raw
@@ -28,22 +33,26 @@ prfmr m1.raw
 The options are as follows:
 .Bl -tag
 .It Fl v
-causes the M1 file to be verified before printing.
+causes the file records to be verified before printing.
 .El
 .Sh EXAMPLES
 \'prfmr m1.raw'
 .Pp
-Print the M1 record.
+Print the minutiae record.
 .Pp
 \'prfmr m1.raw -v'
 .Pp
-Verify, and if successful, print the M1 record.
+Verify, and if successful, print the minutiae record.
 .Pp
 .Sh SEE ALSO
 .Xr mkfmr 1 ,
 .Xr fmr2an2k 1 .
 .Sh STANDARDS
+``Biometric Data Interchange Formats, Part 2: Finger Minutiae data'',
+ISO 19794-2, 2005-09-15.
+
 ``Finger Minutiae Format for Data Interchange'', ANSI/INCITS 378-2004,
 February 20, 2004.
 .Sh HISTORY
 Created March 18th, 2005 by NIST.
+ISO formats added April 17, 2007 by NIST.

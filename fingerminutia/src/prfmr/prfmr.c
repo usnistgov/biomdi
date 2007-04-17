@@ -28,6 +28,10 @@
 #include <fmr.h>
 #include <biomdimacro.h>
 
+static int std_types[4] = {FMR_STD_ANSI, FMR_STD_ISO, FMR_STD_ISO_NORMAL_CARD,
+    FMR_STD_ISO_COMPACT_CARD};
+static char *std_names[4] = {"ANSI", "ISO", "ISO Normal Card", "ISO Compact Card"};
+#define NUM_STD_TYPES	4
 int main(int argc, char *argv[])
 {
 	char *usage = "usage: prfmr [-v] <datafile>\n"
@@ -38,6 +42,7 @@ int main(int argc, char *argv[])
 	int vflag = 0;
 	int ch;
 	int ret;
+	int std;
 	unsigned int total_length;
 
 	if ((argc < 2) || (argc > 3)) {
@@ -69,10 +74,6 @@ int main(int argc, char *argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	if (new_fmr(FMR_STD_ANSI, &fmr) < 0) {
-		fprintf(stderr, "could not allocate FMR\n");
-		exit (EXIT_FAILURE);
-	}
 
 	if (fstat(fileno(fp), &sb) < 0) {
 		fprintf(stdout, "Could not get stats on input file.\n");
@@ -80,10 +81,26 @@ int main(int argc, char *argv[])
 	}
 
 	total_length = 0;
+	std = 0;
 	while (total_length < sb.st_size) {
+		if (new_fmr(std_types[std], &fmr) < 0) {
+			fprintf(stderr, "could not allocate FMR\n");
+			exit (EXIT_FAILURE);
+		}
+		printf("================================================\n");
+		printf("Attempting read conforming to %s:\n", std_names[std]);
 		ret = read_fmr(fp, fmr);
-		if (ret != READ_OK)
-			break;
+		/* Try other standard formats */
+		if (ret != READ_OK) {
+			std++;
+			if (std < NUM_STD_TYPES) {
+				free_fmr(fmr);
+				rewind(fp);
+				continue;
+			} else {
+				break;
+			}
+		}
 		total_length += fmr->record_length;
 
 		// Validate the FMR
@@ -97,17 +114,8 @@ int main(int argc, char *argv[])
 				    "Finger Minutiae Record is valid.\n");
 			}
 		}
-
-		// Dump the entire FMR
 		print_fmr(stdout, fmr);
-
-		// Free the entire FMR
 		free_fmr(fmr);
-
-		if (new_fmr(FMR_STD_ANSI, &fmr) < 0) {
-			fprintf(stderr, "could not allocate FMR\n");
-			exit (EXIT_FAILURE);
-		}
 	}
 	if (ret != READ_OK) {
 		fprintf(stderr, "Could not read entire record; Contents:\n");
@@ -117,7 +125,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (vflag) {
-		// Check the header info against file reality
+		// Check the record length info against file reality
 		if (sb.st_size != total_length) {
 			fprintf(stdout, "WARNING: "
 			    "File size does not match FMR record length(s).\n");
