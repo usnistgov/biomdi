@@ -250,9 +250,11 @@ print_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 	fprintf(fp, "Format ID\t\t: %s\nSpec Version\t\t: %s\n",
 		fmr->format_id, fmr->spec_version);
 
-	fprintf(fp, "Record Length\t\t: %u\nCBEFF Product ID\t: 0x%04x%04x\n",
-		fmr->record_length, fmr->product_identifier_owner,
-		fmr->product_identifier_type);
+	fprintf(fp, "Record Length\t\t: %u\n", fmr->record_length);
+	if (fmr->format_std == FMR_STD_ANSI)
+		fprintf(fp, "CBEFF Product ID\t: 0x%04x%04x\n",
+		    fmr->product_identifier_owner,
+		    fmr->product_identifier_type);
 
 	fprintf(fp, "Capture Eqpt\t\t: Compliance, ");
 	if (fmr->compliance == 0) {

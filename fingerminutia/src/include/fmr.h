@@ -280,6 +280,7 @@ struct finger_extended_data {
 #define fed_startcopy				type_id
 	unsigned short				type_id;
 	unsigned short				length;
+#define fed_endcopy				rcdb
 	union {
 		struct ridge_count_data_block	*rcdb;
 		struct core_delta_data_block	*cddb;
@@ -304,6 +305,7 @@ struct finger_extended_data_block {
 	unsigned int					format_std;
 #define fedb_startcopy					block_length
 	unsigned short					block_length;
+#define fedb_endcopy					partial
 	// Flag to indicate whether a partial EDB was read
 	unsigned int 					partial;
 	TAILQ_HEAD(, finger_extended_data)		extended_data;

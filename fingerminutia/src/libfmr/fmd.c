@@ -207,8 +207,8 @@ print_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 	fprintf(fp, "\tType\t\t: 0x%01x\n", fmd->type);
 	fprintf(fp, "\tCoordinate\t: (%u,%u)\n", fmd->x_coord, fmd->y_coord);
 	fprintf(fp, "\tAngle\t\t: %u\n", fmd->angle);
-	if ((fmd->type == FMR_STD_ANSI) ||
-	    (fmd->type == FMR_STD_ISO))
+	if ((fmd->format_std == FMR_STD_ANSI) ||
+	    (fmd->format_std == FMR_STD_ISO))
 		fprintf(fp, "\tQuality\t\t: %u\n", fmd->quality);
 
 	return 0;
@@ -253,11 +253,13 @@ validate_fmd(struct finger_minutiae_data *fmd)
 	// size/resolution?
 
 	// Angle
-	if ((fmd->angle < MIN_MINUTIA_ANGLE) |
-	    (fmd->angle > MAX_MINUTIA_ANGLE)) {
-		ERRP("Minutia angle %u is out of range %u-%u",
-			fmd->angle, MIN_MINUTIA_ANGLE, MAX_MINUTIA_ANGLE);
-		ret = VALIDATE_ERROR;
+	if (fmd->format_std == FMR_STD_ANSI) {
+		if ((fmd->angle < MIN_MINUTIA_ANGLE) |
+		    (fmd->angle > MAX_MINUTIA_ANGLE)) {
+			ERRP("Minutia angle %u is out of range %u-%u",
+			    fmd->angle, MIN_MINUTIA_ANGLE, MAX_MINUTIA_ANGLE);
+			ret = VALIDATE_ERROR;
+		}
 	}
 
 	// Quality
