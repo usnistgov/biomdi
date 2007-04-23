@@ -1,0 +1,62 @@
+.\""
+.Dd April 23, 2007
+.Dt FMR2FMR 1  
+.Os Mac OS X       
+.Sh NAME
+.Nm fmr2fmr
+.Nd Convert between Finger Minutiae Record formats.
+.Sh SYNOPSIS
+.Nm
+.Fl i
+.Ar infile
+.Fl o
+.Ar outfile
+.Pp
+.Sh DESCRIPTION
+The
+.Nm
+command is used to convert files containing records of one finger minutiae
+format to another. The of record formats that are supported are ANSI/INCITS
+378-2004 and the three ISO formats described in ISO/IEC 19794-2.
+The conversion
+is accomplished by modifying certain values in the minutiae records based
+on constraints of the standard used for the output file. For example, the
+minutia angle is represented differently in the ISO and ANSI record formats.
+In the ISO Compact Card format, values are further constrained, and some
+fields are removed when compared to the full ISO format.
+.Pp
+Currently, the
+.Nm
+program converts from ANSI to full ISO only. Future changes will add the
+capability to convert between all formats.
+.Pp
+The options are as follows:
+.Bl -tag -width -indent
+.It Fl i\ \&m1infile
+Specifies the file containing a complete M1 Finger Minutiae Format as specified
+by ANSI/INCITS 378-2004.
+.It Fl o\ \&m1outfile
+Specifies the file that will contain the modified minutiae, in ISO format.
+This file must not exist prior to execution of
+.Nm .
+.El
+.Sh EXAMPLES
+.Nm
+-i ansifmr.raw -o isofmr.raw
+.Pp
+Produces a new file containing the same minutia records as the input file,
+after passing through the conversion.
+.Pp
+.Sh SEE ALSO
+.Xr mkfmr 1 ,
+.Xr fmrplot 1 ,
+.Xr fmrprune 1 ,
+.Xr prfmr 1 .
+.Sh STANDARDS
+``Finger Minutiae Format for Data Interchange'', ANSI/INCITS 378-2004,
+February 20, 2004.
+.Pp
+``Information Technology - Biometric data interchange formats - Part 2: 
+Finger minutiae data'', ISO/IEC 19794-2, September 2005.
+.Sh HISTORY
+Created April 23rd, 2007 by NIST.
