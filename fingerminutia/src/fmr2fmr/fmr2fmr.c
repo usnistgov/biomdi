@@ -41,15 +41,21 @@ usage()
 {
 	fprintf(stderr, 
 	    "usage:\n"
-	    "\tfmr2fmr -i <m1file> -o <outfile>\n"
+	    "\tfmr2fmr -i <m1file> -ti <type> -o <outfile> -to <type>\n"
 	    "\twhere:\n"
 	    "\t   -i:  Specifies the input FMR file\n"
-	    "\t   -o:  Specifies the output FMR file\n");
+	    "\t   -ti: Specifies the input file type\n"
+	    "\t   -o:  Specifies the output FMR file\n"
+	    "\t   -to: Specifies the output file type\n"
+	    "\t   <type> is one of ISO | ISOCN | ISOCC | ANSI\n");
 }
 
 /* Global file pointers */
 static FILE *in_fp;	// the FMR input file
 static FILE *out_fp;	// for the output file
+
+static int in_std;	// Standard type of the input file
+static int out_std;	// Standard type of the output file
 
 /******************************************************************************/
 /* Close all open files.                                                      */
@@ -66,6 +72,24 @@ close_files()
 }
 
 /******************************************************************************/
+/* Map the string given for the record format type into an integer.           */
+/* Return -1 on if no match.                                                  */
+/******************************************************************************/
+static int
+stdstr_to_type(char *stdstr)
+{
+	if (strcmp(stdstr, "ANSI") == 0)
+		return (FMR_STD_ANSI);
+	if (strcmp(stdstr, "ISO") == 0)
+		return (FMR_STD_ISO);
+	if (strcmp(stdstr, "ISONC") == 0)
+		return (FMR_STD_ISO_NORMAL_CARD);
+	if (strcmp(stdstr, "ISOCC") == 0)
+		return (FMR_STD_ISO_COMPACT_CARD);
+	return (-1);
+}
+
+/******************************************************************************/
 /* Process the command line options, and set the global option indicators     */
 /* based on those options.  This function will force an exit of the program   */
 /* on error.                                                                  */
@@ -73,12 +97,15 @@ close_files()
 static void
 get_options(int argc, char *argv[])
 {
-	int ch, i_opt, o_opt;
-	char *out_file;
+	int ch, i_opt, o_opt, ti_opt, to_opt;
+	char pm, *out_file;
 	struct stat sb;
 
-	i_opt = o_opt = 0;
-	while ((ch = getopt(argc, argv, "i:o:")) != -1) {
+	i_opt = o_opt = ti_opt = to_opt = 0;
+	while ((ch = getopt(argc, argv, "i:o:t:")) != -1) {
+		/* Make sure we don't fall off the end of argv */
+		if (optind >= argc)
+			goto err_usage_out;
 		switch (ch) {
 		    case 'i':
 			if ((in_fp = fopen(optarg, "rb")) == NULL)
@@ -99,12 +126,32 @@ get_options(int argc, char *argv[])
 			o_opt++;
 			break;
 				
+		    case 't':
+			pm = *(char *)optarg;
+			switch (pm) {
+			    case 'i':
+				in_std = stdstr_to_type(argv[optind]);
+				if (in_std < 0)
+					goto err_usage_out;
+				optind++;
+				ti_opt++;
+				break;
+			    case 'o':
+				out_std = stdstr_to_type(argv[optind]);
+				if (out_std < 0)
+					goto err_usage_out;
+				optind++;
+				to_opt++;
+				break;
+			}
+			break;
+
 		    default:
 			goto err_usage_out;
 		}
 	}
 
-	if ((i_opt != 1) || (o_opt != 1))
+	if ((i_opt != 1) || (o_opt != 1) || (ti_opt != 1) || (to_opt != 1))
 		goto err_usage_out;
 
 	return;
@@ -156,8 +203,7 @@ main(int argc, char *argv[])
 		for (r = 0; r < rcount; r++) {
 			if (new_fvmr(FMR_STD_ISO, &ofvmr) < 0)
 	                        ALLOC_ERR_RETURN("Output FVMR");
-			COPY_FVMR(ifvmrs[r], ofvmr);
-			if (ansi2iso_fvmr_theta(ifvmrs[r], ofvmr, &fvmrl) < 0)
+			if (ansi2iso_fvmr(ifvmrs[r], ofvmr, &fvmrl) < 0)
 				ERR_OUT("Modifying FVMR");
 			fmr_length += fvmrl;
 			ofvmr->extended = NULL;

@@ -17,4 +17,17 @@
  *  length - Will contain the total length of the output FVMR
  *           (header plus length of all FMDs)
  */
-int ansi2iso_fvmr_theta(FVMR *ifvmr, FVMR *ofvmr, int *length);
+int ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, int *length);
+
+/*
+ * Copy the minutiae from an ANSI FVMR to an ISO Compact Card FVMR, altering
+ * minutiae records:
+ *   alter the angle value to reflect 6 bit precision
+ *   alter the (x,y) coordinates to reflect 0.1 pix per millimeter units
+ * Parameters:
+ *  ifvmr  - FVMR containing the finger minutiae data (FMD) records to copy
+ *  ofvmr  - FVMR to contain the copied and modified FMDs
+ *  length - Will contain the total length of the output FVMR
+ *           (header plus length of all FMDs)
+ */
+int ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, int *length);
