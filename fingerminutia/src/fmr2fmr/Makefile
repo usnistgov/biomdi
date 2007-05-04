@@ -8,12 +8,15 @@
 # about its quality, reliability, or any other characteristic.
 #
 include ../common.mk
-all: ansi2iso fmr2fmr
+all: ansi2iso iso2ansi fmr2fmr
 ansi2iso: ansi2iso.c ansi2iso.h
 	$(CC) -c $(CFLAGS) ansi2iso.c -o ansi2iso.o
 
-fmr2fmr: fmr2fmr.c ansi2iso
-	$(CC) $(CFLAGS) ansi2iso.o fmr2fmr.c -lm -lfmr -o $(LOCALBIN)/fmr2fmr
+iso2ansi: iso2ansi.c iso2ansi.h
+	$(CC) -c $(CFLAGS) iso2ansi.c -o iso2ansi.o
+
+fmr2fmr: fmr2fmr.c ansi2iso iso2ansi
+	$(CC) $(CFLAGS) ansi2iso.o iso2ansi.o fmr2fmr.c -lm -lfmr -o $(LOCALBIN)/fmr2fmr
 	$(CP) fmr2fmr.1 $(LOCALMAN)
 
 clean:

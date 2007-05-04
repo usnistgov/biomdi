@@ -19,12 +19,13 @@
 #include <fmr.h>
 
 int
-ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, int *length)
+ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length)
 {
 	FMD **ifmds = NULL;
 	FMD *ofmd;
 	int m, mcount;
 	double isotheta;
+	double conversion_factor;
 	int theta;
 
 	COPY_FVMR(ifvmr, ofvmr);
@@ -39,16 +40,18 @@ ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, int *length)
 	if (get_minutiae(ifvmr, ifmds) != mcount)
 		ERR_OUT("getting FMDs from FVMR");
 
+	conversion_factor = (256.0 / 360.0);
 	for (m = 0; m < mcount; m++) {
 		/* The ISO minutia record uses all possible values for the
 		 * angle, so we have 256 possible values to represent 360
 		 * degrees.
 		 */
+		// XXX What about ISO Normal?
 		if (new_fmd(FMR_STD_ISO, &ofmd) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
 		COPY_FMD(ifmds[m], ofmd);
 		theta = 2 * (int)ifmds[m]->angle;
-		isotheta = round((256.0 / 360.0) * (double)theta);
+		isotheta = round(conversion_factor * (double)theta);
 		ofmd->angle = (unsigned char)isotheta;
 		add_fmd_to_fvmr(ofmd, ofvmr);
 		*length += FMD_DATA_LENGTH;
@@ -67,13 +70,19 @@ err_out:
  * Note this code does not remove minutiae (as required by 8 bit datatype) nor
  * implement the sort minutiae, (per, say, the cartesian y-x option in 19794-2).
  */
-static int
-ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, int *length,
+int
+ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
     const unsigned short xres, const unsigned short yres)
 {
 	FMD **ifmds = NULL;
 	FMD *ofmd;
 	int mcount, m;
+	int theta;
+	double conversion_factor;
+	double isotheta;
+	double x, y;
+	double xmm, ymm;
+	double xunits, yunits;
 
 	COPY_FVMR(ifvmr, ofvmr);
 	*length = FVMR_HEADER_LENGTH;
@@ -87,30 +96,31 @@ ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, int *length,
 	if (get_minutiae(ifvmr, ifmds) != mcount)
 		ERR_OUT("getting FMDs from FVMR");
 
+	conversion_factor = (64.0 / 360.0);
 	for (m = 0; m < mcount; m++) {
-		if (new_fmd(FMR_STD_ISO, &ofmd) != 0)
+		if (new_fmd(FMR_STD_ISO_COMPACT_CARD, &ofmd) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
 		COPY_FMD(ifmds[m], ofmd);
 
 		/* The ISO minutia record has 6 bits for the angle, so
 		 * we have 64 possible values to represent 360 degrees.
 		 */
-		const int theta = 2 * (int)ifmds[m]->angle;
-		const double isotheta = round((64.0 / 360.0) * (double)theta);
+		theta = 2 * (int)ifmds[m]->angle;
+		isotheta = round(conversion_factor * (double)theta);
 		ofmd->angle = (unsigned char)isotheta;
 
-		const double x = (double)ifmds[m]->x_coord;
-		const double y = (double)ifmds[m]->y_coord;
+		x = (double)ifmds[m]->x_coord;
+		y = (double)ifmds[m]->y_coord;
 
 		/* millimeters, because INCITS 378 resolution 
 		 * values are in pixels per centimeter */
-		const double xmm = 10.0 * x / (double)xres;
-		const double ymm = 10.0 * y / (double)yres;
+		xmm = 10.0 * x / (double)xres;
+		ymm = 10.0 * y / (double)yres;
 
 		/* units of 0.1 pix per mm which is the compact
 		 * card format's hardwired sampling freq */
- 		const double xunits = xmm / 0.1;
- 		const double yunits = ymm / 0.1;
+ 		xunits = xmm / 0.1;
+ 		yunits = ymm / 0.1;
 
 		/* round the values - this is what would be
 		 * stored in "typical" say 500 dpi operation */

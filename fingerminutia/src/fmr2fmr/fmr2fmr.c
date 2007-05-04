@@ -29,9 +29,7 @@
 #include <fmr.h>
 #include <biomdimacro.h>
 #include "ansi2iso.h"
-
-/* Keep track of the entire FMR length in a global. */
-static unsigned int fmr_length;
+#include "iso2ansi.h"
 
 /******************************************************************************/
 /* Print a how-to-use the program message.                                    */
@@ -53,9 +51,10 @@ usage()
 /* Global file pointers */
 static FILE *in_fp;	// the FMR input file
 static FILE *out_fp;	// for the output file
+static char *out_file;
 
-static int in_std;	// Standard type of the input file
-static int out_std;	// Standard type of the output file
+static int in_type;	// Standard type of the input file
+static int out_type;	// Standard type of the output file
 
 /******************************************************************************/
 /* Close all open files.                                                      */
@@ -98,7 +97,7 @@ static void
 get_options(int argc, char *argv[])
 {
 	int ch, i_opt, o_opt, ti_opt, to_opt;
-	char pm, *out_file;
+	char pm;
 	struct stat sb;
 
 	i_opt = o_opt = ti_opt = to_opt = 0;
@@ -130,15 +129,15 @@ get_options(int argc, char *argv[])
 			pm = *(char *)optarg;
 			switch (pm) {
 			    case 'i':
-				in_std = stdstr_to_type(argv[optind]);
-				if (in_std < 0)
+				in_type = stdstr_to_type(argv[optind]);
+				if (in_type < 0)
 					goto err_usage_out;
 				optind++;
 				ti_opt++;
 				break;
 			    case 'o':
-				out_std = stdstr_to_type(argv[optind]);
-				if (out_std < 0)
+				out_type = stdstr_to_type(argv[optind]);
+				if (out_type < 0)
 					goto err_usage_out;
 				optind++;
 				to_opt++;
@@ -167,31 +166,26 @@ err_out:
 	exit(EXIT_FAILURE);
 }
 
-int
-main(int argc, char *argv[])
+/*
+ * Copy an FMR without any conversion. This procedure goes through the process
+ * of reading the FMR and copying it using the FMR library. The reason for
+ * this is to verify that the FMR is valid.
+ */
+static int
+copy_without_conversion(FMR *ifmr, FMR *ofmr, int fmr_type)
 {
-	FMR *ifmr, *ofmr = NULL;
-	FVMR **ifvmrs = NULL;
 	FVMR *ofvmr;
-	int r, rcount, fvmrl;
+	FVMR **ifvmrs = NULL;
+	FMD **ifmds = NULL;
+	FMD *ofmd;
+	int r, rcount, m, mcount, fvmr_len;
+	int retval;
 
-	get_options(argc, argv);
+	retval = -1;			/* Assume failure, for now */
 
-	// Allocate the input/output FMR records in memory
-	if (new_fmr(FMR_STD_ANSI, &ifmr) < 0)
-		ALLOC_ERR_OUT("Input FMR");
-	if (new_fmr(FMR_STD_ISO, &ofmr) < 0)
-		ALLOC_ERR_OUT("Output FMR");
-
-	// Read the input FMR
-	if (read_fmr(in_fp, ifmr) != READ_OK) {
-		fprintf(stderr, "Could not read FMR from file.\n");
-		goto err_out;
-	}
 	COPY_FMR(ifmr, ofmr);
-	fmr_length = FMR_ISO_HEADER_LENGTH;
 
-	// Get all of the finger view records
+	/* Get all of the finger view records */
 	rcount = get_fvmr_count(ifmr);
 	if (rcount > 0) {
 		ifvmrs = (FVMR **) malloc(rcount * sizeof(FVMR *));
@@ -201,15 +195,115 @@ main(int argc, char *argv[])
 			ERR_OUT("getting FVMRs from FMR");
 
 		for (r = 0; r < rcount; r++) {
-			if (new_fvmr(FMR_STD_ISO, &ofvmr) < 0)
+			if (new_fvmr(fmr_type, &ofvmr) < 0)
 	                        ALLOC_ERR_RETURN("Output FVMR");
-			if (ansi2iso_fvmr(ifvmrs[r], ofvmr, &fvmrl) < 0)
-				ERR_OUT("Modifying FVMR");
-			fmr_length += fvmrl;
-			ofvmr->extended = NULL;
+
+			COPY_FVMR(ifvmrs[r], ofvmr);
+			mcount = get_minutiae_count(ifvmrs[r]);
+			if (mcount != 0) {
+				ifmds = (FMD **)malloc(mcount * sizeof(FMD *));
+				if (ifmds == NULL)
+					ALLOC_ERR_RETURN("FMD array");
+				if (get_minutiae(ifvmrs[r], ifmds) != mcount)
+					ERR_OUT("getting FMDs from FVMR");
+
+				for (m = 0; m < mcount; m++) {
+					if (new_fmd(FMR_STD_ISO, &ofmd) != 0)
+						ALLOC_ERR_RETURN("Output FMD");
+					COPY_FMD(ifmds[m], ofmd);
+					add_fmd_to_fvmr(ofmd, ofvmr);
+				}
+			}
+
+			/* Subtract off the length of the extended data block,
+			 * if present, because we don't copy extended data yet.
+			 */
+			if (ifvmrs[r]->extended != NULL) {
+				ofmr->record_length -=
+				    ifvmrs[r]->extended->block_length;
+				
+			}
 			add_fvmr_to_fmr(ofvmr, ofmr);
 			// XXX Copy the FEDB to the output fmr
-			fmr_length += FEDB_HEADER_LENGTH;
+		}
+
+	} else {
+		if (rcount == 0)
+			ERR_OUT("there are no FVMRs in the input FMR");
+		else
+			ERR_OUT("retrieving FVMRs from input FMR");
+	}
+	retval = 0;
+
+err_out:
+	if (ifvmrs != NULL)
+		free (ifvmrs);
+	if (ifmds != NULL)
+		free (ifmds);
+	return (retval);
+}
+
+/*
+ * Copy an FMR with conversion.
+ */
+static int
+copy_with_conversion(FMR *ifmr, FMR *ofmr, int in_type, int out_type)
+{
+	FVMR *ofvmr;
+	FVMR **ifvmrs = NULL;
+	int r, rcount;
+	unsigned int fmr_len, fvmr_len;
+	int rc, retval;
+
+	retval = -1;			/* Assume failure, for now */
+
+	if (in_type == out_type)
+		return (-1);
+
+	COPY_FMR(ifmr, ofmr);
+	fmr_len = FMR_ISO_HEADER_LENGTH;
+
+	/* Get all of the finger view records */
+	rcount = get_fvmr_count(ifmr);
+	if (rcount > 0) {
+		ifvmrs = (FVMR **) malloc(rcount * sizeof(FVMR *));
+		if (ifvmrs == NULL)
+			ALLOC_ERR_OUT("FVMR Array");
+		if (get_fvmrs(ifmr, ifvmrs) != rcount)
+			ERR_OUT("getting FVMRs from FMR");
+
+		for (r = 0; r < rcount; r++) {
+			if (new_fvmr(out_type, &ofvmr) < 0)
+	                        ALLOC_ERR_RETURN("Output FVMR");
+
+			switch (in_type) {
+			    case FMR_STD_ANSI:
+				if ((out_type == FMR_STD_ISO) ||
+				    (out_type == FMR_STD_ISO_NORMAL_CARD))
+					rc = ansi2iso_fvmr(ifvmrs[r], ofvmr,
+					    &fvmr_len);
+				if (out_type == FMR_STD_ISO_COMPACT_CARD)
+					rc = ansi2isocc_fvmr(ifvmrs[r], ofvmr,
+					    &fvmr_len);
+				break;
+			    case FMR_STD_ISO:
+			    case FMR_STD_ISO_NORMAL_CARD:
+				rc = iso2ansi_fvmr(ifvmrs[r], ofvmr, &fvmr_len);
+				break;
+			    case FMR_STD_ISO_COMPACT_CARD:
+				rc = isocc2ansi_fvmr(ifvmrs[r], ofvmr,
+				    &fvmr_len);
+				break;
+			}
+			if (rc != 0)
+				ERR_OUT("Modifying FVMR");
+
+			fmr_len += fvmr_len;
+			// XXX Copy the FEDB to the output fmr
+			ofvmr->extended = NULL;
+			add_fvmr_to_fmr(ofvmr, ofmr);
+
+			fmr_len += FEDB_HEADER_LENGTH;
 		}
 
 	} else {
@@ -219,7 +313,41 @@ main(int argc, char *argv[])
 			ERR_OUT("retrieving FVMRs from input FMR");
 	}
 
-	ofmr->record_length = fmr_length;
+	ofmr->record_length = fmr_len;
+	retval = 0;
+err_out:
+	if (ifvmrs != NULL)
+		free (ifvmrs);
+	return (retval);
+}
+
+int
+main(int argc, char *argv[])
+{
+	FMR *ifmr, *ofmr = NULL;
+
+	get_options(argc, argv);
+
+	// Allocate the input/output FMR records in memory
+	if (new_fmr(in_type, &ifmr) < 0)
+		ALLOC_ERR_OUT("Input FMR");
+	if (new_fmr(out_type, &ofmr) < 0)
+		ALLOC_ERR_OUT("Output FMR");
+
+	// Read the input FMR
+	if (read_fmr(in_fp, ifmr) != READ_OK) {
+		fprintf(stderr, "Could not read FMR from file.\n");
+		goto err_out;
+	}
+
+	/* If the input and output file types are the same,
+	 * do a straight copy.
+	 */
+	if (in_type == out_type)
+		copy_without_conversion(ifmr, ofmr, in_type);
+	else
+		copy_with_conversion(ifmr, ofmr, in_type, out_type);
+
 	(void)write_fmr(out_fp, ofmr);
 	free_fmr(ifmr);
 	free_fmr(ofmr);
@@ -233,8 +361,10 @@ err_out:
 		free_fmr(ifmr);
 	if (ofmr != NULL)
 		free_fmr(ofmr);
+	/* If we created the output file, remove it. */
+	if (out_fp != NULL)
+		(void)unlink(out_file);
 
 	close_files();
-
 	exit(EXIT_FAILURE);
 }
