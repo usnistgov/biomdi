@@ -95,9 +95,9 @@
 #define FMD_Y_COORD_MASK	0x3FFF
 
 // The ISO Compact FMD record has type encoded with the angle value
-#define FMD_ISOCOMPACT_MINUTIA_TYPE_MASK	0xC0
-#define FMD_ISOCOMPACT_MINUTIA_TYPE_SHIFT	6
-#define FMD_ISOCOMPACT_MINUTIA_ANGLE_MASK	0x3F
+#define FMD_ISO_COMPACT_MINUTIA_TYPE_MASK	0xC0
+#define FMD_ISO_COMPACT_MINUTIA_TYPE_SHIFT	6
+#define FMD_ISO_COMPACT_MINUTIA_ANGLE_MASK	0x3F
 
 // Range of the Minutia Quality values
 #define MIN_MINUTIA_QUALITY	0
@@ -161,7 +161,9 @@
  * used to internally manage the record.
  */
 // Representation of a single finger minutiae data record
-#define FMD_DATA_LENGTH		6
+#define FMD_DATA_LENGTH				6
+#define FMD_ISO_NORMAL_DATA_LENGTH		5
+#define FMD_ISO_COMPACT_DATA_LENGTH		3
 struct finger_minutiae_data {
 	unsigned int				format_std;
 #define	fmd_startcopy				type

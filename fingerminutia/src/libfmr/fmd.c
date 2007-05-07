@@ -61,15 +61,16 @@ read_iso_compact_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 	// Type/angle
 	CREAD(&cval, fp);
 	fmd->type = (unsigned char)
-	    ((cval & FMD_ISOCOMPACT_MINUTIA_TYPE_MASK) >>
-		FMD_ISOCOMPACT_MINUTIA_TYPE_SHIFT);
-	fmd->angle = (unsigned char)(cval & FMD_ISOCOMPACT_MINUTIA_ANGLE_MASK);
+	    ((cval & FMD_ISO_COMPACT_MINUTIA_TYPE_MASK) >>
+		FMD_ISO_COMPACT_MINUTIA_TYPE_SHIFT);
+	fmd->angle = (unsigned char)(cval & FMD_ISO_COMPACT_MINUTIA_ANGLE_MASK);
 
 	fmd->reserved = 0;
 
 	// There is no quality value in the ISO compact record
 	fmd->quality = ISO_UNKNOWN_FINGER_QUALITY;
 
+	return READ_OK;
 eof_out:
 	ERRP("EOF encountered in %s", __FUNCTION__);
 	return READ_EOF;
@@ -146,8 +147,8 @@ write_iso_compact_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 	CWRITE(&cval, fp);
 
 	// Type/angle
-	cval = fmd->type << FMD_ISOCOMPACT_MINUTIA_TYPE_SHIFT;
-	cval = cval | (fmd->angle & FMD_ISOCOMPACT_MINUTIA_ANGLE_MASK);
+	cval = fmd->type << FMD_ISO_COMPACT_MINUTIA_TYPE_SHIFT;
+	cval = cval | (fmd->angle & FMD_ISO_COMPACT_MINUTIA_ANGLE_MASK);
 	CWRITE(&cval, fp);
 
 	return WRITE_OK;
