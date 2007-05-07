@@ -128,7 +128,7 @@ ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
  		ofmd->y_coord = (unsigned short)(0.5 + yunits);
 
 		add_fmd_to_fvmr(ofmd, ofvmr);
-		*length += FMD_DATA_LENGTH;
+		*length += FMD_ISO_COMPACT_DATA_LENGTH;
 	}
 	if (ifmds != NULL)
 		free(ifmds);

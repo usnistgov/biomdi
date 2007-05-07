@@ -284,7 +284,8 @@ copy_with_conversion(FMR *ifmr, FMR *ofmr, int in_type, int out_type)
 					    &fvmr_len);
 				if (out_type == FMR_STD_ISO_COMPACT_CARD)
 					rc = ansi2isocc_fvmr(ifvmrs[r], ofvmr,
-					    &fvmr_len);
+					    &fvmr_len, ifmr->x_resolution,
+					    ifmr->y_resolution);
 				break;
 			    case FMR_STD_ISO:
 			    case FMR_STD_ISO_NORMAL_CARD:

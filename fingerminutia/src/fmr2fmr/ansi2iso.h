@@ -29,5 +29,8 @@ int ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length);
  *  ofvmr  - FVMR to contain the copied and modified FMDs
  *  length - Will contain the total length of the output FVMR
  *           (header plus length of all FMDs)
+ *  xres   - X resolution of input image
+ *  yres   - Y resolution of input image
  */
-int ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length);
+int ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
+    const unsigned short xres, const unsigned short yres);
