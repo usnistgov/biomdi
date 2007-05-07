@@ -46,15 +46,17 @@ ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length)
 		 * angle, so we have 256 possible values to represent 360
 		 * degrees.
 		 */
-		// XXX What about ISO Normal?
-		if (new_fmd(FMR_STD_ISO, &ofmd) != 0)
+		if (new_fmd(ofvmr->format_std, &ofmd) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
 		COPY_FMD(ifmds[m], ofmd);
 		theta = 2 * (int)ifmds[m]->angle;
 		isotheta = round(conversion_factor * (double)theta);
 		ofmd->angle = (unsigned char)isotheta;
 		add_fmd_to_fvmr(ofmd, ofvmr);
-		*length += FMD_DATA_LENGTH;
+		if (ofvmr->format_std == FMR_STD_ISO)
+			*length += FMD_DATA_LENGTH;
+		else
+			*length += FMD_ISO_NORMAL_DATA_LENGTH;
 	}
 
 	free(ifmds);
