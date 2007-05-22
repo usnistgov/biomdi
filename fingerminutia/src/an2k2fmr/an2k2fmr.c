@@ -696,16 +696,16 @@ main(int argc, char *argv[])
 			if (write_fmr(fmr_fp, fmr) != WRITE_OK) 
 			    ERR_OUT("Could not write finger minutiae record");
 
+			if (v_opt) {
+				if (validate_fmr(fmr) != VALIDATE_OK)
+				    ERR_OUT("Finger Minutiae Record is NOT valid.\n");
+				else
+				    fprintf(stdout, "Finger Minutiae Record is valid.\n");
+			}
+
 			free_fmr(fmr);
 
 		}
-	}
-
-	if (v_opt) {
-		if (validate_fmr(fmr) != VALIDATE_OK)
-		    ERR_OUT("Finger Minutiae Record is NOT valid.\n");
-		else
-		    fprintf(stdout, "Finger Minutiae Record is valid.\n");
 	}
 
 	free_ANSI_NIST(ansi_nist);
