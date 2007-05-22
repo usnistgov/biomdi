@@ -137,11 +137,11 @@ void
 convert_type(unsigned char fmr_type, char *ansi_type)
 {
 	switch (fmr_type) {
-		case MINUTIA_TYPE_RIDGE_ENDING :
+		case FMD_MINUTIA_TYPE_RIDGE_ENDING :
 			*ansi_type = 'A';
 			break;
 
-		case MINUTIA_TYPE_BIFURCATION :
+		case FMD_MINUTIA_TYPE_BIFURCATION :
 			*ansi_type = 'B';
 			break;
 

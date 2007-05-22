@@ -236,9 +236,9 @@ validate_fmd(struct finger_minutiae_data *fmd)
 	}
 	
 	// Minutia type is one of these values
-	if ((fmd->type != MINUTIA_TYPE_OTHER) &
-	    (fmd->type != MINUTIA_TYPE_RIDGE_ENDING) &
-	    (fmd->type != MINUTIA_TYPE_BIFURCATION)) {
+	if ((fmd->type != FMD_MINUTIA_TYPE_OTHER) &
+	    (fmd->type != FMD_MINUTIA_TYPE_RIDGE_ENDING) &
+	    (fmd->type != FMD_MINUTIA_TYPE_BIFURCATION)) {
 		ERRP("Minutia Type %u is not valid", fmd->type);
 		ret = VALIDATE_ERROR;
 	}
@@ -246,7 +246,8 @@ validate_fmd(struct finger_minutiae_data *fmd)
 	// Reserved field must be '00'
 	if (fmd->reserved != 0) {
 		ERRP("Minutia Reserved is %u, should be '00'",
-			fmd->quality, MIN_MINUTIA_ANGLE, MAX_MINUTIA_ANGLE);
+			fmd->quality, FMD_MIN_MINUTIA_ANGLE,
+			    FMD_MAX_MINUTIA_ANGLE);
 		ret = VALIDATE_ERROR;
 	}
 
@@ -255,19 +256,21 @@ validate_fmd(struct finger_minutiae_data *fmd)
 
 	// Angle
 	if (fmd->format_std == FMR_STD_ANSI) {
-		if ((fmd->angle < MIN_MINUTIA_ANGLE) |
-		    (fmd->angle > MAX_MINUTIA_ANGLE)) {
+		if ((fmd->angle < FMD_MIN_MINUTIA_ANGLE) |
+		    (fmd->angle > FMD_MAX_MINUTIA_ANGLE)) {
 			ERRP("Minutia angle %u is out of range %u-%u",
-			    fmd->angle, MIN_MINUTIA_ANGLE, MAX_MINUTIA_ANGLE);
+			    fmd->angle, FMD_MIN_MINUTIA_ANGLE,
+				FMD_MAX_MINUTIA_ANGLE);
 			ret = VALIDATE_ERROR;
 		}
 	}
 
 	// Quality
-	if ((fmd->quality < MIN_MINUTIA_QUALITY) |
-	    (fmd->quality > MAX_MINUTIA_QUALITY)) {
+	if ((fmd->quality < FMD_MIN_MINUTIA_QUALITY) |
+	    (fmd->quality > FMD_MAX_MINUTIA_QUALITY)) {
 		ERRP("Minutia quality %u is out of range %u-%u",
-			fmd->quality, MIN_MINUTIA_QUALITY, MAX_MINUTIA_QUALITY);
+			fmd->quality, FMD_MIN_MINUTIA_QUALITY,
+			    FMD_MAX_MINUTIA_QUALITY);
 		ret = VALIDATE_ERROR;
 	}
 

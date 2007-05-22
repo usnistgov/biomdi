@@ -18,6 +18,11 @@
 #include <biomdimacro.h>
 #include <fmr.h>
 
+/*
+ * Convert an FVMR from ISO and ISO Normal Card formats to ANSI.
+ * The finger minutiae data is copied, and the angle is converted to the
+ * ANSI representation. The quality value is set to the unknown value.
+ */
 int
 iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length)
 {
@@ -50,6 +55,7 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length)
 		COPY_FMD(ifmds[m], ofmd);
 		isotheta = round(conversion_factor * (double)(ifmds[m]->angle));
 		ofmd->angle = (unsigned char)(round(isotheta / 2));
+		ofmd->quality = FMD_UNKNOWN_MINUTIA_QUALITY;
 		add_fmd_to_fvmr(ofmd, ofvmr);
 		*length += FMD_DATA_LENGTH;
 	}
@@ -63,9 +69,8 @@ err_out:
 	return (-1);
 }
 
-/* Convert an FVMR from ANSI to ISO Compact Card format.
- * Note this code does not remove minutiae (as required by 8 bit datatype) nor
- * implement the sort minutiae, (per, say, the cartesian y-x option in 19794-2).
+/*
+ * Convert an FVMR from ISO Compact Card format to ANSI.
  */
 int
 isocc2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,

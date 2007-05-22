@@ -1227,10 +1227,11 @@ validate_cd(struct core_data *cd)
 	}
 
 	// Check the angle
-	if ((cd->angle < MIN_MINUTIA_ANGLE) |
-	    (cd->angle > MAX_MINUTIA_ANGLE)) {
+	if ((cd->angle < FMD_MIN_MINUTIA_ANGLE) |
+	    (cd->angle > FMD_MAX_MINUTIA_ANGLE)) {
 		ERRP("Core angle %u is out of range %u-%u",
-			cd->angle, MIN_MINUTIA_ANGLE, MAX_MINUTIA_ANGLE);
+			cd->angle, FMD_MIN_MINUTIA_ANGLE,
+			    FMD_MAX_MINUTIA_ANGLE);
 		ret = VALIDATE_ERROR;
 	}
 
@@ -1258,24 +1259,27 @@ validate_dd(struct delta_data *dd)
 	}
 
 	// Check the angles
-	if ((dd->angle1 < MIN_MINUTIA_ANGLE) |
-	    (dd->angle1 > MAX_MINUTIA_ANGLE)) {
+	if ((dd->angle1 < FMD_MIN_MINUTIA_ANGLE) |
+	    (dd->angle1 > FMD_MAX_MINUTIA_ANGLE)) {
 		ERRP("Delta angle one %u is out of range %u-%u",
-			dd->angle1, MIN_MINUTIA_ANGLE, MAX_MINUTIA_ANGLE);
+			dd->angle1, FMD_MIN_MINUTIA_ANGLE,
+			    FMD_MAX_MINUTIA_ANGLE);
 		ret = VALIDATE_ERROR;
 	}
 
-	if ((dd->angle2 < MIN_MINUTIA_ANGLE) |
-	    (dd->angle2 > MAX_MINUTIA_ANGLE)) {
+	if ((dd->angle2 < FMD_MIN_MINUTIA_ANGLE) |
+	    (dd->angle2 > FMD_MAX_MINUTIA_ANGLE)) {
 		ERRP("Delta angle two %u is out of range %u-%u",
-			dd->angle2, MIN_MINUTIA_ANGLE, MAX_MINUTIA_ANGLE);
+			dd->angle2, FMD_MIN_MINUTIA_ANGLE,
+			     FMD_MAX_MINUTIA_ANGLE);
 		ret = VALIDATE_ERROR;
 	}
 
-	if ((dd->angle3 < MIN_MINUTIA_ANGLE) |
-	    (dd->angle3 > MAX_MINUTIA_ANGLE)) {
+	if ((dd->angle3 < FMD_MIN_MINUTIA_ANGLE) |
+	    (dd->angle3 > FMD_MAX_MINUTIA_ANGLE)) {
 		ERRP("Delta angle three %u is out of range %u-%u",
-			dd->angle3, MIN_MINUTIA_ANGLE, MAX_MINUTIA_ANGLE);
+			dd->angle3, FMD_MIN_MINUTIA_ANGLE,
+			    FMD_MAX_MINUTIA_ANGLE);
 		ret = VALIDATE_ERROR;
 	}
 

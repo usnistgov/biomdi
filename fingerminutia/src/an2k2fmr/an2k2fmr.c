@@ -132,15 +132,15 @@ convert_type(char ansi_type, unsigned char *fmr_type)
 {
 	switch (ansi_type) {
 		case 'A' :
-			*fmr_type = MINUTIA_TYPE_RIDGE_ENDING;
+			*fmr_type = FMD_MINUTIA_TYPE_RIDGE_ENDING;
 			break;
 
 		case 'B' :
-			*fmr_type = MINUTIA_TYPE_BIFURCATION;
+			*fmr_type = FMD_MINUTIA_TYPE_BIFURCATION;
 			break;
 
 		default :
-			*fmr_type = MINUTIA_TYPE_OTHER;
+			*fmr_type = FMD_MINUTIA_TYPE_OTHER;
 			break;
 	}
 }
