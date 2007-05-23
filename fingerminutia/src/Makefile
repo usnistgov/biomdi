@@ -12,7 +12,7 @@
 #
 
 # The 'core' library and programs, that always build
-CORE := libfmr prfmr mkfmr fmrv fmroverlap fmrprune fmrisocompact minexv test
+CORE := libfmr prfmr mkfmr fmrv fmroverlap fmrprune fmr2fmr fmrisocompact minexv test
 # Programs dependent on NBIS
 NBIS := fmr2an2k an2k2fmr
 # Programs dependent on the GD graphics library

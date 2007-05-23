@@ -29,4 +29,5 @@ int iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length);
  *  length - Will contain the total length of the output FVMR
  *           (header plus length of all FMDs)
  */
-int isocc2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length);
+int isocc2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
+    const unsigned short xres, const unsigned short yres);

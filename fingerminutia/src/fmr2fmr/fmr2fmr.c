@@ -45,7 +45,7 @@ usage()
 	    "\t   -ti: Specifies the input file type\n"
 	    "\t   -o:  Specifies the output FMR file\n"
 	    "\t   -to: Specifies the output file type\n"
-	    "\t   <type> is one of ISO | ISOCN | ISOCC | ANSI\n");
+	    "\t   <type> is one of ISO | ISONC | ISOCC | ANSI\n");
 }
 
 /* Global file pointers */
@@ -261,7 +261,10 @@ copy_with_conversion(FMR *ifmr, FMR *ofmr, int in_type, int out_type)
 		return (-1);
 
 	COPY_FMR(ifmr, ofmr);
-	fmr_len = FMR_ISO_HEADER_LENGTH;
+	if (out_type == FMR_STD_ANSI)
+		fmr_len = FMR_ANSI_SMALL_HEADER_LENGTH;
+	else
+		fmr_len = FMR_ISO_HEADER_LENGTH;
 
 	/* Get all of the finger view records */
 	rcount = get_fvmr_count(ifmr);
@@ -293,7 +296,8 @@ copy_with_conversion(FMR *ifmr, FMR *ofmr, int in_type, int out_type)
 				break;
 			    case FMR_STD_ISO_COMPACT_CARD:
 				rc = isocc2ansi_fvmr(ifvmrs[r], ofvmr,
-				    &fvmr_len);
+				    &fvmr_len, ifmr->x_resolution,
+				    ifmr->y_resolution);
 				break;
 			}
 			if (rc != 0)
