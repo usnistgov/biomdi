@@ -195,10 +195,6 @@ write_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 	int ret;
 	struct finger_view_minutiae_record *fvmr;
 
-	/* ISO normal and compact card formats have no record header, so
-	 * we just set some FMR fields, allocate one FVMR, and proceed to
-	 * read into that FVMR.
-	 */
 	if ((fmr->format_std == FMR_STD_ANSI) ||
 	    (fmr->format_std == FMR_STD_ISO)) {
 
