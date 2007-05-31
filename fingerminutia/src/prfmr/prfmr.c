@@ -28,44 +28,81 @@
 #include <fmr.h>
 #include <biomdimacro.h>
 
-static int std_types[4] = {FMR_STD_ANSI, FMR_STD_ISO, FMR_STD_ISO_NORMAL_CARD,
-    FMR_STD_ISO_COMPACT_CARD};
-static char *std_names[4] = {"ANSI", "ISO", "ISO Normal Card", "ISO Compact Card"};
-#define NUM_STD_TYPES	4
+static int in_type;	// Standard type of the input file
+
+
+/******************************************************************************/
+/* Map the string given for the record format type into an integer.           */
+/* Return -1 on if no match.                                                  */
+/******************************************************************************/
+static int
+stdstr_to_type(char *stdstr)
+{
+	if (strcmp(stdstr, "ANSI") == 0)
+		return (FMR_STD_ANSI);
+	if (strcmp(stdstr, "ISO") == 0)
+		return (FMR_STD_ISO);
+	if (strcmp(stdstr, "ISONC") == 0)
+		return (FMR_STD_ISO_NORMAL_CARD);
+	if (strcmp(stdstr, "ISOCC") == 0)
+		return (FMR_STD_ISO_COMPACT_CARD);
+	return (-1);
+}
+
+static void
+usage()
+{
+	fprintf(stderr, "usage: prfmr [-v] [-ti <type] <datafile>\n"
+		"\t -v Validate the record\n"
+		"\t -ti <type> is one of ISO | ISONC | ISOCC | ANSI\n");
+	exit (EXIT_FAILURE);
+}
+
 int main(int argc, char *argv[])
 {
-	char *usage = "usage: prfmr [-v] <datafile>\n"
-			"\t -v Validate the record";
 	FILE *fp;
 	struct stat sb;
 	struct finger_minutiae_record *fmr;
-	int vflag = 0;
+	int v_opt = 0;
+	int ti_opt = 0;
 	int ch;
 	int ret;
-	int std;
 	unsigned int total_length;
+	char pm;
 
-	if ((argc < 2) || (argc > 3)) {
-		printf("%s\n", usage);
-		exit (EXIT_FAILURE);
-	}
+	if ((argc < 2) || (argc > 5))
+		usage();
 
-	while ((ch = getopt(argc, argv, "v")) != -1) {
+	/* Default to readin an ANSI record */
+	in_type = FMR_STD_ANSI;
+	while ((ch = getopt(argc, argv, "vt:")) != -1) {
 		switch (ch) {
-			case 'v' :
-				vflag = 1;
+			case 'v':
+				v_opt = 1;
 				break;
-			default :
-				printf("%s\n", usage);
-				exit (EXIT_FAILURE);
+			case 't':
+				pm = *(char *)optarg;
+				switch (pm) {
+				    case 'i':
+					in_type = stdstr_to_type(argv[optind]);
+					if (in_type < 0)
+						usage();
+					optind++;
+					ti_opt++;
+					break;
+				    default:
+					usage();
+					break;	/* not reached */
+				}
 				break;
+			default:
+				usage();
+				break;	/* not reached */
 		}
 	}
 				
-	if (argv[optind] == NULL) {
-		printf("%s\n", usage);
-		exit (EXIT_FAILURE);
-	}
+	if (ti_opt > 1)
+		usage();
 
 	fp = fopen(argv[optind], "rb");
 	if (fp == NULL) {
@@ -74,37 +111,25 @@ int main(int argc, char *argv[])
 		exit (EXIT_FAILURE);
 	}
 
-
 	if (fstat(fileno(fp), &sb) < 0) {
 		fprintf(stdout, "Could not get stats on input file.\n");
 		exit (EXIT_FAILURE);
 	}
 
+	if (new_fmr(in_type, &fmr) < 0) {
+		fprintf(stderr, "could not allocate FMR\n");
+		exit (EXIT_FAILURE);
+	}
+
 	total_length = 0;
-	std = 0;
 	while (total_length < sb.st_size) {
-		if (new_fmr(std_types[std], &fmr) < 0) {
-			fprintf(stderr, "could not allocate FMR\n");
-			exit (EXIT_FAILURE);
-		}
-		printf("================================================\n");
-		printf("Attempting read conforming to %s:\n", std_names[std]);
 		ret = read_fmr(fp, fmr);
-		/* Try other standard formats */
-		if (ret != READ_OK) {
-			std++;
-			if (std < NUM_STD_TYPES) {
-				free_fmr(fmr);
-				rewind(fp);
-				continue;
-			} else {
+		if (ret != READ_OK)
 				break;
-			}
-		}
 		total_length += fmr->record_length;
 
 		// Validate the FMR
-		if (vflag) {
+		if (v_opt) {
 			if (validate_fmr(fmr) != VALIDATE_OK) {
 				fprintf(stdout, 
 				    "Finger Minutiae Record is invalid.\n");
@@ -115,16 +140,16 @@ int main(int argc, char *argv[])
 			}
 		}
 		print_fmr(stdout, fmr);
-		free_fmr(fmr);
+		//free_fmr(fmr);
 	}
 	if (ret != READ_OK) {
 		fprintf(stderr, "Could not read entire record; Contents:\n");
 		print_fmr(stderr, fmr);
-		free_fmr(fmr);
+		//free_fmr(fmr);
 		exit (EXIT_FAILURE);
 	}
 
-	if (vflag) {
+	if (v_opt) {
 		// Check the record length info against file reality
 		if (sb.st_size != total_length) {
 			fprintf(stdout, "WARNING: "
