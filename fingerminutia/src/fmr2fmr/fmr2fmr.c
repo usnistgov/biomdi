@@ -208,7 +208,7 @@ copy_without_conversion(FMR *ifmr, FMR *ofmr, int fmr_type)
 					ERR_OUT("getting FMDs from FVMR");
 
 				for (m = 0; m < mcount; m++) {
-					if (new_fmd(FMR_STD_ISO, &ofmd) != 0)
+					if (new_fmd(FMR_STD_ISO, &ofmd, m) != 0)
 						ALLOC_ERR_RETURN("Output FMD");
 					COPY_FMD(ifmds[m], ofmd);
 					add_fmd_to_fvmr(ofmd, ofvmr);

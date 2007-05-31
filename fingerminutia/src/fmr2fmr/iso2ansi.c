@@ -50,7 +50,7 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length)
 	 */
 	conversion_factor = (360.0 / 256.0);
 	for (m = 0; m < mcount; m++) {
-		if (new_fmd(FMR_STD_ANSI, &ofmd) != 0)
+		if (new_fmd(FMR_STD_ANSI, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
 		COPY_FMD(ifmds[m], ofmd);
 		theta = round(conversion_factor * (double)(ifmds[m]->angle));
@@ -99,7 +99,7 @@ isocc2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 
 	conversion_factor = (360.0 / 64.0);
 	for (m = 0; m < mcount; m++) {
-		if (new_fmd(FMR_STD_ANSI, &ofmd) != 0)
+		if (new_fmd(FMR_STD_ANSI, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
 		COPY_FMD(ifmds[m], ofmd);
 		theta = conversion_factor * (double)(ifmds[m]->angle);

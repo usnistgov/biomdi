@@ -46,7 +46,7 @@ ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length)
 		 * angle, so we have 256 possible values to represent 360
 		 * degrees.
 		 */
-		if (new_fmd(ofvmr->format_std, &ofmd) != 0)
+		if (new_fmd(ofvmr->format_std, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
 		COPY_FMD(ifmds[m], ofmd);
 		theta = 2 * (int)ifmds[m]->angle;
@@ -100,7 +100,7 @@ ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 
 	conversion_factor = (64.0 / 360.0);
 	for (m = 0; m < mcount; m++) {
-		if (new_fmd(FMR_STD_ISO_COMPACT_CARD, &ofmd) != 0)
+		if (new_fmd(FMR_STD_ISO_COMPACT_CARD, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
 		COPY_FMD(ifmds[m], ofmd);
 
