@@ -266,6 +266,18 @@ copy_with_conversion(FMR *ifmr, FMR *ofmr, int in_type, int out_type)
 	else
 		fmr_len = FMR_ISO_HEADER_LENGTH;
 
+	/* Fix up the output FMR header for those input types that don't
+	 * have all the needed information.
+	 */
+	if ((out_type == FMR_STD_ANSI) || (out_type == FMR_STD_ISO))
+		if ((in_type == FMR_STD_ISO_NORMAL_CARD) ||
+		    (in_type == FMR_STD_ISO_COMPACT_CARD)) {
+			strncpy(ofmr->format_id, FMR_FORMAT_ID,
+			    FMR_FORMAT_ID_LEN);
+			strncpy(ofmr->spec_version, FMR_SPEC_VERSION,
+			    FMR_SPEC_VERSION_LEN);
+		}
+
 	/* Get all of the finger view records */
 	rcount = get_fvmr_count(ifmr);
 	if (rcount > 0) {
