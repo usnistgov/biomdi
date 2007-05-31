@@ -167,6 +167,7 @@
 #define FMD_ISO_COMPACT_DATA_LENGTH		3
 struct finger_minutiae_data {
 	unsigned int				format_std;
+	unsigned int				index;
 #define	fmd_startcopy				type
 	unsigned char				type;
 	unsigned short				x_coord;
@@ -508,6 +509,7 @@ add_fedb_to_fvmr(struct finger_extended_data_block *fedb,
 /* Parameters:                                                                */
 /*   format_std The standard for record (ANSI, ISO, etc.)                     */
 /*   fmd    Address of the pointer to the FV structure that will be allocated.*/
+/*   index  Index number of the minutiae (position within the record)         */
 /*                                                                            */
 /* Returns:                                                                   */
 /*   0      Success                                                           */
@@ -515,7 +517,8 @@ add_fedb_to_fvmr(struct finger_extended_data_block *fedb,
 /*                                                                            */
 /******************************************************************************/
 int
-new_fmd(unsigned int format_std, struct finger_minutiae_data **fmd);
+new_fmd(unsigned int format_std, struct finger_minutiae_data **fmd,
+    unsigned int index);
 
 /******************************************************************************/
 /* Free the storage for a single Finger Minutiae Data Record.                 */

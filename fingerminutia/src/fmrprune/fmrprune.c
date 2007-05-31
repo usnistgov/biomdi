@@ -248,6 +248,20 @@ err_out:
 	exit(EXIT_FAILURE);
 }
 
+static int
+compare_fmd_by_index(const void *m1, const void *m2)
+{
+	FMD *lm1, *lm2;
+	lm1 = (FMD *)m1;
+	lm2 = (FMD *)m2;
+	if (lm1->index == lm2->index)	/* Should not happen */
+		return (0);
+	else if (lm1->index < lm2->index)
+		return (-1);
+	else
+		return (1);
+}
+
 /*
  * Copy one FVMR's header information to another, then selectively copy
  * the minutiae. Parameter mcount is the requested number of minutiae.
@@ -311,8 +325,9 @@ copy_and_select_fvmr(FVMR *src, FVMR *dst, int mcount)
 
 	}
 
+	qsort(fmds, mcount, sizeof(FMD *), compare_fmd_by_index);
 	for (m = 0; m < mcount; m++) {
-		if (new_fmd(FMR_STD_ANSI, &ofmd) < 0)
+		if (new_fmd(FMR_STD_ANSI, &ofmd, m) < 0)
 			ALLOC_ERR_EXIT("Output FMD");
 		COPY_FMD(fmds[m], ofmd);
 		fmr_length += FMD_DATA_LENGTH;

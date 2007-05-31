@@ -100,7 +100,7 @@ read_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 
 	// Finger minutiae data
 	for (i = 0; i < fvmr->number_of_minutiae; i++) {
-		if (new_fmd(fvmr->format_std, &fmd) < 0)
+		if (new_fmd(fvmr->format_std, &fmd, i) < 0)
 			ERR_OUT("Could not allocate FMD %d", i);
 
 		ret = read_fmd(fp, fmd);
@@ -191,7 +191,7 @@ print_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 
 	i = 1;
 	TAILQ_FOREACH(fmd, &fvmr->minutiae_data, list) {
-		fprintf(fp, "(%03d) ", i++);
+		fprintf(fp, "(%03d) ", fmd->index);
 		if (print_fmd(fp, fmd) != PRINT_OK)
 			ERR_OUT("Could not print minutiae data");
 	}

@@ -478,7 +478,7 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 
 	/* For each minutiae index number, create the minutiae data records */
 	for (subfield = 0; subfield < fvmr->number_of_minutiae; subfield++) {
-		if (new_fmd(FMR_STD_ANSI, &fmd) != 0)
+		if (new_fmd(FMR_STD_ANSI, &fmd, subfield) != 0)
 			ALLOC_ERR_OUT("finger minutiae data record");
 
 		/* The x,y,theta values are in the second item,

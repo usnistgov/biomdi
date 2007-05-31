@@ -112,7 +112,7 @@ load_fmds(FILE *fp, struct finger_view_minutiae_record *fvmr)
 	// index x y theta type
 	//
 	for (i = 0; i < fvmr->number_of_minutiae; i++) {
-		if (new_fmd(FMR_STD_ANSI, &fmd) < 0)
+		if (new_fmd(FMR_STD_ANSI, &fmd, i) < 0)
 			ALLOC_ERR_RETURN("FMD for XYT data");
 
 		if (fscanf(fp, "%u %hu %hu %hhu %hhu",

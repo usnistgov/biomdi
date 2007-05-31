@@ -21,7 +21,8 @@
 #include <biomdimacro.h>
 
 int
-new_fmd(unsigned int format_std, struct finger_minutiae_data **fmd)
+new_fmd(unsigned int format_std, struct finger_minutiae_data **fmd,
+    unsigned int index)
 {
 	struct finger_minutiae_data *lfmd;
 	lfmd = (struct finger_minutiae_data *)malloc(
@@ -32,6 +33,7 @@ new_fmd(unsigned int format_std, struct finger_minutiae_data **fmd)
 	}
 	memset((void *)lfmd, 0, sizeof(struct finger_minutiae_data));
 	lfmd->format_std = format_std;
+	lfmd->index = index;
 	*fmd = lfmd;
 	return 0;
 }
