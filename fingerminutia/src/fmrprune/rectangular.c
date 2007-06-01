@@ -19,27 +19,19 @@
 #include <fmr.h>
 #include <biomdimacro.h>
 
-#include "fmrprune.h"
-
-/* 
- * Sort by the rectangular method, as described above. Parameter
- * mcount is the total number of minutiae available, and is set
- * to the number of selected minutiae on return.
- */
 void
-sort_fmd_by_rectangular(FMD **fmds, int *mcount, int x, int y, int a, int b)
+select_fmd_by_rectangular(FMD **fmds, int *mcount, int x, int y, int a, int b)
 {
 	int m, lcount;
 	int Lx, Rx, Uy, Ly;
-	struct minutia_sort_data *msds;
+	FMD **lfmds;
 
-	/* Allocate an array to hold the sorting criteria for the FMDs */
-	msds = (struct minutia_sort_data *)malloc(*mcount *
-	    sizeof(struct minutia_sort_data));
-	if (msds == NULL)
+	/* Allocate an array to hold a local copy of the FMD pointers */
+	lfmds = (FMD **)malloc(*mcount * sizeof(FMD *));
+	if (lfmds == NULL)
 		ALLOC_ERR_EXIT("Sorting criteria array");
 	for (m = 0; m < *mcount; m++)
-		msds[m].fmd = fmds[m];
+		lfmds[m] = fmds[m];
 
 	/* Set the left and right-most x, upper and lower-most y */
 	Lx = x;
@@ -50,11 +42,11 @@ sort_fmd_by_rectangular(FMD **fmds, int *mcount, int x, int y, int a, int b)
 	/* Check each minutia point for location inside the box */
 	lcount = 0;
 	for (m = 0; m < *mcount; m++) {
-		if ((msds[m].fmd->x_coord >= Lx) &&
-		    (msds[m].fmd->x_coord <= Rx) &&
-		    (msds[m].fmd->y_coord >= Uy) &&
-		    (msds[m].fmd->y_coord <= Ly)) {
-			fmds[lcount] = msds[m].fmd;
+		if ((lfmds[m]->x_coord >= Lx) &&
+		    (lfmds[m]->x_coord <= Rx) &&
+		    (lfmds[m]->y_coord >= Uy) &&
+		    (lfmds[m]->y_coord <= Ly)) {
+			fmds[lcount] = lfmds[m];
 			lcount++;
 		}
 	}
@@ -66,5 +58,5 @@ sort_fmd_by_rectangular(FMD **fmds, int *mcount, int x, int y, int a, int b)
 #endif
 
 	*mcount = lcount;
-	free(msds);
+	free(lfmds);
 }

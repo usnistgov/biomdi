@@ -25,6 +25,7 @@
 #include <sys/types.h>
 
 #include <fmr.h>
+#include <fmrsort.h>
 #include <biomdimacro.h>
 
 #include "fmrprune.h"
@@ -319,7 +320,7 @@ copy_and_select_fvmr(FVMR *src, FVMR *dst, int mcount)
 		break;
 
 	    case PRUNE_METHOD_RECTANGULAR:
-		sort_fmd_by_rectangular(fmds, &num, x, y, a, b);
+		select_fmd_by_rectangular(fmds, &num, x, y, a, b);
 		mcount = num;
 		break;
 

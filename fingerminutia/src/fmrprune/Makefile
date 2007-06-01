@@ -8,14 +8,9 @@
 # about its quality, reliability, or any other characteristic.
 #
 include ../common.mk
-all: elliptical.c polar.c fmrprune.c
-	$(CC) $(CFLAGS) -c polar.c
-#	$(CC) $(CFLAGS) -c elliptical.c -DDEBUG
-	$(CC) $(CFLAGS) -c elliptical.c
-	$(CC) $(CFLAGS) -c rectangular.c
-#	$(CC) $(CFLAGS) -c rectangular.c -DDEBUG
-	$(CC) $(CFLAGS) -c random.c
-	$(CC) $(CFLAGS) fmrprune.c elliptical.o polar.o random.o rectangular.o -lm -lfmr -o $(LOCALBIN)/fmrprune
+SOURCES = fmrprune.c rectangular.c
+all: $(SOURCES)
+	$(CC) $(CFLAGS) $(SOURCES) -lm -lfmr -o $(LOCALBIN)/fmrprune
 	$(CP) fmrprune.1 $(LOCALMAN)
 
 clean:
