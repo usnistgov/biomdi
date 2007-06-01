@@ -302,6 +302,11 @@ copy_with_conversion(FMR *ifmr, FMR *ofmr, int in_type, int out_type)
 					    &fvmr_len, ifmr->x_resolution,
 					    ifmr->y_resolution);
 				break;
+
+			/* XXX Handle ISO->ISO conversions, but assume that
+			 * this funciton is not called with that type of
+			 * conversion request.
+			 */
 			    case FMR_STD_ISO:
 			    case FMR_STD_ISO_NORMAL_CARD:
 				rc = iso2ansi_fvmr(ifvmrs[r], ofvmr, &fvmr_len);
@@ -341,9 +346,17 @@ err_out:
 int
 main(int argc, char *argv[])
 {
-	FMR *ifmr, *ofmr = NULL;
+	FMR *ifmr = NULL, *ofmr = NULL;
 
 	get_options(argc, argv);
+
+	if ((in_type == FMR_STD_ISO) ||
+	    (in_type == FMR_STD_ISO_NORMAL_CARD) ||
+	    (in_type == FMR_STD_ISO_COMPACT_CARD))
+		if ((out_type == FMR_STD_ISO) ||
+		    (out_type == FMR_STD_ISO_NORMAL_CARD) ||
+		    (out_type == FMR_STD_ISO_COMPACT_CARD))
+			ERR_OUT("Unsupported conversion");
 
 	// Allocate the input/output FMR records in memory
 	if (new_fmr(in_type, &ifmr) < 0)
