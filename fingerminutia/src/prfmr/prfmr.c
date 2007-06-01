@@ -126,6 +126,12 @@ int main(int argc, char *argv[])
 		ret = read_fmr(fp, fmr);
 		if (ret != READ_OK)
 				break;
+		/* We don't want to stop making progress when reading */
+		if (fmr->record_length == 0) {
+			fprintf(stderr, "FMR Record length is 0.\n");
+			exit (EXIT_FAILURE);
+		}
+		
 		total_length += fmr->record_length;
 
 		// Validate the FMR
