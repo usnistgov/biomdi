@@ -14,7 +14,7 @@
 struct minutia_sort_data {
 	FMD	*fmd;
 	int	distance;	// linear distance between two points
-	double	z;		// elliptical distance
+	double	z;		// floating point distance
 	int	rand;		// a random number associated with the record
 };
 
@@ -27,18 +27,6 @@ struct minutia_sort_data {
  */
 void sort_fmd_by_polar(FMD **fmds, int mcount);
 
-/* sort_fmd_by_elliptical() modifies the input array by storing the minutiae
- * that fall within an ellipse centered on the center of mass of the
- * minutiae.
- * Parameters:
- *   fmds   : The array of pointers to the minutia data records.
- *   mcount : The number of minutiae in input; the actual number of
- *            minutiae that fall within the ellipse on output.
- *   a      : The semi-major axis of the ellipse.
- *   b      : The semi-minor axis of the ellipse.
- */
-void sort_fmd_by_elliptical(FMD **fmds, int *mcount, int a, int b);
-
 /* sort_fmd_by_random() modifies the input array by sorting the minutiae
  * randomly.
  * Parameters:
@@ -46,18 +34,3 @@ void sort_fmd_by_elliptical(FMD **fmds, int *mcount, int a, int b);
  *   mcount : The number of minutiae.
  */
 void sort_fmd_by_random(FMD **fmds, int mcount);
-
-/* sort_fmd_by_rectangular() modifies the input array by storing the minutiae
- * that fall within an rectangle centered on the center of mass of the
- * minutiae.
- * Parameters:
- *   fmds   : The array of pointers to the minutia data records.
- *   mcount : On input, is the number of minutiae in the FMR. On output,
- *            returns the actual number of minutiae that fall within the
- *            rectangle.
- *   x      : The X coordinate of the upper left corner of the rectangle.
- *   y      : The Y coordinate of the upper left corner of the rectangle.
- *   a      : The width (X direction) of the rectangle.
- *   b      : The height (Y direction) of the rectangle.
- */
-void sort_fmd_by_rectangle(FMD **fmds, int *mcount, int x, int y, int a, int b);
