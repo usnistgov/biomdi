@@ -28,3 +28,15 @@
  */
 void
 select_fmd_by_rectangular(FMD **fmds, int *mcount, int x, int y, int a, int b);
+
+/* select_fmd_by_elliptical() modifies the input array by storing the minutiae
+ * that fall within an ellipse centered on the center of mass of the
+ * minutiae.
+ * Parameters:
+ *   fmds   : The array of pointers to the minutia data records.
+ *   mcount : The number of minutiae in input; on output, the actual
+ *            number of minutiae that fall within the ellipse.
+ *   a      : The semi-major axis of the ellipse.
+ *   b      : The semi-minor axis of the ellipse.
+ */
+void select_fmd_by_elliptical(FMD **fmds, int *mcount, int a, int b);

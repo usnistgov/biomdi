@@ -8,9 +8,18 @@
 # about its quality, reliability, or any other characteristic.
 #
 include ../common.mk
-SOURCES = fmrprune.c rectangular.c
-all: $(SOURCES)
-	$(CC) $(CFLAGS) $(SOURCES) -lm -lfmr -o $(LOCALBIN)/fmrprune
+SOURCES = fmrprune.c fmrprune.h
+OBJS = elliptical.o rectangular.o
+
+all: elliptical rectangular fmrprune
+elliptical:	elliptical.c
+	$(CC) $(CFLAGS) -c $< -o elliptical.o
+
+rectangular:	rectangular.c
+	$(CC) $(CFLAGS) -c $< -o rectangular.o
+
+fmrprune: $(SOURCES)
+	$(CC) $(CFLAGS) fmrprune.c $(OBJS) -lm -lfmr -o $(LOCALBIN)/fmrprune
 	$(CP) fmrprune.1 $(LOCALMAN)
 
 clean:

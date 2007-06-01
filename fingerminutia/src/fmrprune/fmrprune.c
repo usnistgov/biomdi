@@ -307,7 +307,7 @@ copy_and_select_fvmr(FVMR *src, FVMR *dst, int mcount)
 		break;
 
 	    case PRUNE_METHOD_ELLIPTICAL:
-		sort_fmd_by_elliptical(fmds, &num, a, b);
+		select_fmd_by_elliptical(fmds, &num, a, b);
 		if (num < mcount)	// We may have less minutiae than asked
 			mcount = num;
 		break;
