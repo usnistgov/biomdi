@@ -814,7 +814,7 @@ read_cddb(FILE *fp, struct core_delta_data_block *cddb)
 
 	// ANSI Core Type, Number of Cores
 	CREAD(&cval, fp);
-	if (dd->format_std == FMR_STD_ANSI) {
+	if (cddb->format_std == FMR_STD_ANSI) {
 		cddb->core_type = (cval & ANSI_CORE_TYPE_MASK) >>
 		    ANSI_CORE_TYPE_SHIFT;
 		cddb->num_cores = cval & ANSI_CORE_NUM_CORES_MASK;
@@ -839,7 +839,7 @@ read_cddb(FILE *fp, struct core_delta_data_block *cddb)
 
 	// Delta Type, Number of Deltas
 	CREAD(&cval, fp);
-	if (dd->format_std == FMR_STD_ANSI) {
+	if (cddb->format_std == FMR_STD_ANSI) {
 		cddb->delta_type = (cval & ANSI_DELTA_TYPE_MASK) >>
 		    ANSI_DELTA_TYPE_SHIFT;
 	}
@@ -958,9 +958,9 @@ write_cddb(FILE *fp, struct core_delta_data_block *cddb)
 	struct delta_data *dd;
 	unsigned char cval = 0;
 
-	if ((cd->format_std == FMR_STD_ISO) ||
-	    (cd->format_std == FMR_STD_ISO_NORMAL_CARD) ||
-	    (cd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
+	if ((cddb->format_std == FMR_STD_ISO) ||
+	    (cddb->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (cddb->format_std == FMR_STD_ISO_COMPACT_CARD)) {
 		cval = cddb->num_cores;
 	} else {
 		cval = (cddb->core_type << ANSI_CORE_TYPE_SHIFT) |
@@ -973,9 +973,9 @@ write_cddb(FILE *fp, struct core_delta_data_block *cddb)
 			ERR_OUT("Could not write core data record");
 	}
 
-	if ((cd->format_std == FMR_STD_ISO) ||
-	    (cd->format_std == FMR_STD_ISO_NORMAL_CARD) ||
-	    (cd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
+	if ((cddb->format_std == FMR_STD_ISO) ||
+	    (cddb->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (cddb->format_std == FMR_STD_ISO_COMPACT_CARD)) {
 		cval = cddb->num_deltas;
 	} else {
 		cval = (cddb->delta_type << ANSI_DELTA_TYPE_SHIFT) |
