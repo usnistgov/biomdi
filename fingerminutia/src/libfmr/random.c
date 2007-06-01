@@ -18,9 +18,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fmr.h>
+#include <fmrsort.h>
 #include <biomdimacro.h>
-
-#include "fmrprune.h"
 
 /*
  * Sort a set of finger minutiae data in a random order.

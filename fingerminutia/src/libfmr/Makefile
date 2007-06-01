@@ -11,7 +11,7 @@
 # form of linking libraries.
 #
 include ../common.mk
-SOURCES = fmr.c fvmr.c fmd.c fedb.c
+SOURCES = fmr.c fvmr.c fmd.c fedb.c elliptical.c polar.c random.c
 
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
