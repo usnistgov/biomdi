@@ -30,6 +30,9 @@
 
 #define SORT_METHOD_POLAR	1
 #define SORT_METHOD_RANDOM	2
+#define SORT_METHOD_XY		3
+#define SORT_METHOD_YX		4
+#define SORT_METHOD_ANGLE	5
 
 #define SORT_ORDER_ASCENDING	1
 #define SORT_ORDER_DESCENDING	2
@@ -45,11 +48,20 @@ usage()
 	    "\tfmrsort -i <m1file> -o <outfile> -mp [-r]\n"
 	    "\tor\n"
 	    "\tfmrsort -i <m1file> -o <outfile> -mr [-r]\n"
+	    "\tor\n"
+	    "\tfmrsort -i <m1file> -o <outfile> -mx [-r]\n"
+	    "\tor\n"
+	    "\tfmrsort -i <m1file> -o <outfile> -my [-r]\n"
+	    "\tor\n"
+	    "\tfmrsort -i <m1file> -o <outfile> -ma [-r]\n"
 	    "\twhere:\n"
 	    "\t   -i:  Specifies the input file\n"
 	    "\t   -o:  Specifies the output file\n"
 	    "\t   -mp: Sort using the polar method\n"
 	    "\t   -mr: Sort using the random method\n"
+	    "\t   -mx: Sort using the Cartesian X-Y method\n"
+	    "\t   -my: Sort using the Cartesian Y-X method\n"
+	    "\t   -ma: Sort using the Angle method\n"
 	    "\t   -r:  Reverse the sort order to descending\n");
 }
 
@@ -120,6 +132,15 @@ get_options(int argc, char *argv[])
 				break;
 			    case 'r':
 				sort_method = SORT_METHOD_RANDOM;
+				break;
+			    case 'x':
+				sort_method = SORT_METHOD_XY;
+				break;
+			    case 'y':
+				sort_method = SORT_METHOD_YX;
+				break;
+			    case 'a':
+				sort_method = SORT_METHOD_ANGLE;
 				break;
 			    default:
 				goto err_usage_out;
@@ -196,6 +217,18 @@ sort_and_copy_fvmr(FVMR *src, FVMR *dst)
 
 	    case SORT_METHOD_RANDOM:
 		sort_fmd_by_random(fmds, mcount);
+		break;
+
+	    case SORT_METHOD_XY:
+		sort_fmd_by_xy(fmds, mcount);
+		break;
+
+	    case SORT_METHOD_YX:
+		sort_fmd_by_yx(fmds, mcount);
+		break;
+
+	    case SORT_METHOD_ANGLE:
+		sort_fmd_by_angle(fmds, mcount);
 		break;
 	}
 

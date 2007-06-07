@@ -16,7 +16,18 @@ struct minutia_sort_data {
 	int	distance;	// linear distance between two points
 	double	z;		// floating point distance
 	int	rand;		// a random number associated with the record
+	unsigned short maj_coord;	// The major coordinate
+	unsigned short min_coord;	// The minor coordinate
 };
+
+/*
+ * Declare the sorting functions. All of these functions sort in ascending
+ * order. It is up to the caller the reverse the sort order if that is
+ * desired.
+ *
+ * The sort methods are defined in ISO/IEc 19794-2, "Biometric data interchange
+ * formats: Finger minutiae data".
+ */
 
 /* sort_fmd_by_polar() modifies the input array by sorting the minutiae
  * using the Polar distance from the center of mass of the minutiae.
@@ -34,3 +45,30 @@ void sort_fmd_by_polar(FMD **fmds, int mcount);
  *   mcount : The number of minutiae.
  */
 void sort_fmd_by_random(FMD **fmds, int mcount);
+
+/* sort_fmd_by_xy() modifies the input array by sorting the minutiae
+ * according to Cartesian x-y coordinates: Sort by the X coordinate,
+ * and if they are equal, use the Y coordinate.
+ * Parameters:
+ *   fmds   : The array of pointers to the minutia data records.
+ *   mcount : The number of minutiae.
+ */
+void sort_fmd_by_xy(FMD **fmds, int mcount);
+
+/* sort_fmd_by_yy() modifies the input array by sorting the minutiae
+ * according to Cartesian y-x coordinates: Sort by the Y coordinate,
+ * and if they are equal, use the X coordinate.
+ * Parameters:
+ *   fmds   : The array of pointers to the minutia data records.
+ *   mcount : The number of minutiae.
+ */
+void sort_fmd_by_yx(FMD **fmds, int mcount);
+
+/* sort_fmd_by_angle() modifies the input array by sorting the minutiae
+ * according to Anlge. If two angles are equivalent, the sort order is
+ * indeterminate.
+ * Parameters:
+ *   fmds   : The array of pointers to the minutia data records.
+ *   mcount : The number of minutiae.
+ */
+void sort_fmd_by_angle(FMD **fmds, int mcount);
