@@ -45,7 +45,6 @@ sort_fmd_by_random(FMD **fmds, int mcount)
 {
 	int m;
 	struct minutia_sort_data *msds;
-	int *claimed;
 
 	if (mcount == 0)
 		return;
