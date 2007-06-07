@@ -31,6 +31,9 @@
 #define SORT_METHOD_POLAR	1
 #define SORT_METHOD_RANDOM	2
 
+#define SORT_ORDER_ASCENDING	1
+#define SORT_ORDER_DESCENDING	2
+
 /******************************************************************************/
 /* Print a how-to-use the program message.                                    */
 /******************************************************************************/
@@ -39,18 +42,20 @@ usage()
 {
 	fprintf(stderr, 
 	    "usage:\n"
-	    "\tfmrsort -i <m1file> -o <outfile> -mp\n"
+	    "\tfmrsort -i <m1file> -o <outfile> -mp [-r]\n"
 	    "\tor\n"
-	    "\tfmrsort -i <m1file> -o <outfile> -mr\n"
+	    "\tfmrsort -i <m1file> -o <outfile> -mr [-r]\n"
 	    "\twhere:\n"
 	    "\t   -i:  Specifies the input file\n"
 	    "\t   -o:  Specifies the output file\n"
 	    "\t   -mp: Sort using the polar method\n"
-	    "\t   -mr: Sort using the random method\n");
+	    "\t   -mr: Sort using the random method\n"
+	    "\t   -r:  Reverse the sort order to descending\n");
 }
 
 /*  */
 static int sort_method;
+static int sort_order = SORT_ORDER_ASCENDING;
 
 /* Keep track of the entire FMR length in a global. */
 static unsigned int fmr_length;
@@ -86,7 +91,7 @@ get_options(int argc, char *argv[])
 	struct stat sb;
 
 	i_opt = o_opt = m_opt = 0;
-	while ((ch = getopt(argc, argv, "i:o:m:")) != -1) {
+	while ((ch = getopt(argc, argv, "i:o:m:r")) != -1) {
 		switch (ch) {
 		    case 'i':
 			if ((in_fp = fopen(optarg, "rb")) == NULL)
@@ -123,6 +128,10 @@ get_options(int argc, char *argv[])
 			m_opt++;
 			break;
 
+		    case 'r':
+			sort_order = SORT_ORDER_DESCENDING;
+			break;
+
 		    default:
 			goto err_usage_out;
 			break;
@@ -149,6 +158,15 @@ err_out:
  * Copy one FVMR's header information to another, then sort and copy
  * the minutiae.
  */
+#define DUP_FMD							\
+	do {							\
+		if (new_fmd(src->format_std, &ofmd, m) < 0)	\
+			ALLOC_ERR_EXIT("Output FMD");		\
+		COPY_FMD(fmds[m], ofmd);			\
+		fmr_length += FMD_DATA_LENGTH;			\
+		add_fmd_to_fvmr(ofmd, dst);			\
+	} while (0)
+
 static int
 sort_and_copy_fvmr(FVMR *src, FVMR *dst)
 {
@@ -181,13 +199,12 @@ sort_and_copy_fvmr(FVMR *src, FVMR *dst)
 		break;
 	}
 
-	for (m = 0; m < mcount; m++) {
-		if (new_fmd(src->format_std, &ofmd, m) < 0)
-			ALLOC_ERR_EXIT("Output FMD");
-		COPY_FMD(fmds[m], ofmd);
-		fmr_length += FMD_DATA_LENGTH;
-		add_fmd_to_fvmr(ofmd, dst);
-	}
+	if (sort_order == SORT_ORDER_ASCENDING)
+		for (m = 0; m < mcount; m++)
+			DUP_FMD;
+	else
+		for (m = mcount - 1; m >= 0; m--)
+			DUP_FMD;
 
 	free(fmds);
 	return (0);

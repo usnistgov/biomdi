@@ -12,6 +12,7 @@
 .Fl o
 .Ar outfile
 .Fl mp
+.Op Fl r
 .Nm
 .Fl i
 .Ar infile
@@ -37,14 +38,16 @@ not exist.
 Specifies the Polar sorting method.
 .It Fl mr
 Specifies the Random sorting method.
+.It Fl r
+Sort in reverse (descending) order.
 .El
 .Sh EXAMPLES
 fmrsort -i m1.raw -o newm1.raw -mp
 .Pp
 Produces a new file containing the minutiae from the input file sorted
-using the Polar method.
+using the Polar method, in descending order.
 .Pp
-fmrsort -i m1.raw -o newm1.raw -mr
+fmrsort -i m1.raw -o newm1.raw -mr -r
 .Pp
 Produces a new file containing the minutiae from the input file randomly sorted.
 .Pp
