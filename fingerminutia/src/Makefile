@@ -12,7 +12,7 @@
 #
 
 # The 'core' library and programs, that always build
-CORE := libfmr prfmr mkfmr fmrv fmroverlap fmrprune fmr2fmr fmrisocompact minexv test
+CORE := libfmr prfmr mkfmr fmrv fmroverlap fmrprune fmrsort fmr2fmr fmrisocompact minexv test
 # Programs dependent on NBIS
 NBIS := fmr2an2k an2k2fmr
 # Programs dependent on the GD graphics library
@@ -29,8 +29,8 @@ SUBDIRS := $(CORE)
 # Library used by the minutiae plotter, use this SUBDIRS line. See the comments
 # in src/fmrplot/fmrplot.c for information on the graphics library.
 
-#SUBDIRS := $(CORE) $(NBIS) $(GD)
-SUBDIRS := $(CORE) $(GD)
+SUBDIRS := $(CORE) $(NBIS) $(GD)
+#SUBDIRS := $(CORE) $(GD)
 
 all:
 	@for subdir in $(SUBDIRS); do \
