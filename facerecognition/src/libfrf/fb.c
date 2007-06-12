@@ -26,7 +26,7 @@
 #include <string.h>
 
 #include <frf.h>
-#include <m1io.h>
+#include <biomdimacro.h>
 
 int
 new_fb(struct facial_block **fb)

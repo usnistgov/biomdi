@@ -20,8 +20,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <biomdimacro.h>
 #include <frf.h>
-#include <m1io.h>
 
 int
 new_fpb(struct feature_point_block **fpb)

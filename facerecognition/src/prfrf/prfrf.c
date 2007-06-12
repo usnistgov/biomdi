@@ -27,8 +27,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <biomdimacro.h>
 #include <frf.h>
-#include <m1io.h>
 
 char *fn_prefix;
 

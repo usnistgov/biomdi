@@ -22,8 +22,8 @@
 #include <string.h>
 
 #include <frf.h>
-#include <m1.h>
-#include <m1io.h>
+#include <biomdi.h>
+#include <biomdimacro.h>
 
 int
 new_fdb(struct facial_data_block **fdb)
