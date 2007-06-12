@@ -25,7 +25,7 @@
 #include <unistd.h>
 
 #include <fir.h>
-#include <m1io.h>
+#include <biomdimacro.h>
 
 void
 usage(char *name) {

@@ -13,8 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <m1.h>
-#include <m1io.h>
+#include <biomdi.h>
+#include <biomdimacro.h>
 #include <fir.h>
 
 /******************************************************************************/

@@ -31,8 +31,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <m1.h>
-#include <m1io.h>
+#include <biomdi.h>
+#include <biomdimacro.h>
 #include <fir.h>
 
 int total_length = 0;

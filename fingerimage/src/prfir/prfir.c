@@ -23,7 +23,8 @@
 #include <unistd.h>
 
 #include <fir.h>
-#include <m1io.h>
+#include <biomdi.h>
+#include <biomdimacro.h>
 
 int main(int argc, char *argv[])
 {
