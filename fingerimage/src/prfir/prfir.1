@@ -1,0 +1,48 @@
+.\""
+.Dd August 11, 2006
+.Dt PRFIR 1  
+.Os Mac OS X       
+.Sh NAME
+.Nm prfir
+.Nd Prints an ANSI-381 M1 Finger Image Record in human-readable form.
+.Sh SYNOPSIS
+.Nm
+.Op Fl v
+.Ar file
+.Pp
+.Sh DESCRIPTION
+The
+.Nm
+command is used to print ANSI/ICITS 381-2004 compliant finger image records
+in human-readable form. The output is sent to stdout, while error messages
+are sent to stderr. A file can contain multiple finger image records.
+.Pp
+The image record can be optionally verified, which means the certain fields 
+in the record are checked against constraints given in the ANSI/INCITS 381-2004
+specification.
+.Pp
+.Bd -literal
+prfir 381.raw
+.Ed
+.Pp
+The options are as follows:
+.Bl -tag
+.It Fl v
+causes the image file to be verified before printing.
+.El
+.Sh EXAMPLES
+\'prfir 381.raw'
+.Pp
+Print the image records in the file.
+.Pp
+\'prfir -v 381.raw'
+.Pp
+Verify, and if successful, print the image records.
+.Pp
+.Sh SEE ALSO
+.Xr prfmr 1 ,
+.Sh STANDARDS
+``Finger Image-Based Data Interchange Format'', ANSI/INCITS 381-2004,
+May 13, 2004.
+.Sh HISTORY
+Created August 11th, 2006 by NIST.
