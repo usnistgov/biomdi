@@ -11,8 +11,8 @@
  * Collection of macros that are useful.
  */
 
-#ifndef _M1IO_H
-#define _M1IO_H 
+#ifndef _BIOMDIMACRO_H
+#define _BIOMDIMACRO_H 
 
 /******************************************************************************/
 /* Common definitions used throughout                                         */
@@ -304,4 +304,4 @@
 	for (var = TAILQ_FIRST(head); var; var = TAILQ_NEXT(var, field))
 #endif
 
-#endif /* !_M1IO_H  */
+#endif /* !_BIOMDIMACRO_H  */

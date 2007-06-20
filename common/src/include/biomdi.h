@@ -8,8 +8,8 @@
  * about its quality, reliability, or any other characteristic.
  */
 
-#ifndef _M1
-#define _M1
+#ifndef _BIOMDI_H
+#define _BIOMDI_H
 
 // Header CBEFF ID fields
 #define HDR_PROD_ID_OWNER_MASK	0xFFFF0000
@@ -205,4 +205,4 @@
 #define SOURCE_TYPE_VENDOR_MIN			128
 #define SOURCE_TYPE_VENDOR_MAX			255
 
-#endif /* _M1 */
+#endif /* _BIOMDI_H */
