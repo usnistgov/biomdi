@@ -23,9 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <fmr.h>
 #include <biomdi.h>
 #include <biomdimacro.h>
+#include <fmr.h>
 
 /******************************************************************************/
 /* Implement the interface for allocating and freeing minutiae records        */
@@ -68,8 +68,8 @@ free_fmr(struct finger_minutiae_record *fmr)
 /* Implement the interface for reading and writing finger minutiae records    */
 /******************************************************************************/
 
-int
-read_fmr(FILE *fp, struct finger_minutiae_record *fmr)
+static int
+internal_read_fmr(FILE *fp, BDB *fmdb, struct finger_minutiae_record *fmr)
 {
 	unsigned int lval = 0;
 	unsigned short sval = 0;
@@ -89,13 +89,13 @@ read_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 	} else {
 		// Read the header information first
 		// Format ID
-		OREAD(fmr->format_id, 1, FMR_FORMAT_ID_LEN, fp);
+		OGET(fmr->format_id, 1, FMR_FORMAT_ID_LEN, fp, fmdb);
 
 		// Spec Version
-		OREAD(fmr->spec_version, 1, FMR_SPEC_VERSION_LEN, fp);
+		OGET(fmr->spec_version, 1, FMR_SPEC_VERSION_LEN, fp, fmdb);
 
 		if (fmr->format_std == FMR_STD_ISO) {
-			LREAD(&lval, fp);
+			LGET(&lval, fp, fmdb);
 			fmr->record_length = lval;
 			fmr->record_length_type = FMR_ISO_HEADER_TYPE;
 		} else {
@@ -103,9 +103,9 @@ read_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 			 * not 0, that is the length; otherwise, the length
 			 * is in the next 4 bytes
 			 */
-			SREAD(&sval, fp);
+			SGET(&sval, fp, fmdb);
 			if (sval == 0) {
-				LREAD(&lval, fp);
+				LGET(&lval, fp, fmdb);
 				fmr->record_length = lval;
 				fmr->record_length_type =
 				    FMR_ANSI_LARGE_HEADER_TYPE;
@@ -116,39 +116,39 @@ read_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 			}
 
 			// CBEFF Product ID
-			SREAD(&fmr->product_identifier_owner, fp);
-			SREAD(&fmr->product_identifier_type, fp);
+			SGET(&fmr->product_identifier_owner, fp, fmdb);
+			SGET(&fmr->product_identifier_type, fp, fmdb);
 		}
 
 		// Capture Eqpt Compliance/Scanner ID
-		SREAD(&sval, fp);
+		SGET(&sval, fp, fmdb);
 		sval = sval;
 		fmr->scanner_id = sval & HDR_SCANNER_ID_MASK; 
 		fmr->compliance = (sval & HDR_COMPLIANCE_MASK) >>
 		    HDR_COMPLIANCE_SHIFT; 
 
 		// x image size
-		SREAD(&sval, fp);
+		SGET(&sval, fp, fmdb);
 		fmr->x_image_size = sval;
 
 		// y image size
-		SREAD(&sval, fp);
+		SGET(&sval, fp, fmdb);
 		fmr->y_image_size = sval;
 
 		// x resolution
-		SREAD(&sval, fp);
+		SGET(&sval, fp, fmdb);
 		fmr->x_resolution = sval;
 
 		// y resolution
-		SREAD(&sval, fp);
+		SGET(&sval, fp, fmdb);
 		fmr->y_resolution = sval;
 
 		// number of finger views
-		CREAD(&cval, fp);
+		CGET(&cval, fp, fmdb);
 		fmr->num_views = cval;
 
 		// reserved fields
-		CREAD(&cval, fp);
+		CGET(&cval, fp, fmdb);
 		fmr->reserved = cval;
 	}
 
@@ -157,7 +157,10 @@ read_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 		if (new_fvmr(fmr->format_std, &fvmr) < 0)
 			ERR_OUT("Could not allocate FVMR %d", i);
 
-		ret = read_fvmr(fp, fvmr);
+		if (fp != NULL)
+			ret = read_fvmr(fp, fvmr);
+		else
+			ret = scan_fvmr(fmdb, fvmr);
 		if (ret == READ_OK) {
 			if (fmr->format_std == FMR_STD_ISO_NORMAL_CARD)
 				fmr->record_length = fvmr->number_of_minutiae *
@@ -185,6 +188,18 @@ err_out:
 	if (fvmr != NULL)
 		print_fvmr(stderr, fvmr);
 	return READ_ERROR;
+}
+
+int
+read_fmr(FILE *fp, struct finger_minutiae_record *fmr)
+{
+	return (internal_read_fmr(fp, NULL, fmr));
+}
+
+int
+scan_fmr(BDB *fmdb, struct finger_minutiae_record *fmr)
+{
+	return (internal_read_fmr(NULL, fmdb, fmr));
 }
 
 int

@@ -17,8 +17,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <fmr.h>
 #include <biomdimacro.h>
+#include <fmr.h>
 
 int
 new_fmd(unsigned int format_std, struct finger_minutiae_data **fmd,
@@ -48,20 +48,20 @@ free_fmd(struct finger_minutiae_data *fmd)
  * Read ISO compact card finger minutiae.
  */
 static int
-read_iso_compact_fmd(FILE *fp, struct finger_minutiae_data *fmd)
+read_iso_compact_fmd(FILE *fp, BDB *fmdb, struct finger_minutiae_data *fmd)
 {
 	unsigned char cval;
 
 	// X Coord
-	CREAD(&cval, fp);
+	CGET(&cval, fp, fmdb);
 	fmd->x_coord = (unsigned short)cval;
 
 	// Y Coord
-	CREAD(&cval, fp);
+	CGET(&cval, fp, fmdb);
 	fmd->y_coord = (unsigned short)cval;
 
 	// Type/angle
-	CREAD(&cval, fp);
+	CGET(&cval, fp, fmdb);
 	fmd->type = (unsigned char)
 	    ((cval & FMD_ISO_COMPACT_MINUTIA_TYPE_MASK) >>
 		FMD_ISO_COMPACT_MINUTIA_TYPE_SHIFT);
@@ -84,20 +84,20 @@ err_out:
  * Read ANSI, ISO, and ISO normal card finger minutiae.
  */
 static int
-read_ansi_iso_fmd(FILE *fp, struct finger_minutiae_data *fmd)
+read_ansi_iso_fmd(FILE *fp, BDB *fmdb, struct finger_minutiae_data *fmd)
 {
 	unsigned short sval;
 	unsigned char cval;
 
 	// Type/X Coord
-	SREAD(&sval, fp);
+	SGET(&sval, fp, fmdb);
 	fmd->type = (unsigned char)
 			((sval & FMD_MINUTIA_TYPE_MASK) >> 
 				FMD_MINUTIA_TYPE_SHIFT);
 	fmd->x_coord = sval & FMD_X_COORD_MASK;
 
 	// Y Coord
-	SREAD(&sval, fp);
+	SGET(&sval, fp, fmdb);
 
 	// We save the reserved field for conformance checking
 	fmd->reserved = (unsigned char)
@@ -106,11 +106,11 @@ read_ansi_iso_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 	fmd->y_coord = sval & FMD_Y_COORD_MASK;
 
 	// Minutia angle
-	CREAD(&cval, fp);
+	CGET(&cval, fp, fmdb);
 	fmd->angle = cval;
 
 	if (fmd->format_std != FMR_STD_ISO_NORMAL_CARD) {
-		CREAD(&cval, fp);
+		CGET(&cval, fp, fmdb);
 		fmd->quality = cval;
 	}
 
@@ -127,9 +127,18 @@ int
 read_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 {
 	if (fmd->format_std == FMR_STD_ISO_COMPACT_CARD)
-		return (read_iso_compact_fmd(fp, fmd));
+		return (read_iso_compact_fmd(fp, NULL, fmd));
 	else
-		return (read_ansi_iso_fmd(fp, fmd));
+		return (read_ansi_iso_fmd(fp, NULL, fmd));
+}
+
+int
+scan_fmd(BDB *fmdb, struct finger_minutiae_data *fmd)
+{
+	if (fmd->format_std == FMR_STD_ISO_COMPACT_CARD)
+		return (read_iso_compact_fmd(NULL, fmdb, fmd));
+	else
+		return (read_ansi_iso_fmd(NULL, fmdb, fmd));
 }
 
 /*

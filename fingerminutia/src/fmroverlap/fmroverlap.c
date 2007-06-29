@@ -23,8 +23,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <fmr.h>
 #include <biomdimacro.h>
+#include <fmr.h>
 
 /* Global option indicators */
 static int v_opt;

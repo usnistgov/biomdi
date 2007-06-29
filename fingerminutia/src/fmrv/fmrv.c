@@ -27,8 +27,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <fmr.h>
 #include <biomdimacro.h>
+#include <fmr.h>
 
 int main(int argc, char *argv[])
 {

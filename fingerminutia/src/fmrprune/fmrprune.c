@@ -24,9 +24,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <biomdimacro.h>
 #include <fmr.h>
 #include <fmrsort.h>
-#include <biomdimacro.h>
 
 #include "fmrprune.h"
 

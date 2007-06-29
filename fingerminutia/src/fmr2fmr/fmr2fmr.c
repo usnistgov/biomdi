@@ -26,8 +26,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <fmr.h>
 #include <biomdimacro.h>
+#include <fmr.h>
+
 #include "ansi2iso.h"
 #include "iso2ansi.h"
 

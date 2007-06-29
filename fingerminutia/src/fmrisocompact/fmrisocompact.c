@@ -26,8 +26,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <fmr.h>
 #include <biomdimacro.h>
+#include <fmr.h>
 
 /******************************************************************************/
 /* Print a how-to-use the program message.                                    */

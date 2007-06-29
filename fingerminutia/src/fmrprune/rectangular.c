@@ -16,8 +16,8 @@
 #include <sys/queue.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fmr.h>
 #include <biomdimacro.h>
+#include <fmr.h>
 
 void
 select_fmd_by_rectangular(FMD **fmds, int *mcount, int x, int y, int a, int b)

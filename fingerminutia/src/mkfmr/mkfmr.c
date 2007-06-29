@@ -33,9 +33,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <fmr.h>
 #include <biomdi.h>
 #include <biomdimacro.h>
+#include <fmr.h>
 
 int total_length = 0;
 

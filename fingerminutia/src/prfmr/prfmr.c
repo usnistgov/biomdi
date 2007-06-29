@@ -25,8 +25,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <fmr.h>
 #include <biomdimacro.h>
+#include <fmr.h>
 
 static int in_type;	// Standard type of the input file
 

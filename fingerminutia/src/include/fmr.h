@@ -847,10 +847,11 @@ validate_fmr(struct finger_minutiae_record *fmr);
 /******************************************************************************/
 
 /******************************************************************************/
-/* Read a single Finger View Minutiae Record from a file.                     */
+/* Read a single Finger View Minutiae Record from a file or memory buffer.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   buf    Pointer to the memory buffer                                      */
 /*   fvmr   Pointer to the Finger View Minutiae Record.                       */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -860,6 +861,9 @@ validate_fmr(struct finger_minutiae_record *fmr);
 /******************************************************************************/
 int
 read_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr);
+
+int
+scan_fvmr(BDB *fmdb, struct finger_view_minutiae_record *fvmr);
 
 /******************************************************************************/
 /* Write a single Finger View Minutiae Record to a file.                      */
@@ -985,10 +989,11 @@ validate_fmd(struct finger_minutiae_data *fmd);
 /******************************************************************************/
 
 /******************************************************************************/
-/* Read an entire Extended Data Block from a file.                            */
+/* Read an entire Extended Data Block from a file or memory buffer.           */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   buf    Pointer to the memory buffer                                      */
 /*   fedb   Pointer to the Extended Data block.                               */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -998,6 +1003,9 @@ validate_fmd(struct finger_minutiae_data *fmd);
 /******************************************************************************/
 int
 read_fedb(FILE *fp, struct finger_extended_data_block *fedb);
+
+int
+scan_fedb(BDB *fmdb, struct finger_extended_data_block *fedb);
 
 /******************************************************************************/
 /* Write an entire Extended Data Block to a file.                             */
@@ -1043,10 +1051,11 @@ int
 validate_fedb(struct finger_extended_data_block *fedb);
 
 /******************************************************************************/
-/* Read a single Extended Data record from a file.                            */
+/* Read a single Extended Data record from a file or a memory buffer.         */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   buf    Pointer to the memory buffer                                      */
 /*   fed    Pointer to the Extended Data record.                              */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -1056,6 +1065,9 @@ validate_fedb(struct finger_extended_data_block *fedb);
 /******************************************************************************/
 int
 read_fed(FILE *fp, struct finger_extended_data *fed);
+
+int
+scan_fed(BDB *fmdb, struct finger_extended_data *fed);
 
 /******************************************************************************/
 /* Write a single Extended Data record to a file.                             */
@@ -1105,10 +1117,11 @@ validate_fed(struct finger_extended_data *fed);
 /******************************************************************************/
 /******************************************************************************/
 /* Functions to read an entire Ridge Count Data Block and a single Ridge      */
-/* Count Data record from a file.                                             */
+/* Count Data record from a file or memory buffer.                            */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   buf    Pointer to the memory buffer                                      */
 /*   rcdb   Pointer to the Ridge Count Data Block record.                     */
 /*   rcd    Pointer to the Ridge Count Data record.                           */
 /*                                                                            */
@@ -1121,7 +1134,13 @@ int
 read_rcdb(FILE *fp, struct ridge_count_data_block *rcdb);
 
 int
+scan_rcdb(BDB *fmdb, struct ridge_count_data_block *rcdb);
+
+int
 read_rcd(FILE *fp, struct ridge_count_data *rcd);
+
+int
+scan_rcd(BDB *fmdb, struct ridge_count_data *rcd);
 
 /******************************************************************************/
 /* Functions to write an entire Ridge Count Data Block, and a single Ridge    */
@@ -1188,6 +1207,7 @@ validate_rcd(struct ridge_count_data *rcd);
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp          The open file pointer.                                       */
+/*   buf         Pointer to a memory buffer to read instead of a file.        */
 /*   cddb        Pointer to the Core and Delta Data Block record.             */
 /*   cd          Pointer to the Core Data record.                             */
 /*   core_type   The type of the Core Data.                                   */
@@ -1203,10 +1223,19 @@ int
 read_cddb(FILE *fp, struct core_delta_data_block *cddb);
 
 int
+scan_cddb(BDB *fmdb, struct core_delta_data_block *cddb);
+
+int
 read_cd(FILE *fp, struct core_data *cd, unsigned char core_type);
 
 int
+scan_cd(BDB *fmdb, struct core_data *cd, unsigned char core_type);
+
+int
 read_dd(FILE *fp, struct delta_data *dd, unsigned char delta_type);
+
+int
+scan_dd(BDB *fmdb, struct delta_data *dd, unsigned char delta_type);
 
 /******************************************************************************/
 /* Functions to write an entire Core Data Block, a single Core Data record,   */

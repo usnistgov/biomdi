@@ -24,9 +24,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <biomdimacro.h>
 #include <fmr.h>
 #include <fmrsort.h>
-#include <biomdimacro.h>
 
 #define SORT_METHOD_POLAR	1
 #define SORT_METHOD_RANDOM	2

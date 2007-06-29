@@ -19,9 +19,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <fmr.h>
 #include <biomdi.h>
 #include <biomdimacro.h>
+#include <fmr.h>
 
 /******************************************************************************/
 /* Implement the interface for allocating and freeing Finger View Minutiae    */
@@ -70,8 +70,9 @@ free_fvmr(struct finger_view_minutiae_record *fvmr)
 /* Implement the interface for reading and writing Finger View Minutiae       */
 /* records.                                                                   */
 /******************************************************************************/
-int
-read_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
+static int
+internal_read_fvmr(FILE *fp, BDB *fmdb,
+    struct finger_view_minutiae_record *fvmr)
 {
 	unsigned char cval;
 	unsigned short sval;
@@ -91,7 +92,10 @@ read_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 			if (new_fmd(fvmr->format_std, &fmd, i) < 0)
 				ERR_OUT("Could not allocate FMD %d", i);
 
-			ret = read_fmd(fp, fmd);
+			if (fp != NULL)
+				ret = read_fmd(fp, fmd);
+			else
+				ret = scan_fmd(fmdb, fmd);
 			if (ret == READ_OK) {
 				add_fmd_to_fvmr(fmd, fvmr);
 				i++;
@@ -104,21 +108,21 @@ read_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 	}
 
 	// Finger number
-	CREAD(&cval, fp);
+	CGET(&cval, fp, fmdb);
 	fvmr->finger_number = cval;
 
 	// View number/impression type
-	CREAD(&cval, fp);
+	CGET(&cval, fp, fmdb);
 	fvmr->view_number = (cval & FVMR_VIEW_NUMBER_MASK) >> 
 				FVMR_VIEW_NUMBER_SHIFT;
 	fvmr->impression_type = (unsigned short)(cval & FVMR_IMPRESSION_MASK);
 
 	// Finger quality
-	CREAD(&cval, fp);
+	CGET(&cval, fp, fmdb);
 	fvmr->finger_quality = (unsigned short)cval;
 
 	// Number of minutiae
-	CREAD(&cval, fp);
+	CGET(&cval, fp, fmdb);
 	fvmr->number_of_minutiae = cval;
 
 	// Finger minutiae data
@@ -126,7 +130,10 @@ read_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 		if (new_fmd(fvmr->format_std, &fmd, i) < 0)
 			ERR_OUT("Could not allocate FMD %d", i);
 
-		ret = read_fmd(fp, fmd);
+		if (fp != NULL)
+			ret = read_fmd(fp, fmd);
+		else
+			ret = scan_fmd(fmdb, fmd);
 		if (ret == READ_OK)
 			add_fmd_to_fvmr(fmd, fvmr);
 		else if (ret == READ_EOF)
@@ -139,7 +146,10 @@ read_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 	if (new_fedb(fvmr->format_std, &fedb) < 0)
 		ERR_OUT("Could not allocate extended data block");
 
-	ret = read_fedb(fp, fedb);
+	if (fp != NULL)
+		ret = read_fedb(fp, fedb);
+	else
+		ret = scan_fedb(fmdb, fedb);
 	if (ret == READ_ERROR)
 		ERR_OUT("Could not read extended data block");
 
@@ -158,6 +168,18 @@ eof_out:
 	return READ_EOF;
 err_out:
 	return READ_ERROR;
+}
+
+int
+read_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
+{
+	return (internal_read_fvmr(fp, NULL, fvmr));
+}
+
+int
+scan_fvmr(BDB *fmdb, struct finger_view_minutiae_record *fvmr)
+{
+	return (internal_read_fvmr(NULL, fmdb, fvmr));
 }
 
 int

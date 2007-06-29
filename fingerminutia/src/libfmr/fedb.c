@@ -18,8 +18,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <fmr.h>
 #include <biomdimacro.h>
+#include <fmr.h>
 
 // Define a constant for the size of the Extended Data Header, in bytes, which
 // is comprised of the Extended Area Type ID and Extended Data Length
@@ -115,8 +115,8 @@ free_fedb(struct finger_extended_data_block *fedb)
 	free(fedb);
 }
 
-int
-read_fedb(FILE *fp, struct finger_extended_data_block *fedb)
+static int
+internal_read_fedb(FILE *fp, BDB *fmdb, struct finger_extended_data_block *fedb)
 {
 	unsigned short sval1, sval2;
 	short block_length;
@@ -124,7 +124,7 @@ read_fedb(FILE *fp, struct finger_extended_data_block *fedb)
 	int ret;
 
 	// Block length
-	SREAD(&sval1, fp);
+	SGET(&sval1, fp, fmdb);
 	fedb->block_length = sval1;
 
 	// If the block length is 0, then just return
@@ -137,10 +137,10 @@ read_fedb(FILE *fp, struct finger_extended_data_block *fedb)
 	while (block_length > 0) {
 
 		// Type ID code
-		SREAD(&sval1, fp);
+		SGET(&sval1, fp, fmdb);
 
 		// Length
-		SREAD(&sval2, fp);
+		SGET(&sval2, fp, fmdb);
 
 		// If the extended data length is 0, or greater than the
 		// remaining extended data block length, something is wrong
@@ -153,7 +153,10 @@ read_fedb(FILE *fp, struct finger_extended_data_block *fedb)
 		if (new_fed(fedb->format_std, &fed, sval1, sval2) < 0)
 			ERR_OUT("Cannot create new extended data block");
 
-		ret = read_fed(fp, fed);
+		if (fp != NULL)
+			ret = read_fed(fp, fed);
+		else
+			ret = scan_fed(fmdb, fed);
 		if (ret == READ_EOF) {
 			if (fed->partial) {
 				add_fed_to_fedb(fed, fedb);
@@ -176,6 +179,18 @@ err_out:
 	if (fed != NULL)
 		free_fed(fed);
 	return (READ_ERROR);
+}
+
+int
+read_fedb(FILE *fp, struct finger_extended_data_block *fedb)
+{
+	return (internal_read_fedb(fp, NULL, fedb));
+}
+
+int
+scan_fedb(BDB *fmdb, struct finger_extended_data_block *fedb)
+{
+	return (internal_read_fedb(NULL, fmdb, fedb));
 }
 
 int
@@ -342,21 +357,27 @@ free_fed(struct finger_extended_data *fed)
 	free((void *)fed);
 }
 
-int
-read_fed(FILE *fp, struct finger_extended_data *fed)
+static int
+internal_read_fed(FILE *fp, BDB *fmdb, struct finger_extended_data *fed)
 {
 	int ret = READ_OK;
 
 	switch (fed->type_id) {
 
 	case FED_RIDGE_COUNT :
-		ret = read_rcdb(fp, fed->rcdb);
+		if (fp != NULL)
+			ret = read_rcdb(fp, fed->rcdb);
+		else
+			ret = scan_rcdb(fmdb, fed->rcdb);
 		if (!TAILQ_EMPTY(&fed->rcdb->ridge_counts))
 			fed->partial = TRUE;
 		break;
 
 	case FED_CORE_AND_DELTA :
-		ret = read_cddb(fp, fed->cddb);
+		if (fp != NULL)
+			ret = read_cddb(fp, fed->cddb);
+		else
+			ret = scan_cddb(fmdb, fed->cddb);
 		if ((!TAILQ_EMPTY(&fed->cddb->cores)) || 
 		    (!TAILQ_EMPTY(&fed->cddb->deltas)))
 			fed->partial = TRUE;
@@ -364,7 +385,7 @@ read_fed(FILE *fp, struct finger_extended_data *fed)
 
 	default :
 		// Unknown data type
-		OREAD(fed->data, fed->length - EXTENDED_DATA_HDR_LEN, 1, fp);
+		OGET(fed->data, fed->length - EXTENDED_DATA_HDR_LEN, 1, fp, fmdb);
 					// The data length includes the 
 					// type ID and length sizes, so subtract
 					// them out
@@ -378,6 +399,18 @@ eof_out:
 	return (READ_EOF);
 err_out:
 	return (READ_ERROR);
+}
+
+int
+read_fed(FILE *fp, struct finger_extended_data *fed)
+{
+	return (internal_read_fed(fp, NULL, fed));
+}
+
+int
+scan_fed(BDB *fmdb, struct finger_extended_data *fed)
+{
+	return (internal_read_fed(NULL, fmdb, fed));
 }
 
 int
@@ -524,8 +557,8 @@ free_rcd(struct ridge_count_data *rcd)
 	free(rcd);
 }
 
-int
-read_rcdb(FILE *fp, struct ridge_count_data_block *rcdb)
+static int
+internal_read_rcdb(FILE *fp, BDB *fmdb, struct ridge_count_data_block *rcdb)
 {
 	unsigned char cval;
 	short block_length;
@@ -533,7 +566,7 @@ read_rcdb(FILE *fp, struct ridge_count_data_block *rcdb)
 	struct ridge_count_data *rcd;
 
 	// Method
-	CREAD(&cval, fp);
+	CGET(&cval, fp, fmdb);
 	rcdb->method = cval;
 
 	// The block length of the Ridge Count Data Block is derived
@@ -544,7 +577,10 @@ read_rcdb(FILE *fp, struct ridge_count_data_block *rcdb)
 		if (ret != 0)
 			ERR_OUT("Could not allocate new ridge count data");
 
-		ret = read_rcd(fp, rcd);
+		if (fp != NULL)
+			ret = read_rcd(fp, rcd);
+		else
+			ret = scan_rcd(fmdb, rcd);
 		if (ret == READ_EOF)
 			return (READ_EOF);
 		if (ret == READ_ERROR)
@@ -563,6 +599,18 @@ err_out:
 }
 
 int
+read_rcdb(FILE *fp, struct ridge_count_data_block *rcdb)
+{
+	return (internal_read_rcdb(fp, NULL, rcdb));
+}
+
+int
+scan_rcdb(BDB *fmdb, struct ridge_count_data_block *rcdb)
+{
+	return (internal_read_rcdb(NULL, fmdb, rcdb));
+}
+
+int
 read_rcd(FILE *fp, struct ridge_count_data *rcd)
 {
 	CREAD(&rcd->index_one, fp);
@@ -576,6 +624,18 @@ eof_out:
 	return (READ_EOF);
 err_out:
 	return (READ_ERROR);
+}
+
+int
+scan_rcd(BDB *fmdb, struct ridge_count_data *rcd)
+{
+	CSCAN(&rcd->index_one, fmdb);
+	CSCAN(&rcd->index_two, fmdb);
+	CSCAN(&rcd->count, fmdb);
+	
+	return (READ_OK);
+eof_out:
+	return (READ_EOF);
 }
 
 int
@@ -804,8 +864,8 @@ free_dd(struct delta_data *dd)
 	free(dd);
 }
 
-int
-read_cddb(FILE *fp, struct core_delta_data_block *cddb)
+static int
+internal_read_cddb(FILE *fp, BDB *fmdb, struct core_delta_data_block *cddb)
 {
 	struct core_data *cd;
 	struct delta_data *dd;
@@ -813,7 +873,7 @@ read_cddb(FILE *fp, struct core_delta_data_block *cddb)
 	int ret, i;
 
 	// ANSI Core Type, Number of Cores
-	CREAD(&cval, fp);
+	CGET(&cval, fp, fmdb);
 	if (cddb->format_std == FMR_STD_ANSI) {
 		cddb->core_type = (cval & ANSI_CORE_TYPE_MASK) >>
 		    ANSI_CORE_TYPE_SHIFT;
@@ -829,16 +889,20 @@ read_cddb(FILE *fp, struct core_delta_data_block *cddb)
 		if (ret != 0)
 			ERR_OUT("Could not allocate core data record");
 
-		ret = read_cd(fp, cd, cddb->core_type);
-		if (ret == READ_EOF)
-			return (READ_EOF);
+		if (fp != NULL) {
+			ret = read_cd(fp, cd, cddb->core_type);
+			if (ret == READ_EOF)
+				return (READ_EOF);
+		} else {
+			ret = scan_cd(fmdb, cd, cddb->core_type);
+		}
 		if (ret == READ_ERROR)
 			ERR_OUT("Could not read core data record");
 		add_cd_to_cddb(cd, cddb);
 	}
 
 	// Delta Type, Number of Deltas
-	CREAD(&cval, fp);
+	CGET(&cval, fp, fmdb);
 	if (cddb->format_std == FMR_STD_ANSI) {
 		cddb->delta_type = (cval & ANSI_DELTA_TYPE_MASK) >>
 		    ANSI_DELTA_TYPE_SHIFT;
@@ -851,9 +915,13 @@ read_cddb(FILE *fp, struct core_delta_data_block *cddb)
 		if (ret != 0)
 			ERR_OUT("Could not allocate delta data record");
 
-		ret = read_dd(fp, dd, cddb->delta_type);
-		if (ret == READ_EOF)
-			return (READ_EOF);
+		if (fp != NULL) {
+			ret = read_dd(fp, dd, cddb->delta_type);
+			if (ret == READ_EOF)
+				return (READ_EOF);
+		} else {
+			ret = scan_dd(fmdb, dd, cddb->delta_type);
+		}
 		if (ret == READ_ERROR)
 			ERR_OUT("Could not read delta data record");
 		add_dd_to_cddb(dd, cddb);
@@ -869,12 +937,25 @@ err_out:
 }
 
 int
-read_cd(FILE *fp, struct core_data *cd, unsigned char core_type)
+read_cddb(FILE *fp, struct core_delta_data_block *cddb)
+{
+	return (internal_read_cddb(fp, NULL, cddb));
+}
+
+int
+scan_cddb(BDB *fmdb, struct core_delta_data_block *cddb)
+{
+	return (internal_read_cddb(NULL, fmdb, cddb));
+}
+
+static int
+internal_read_cd(FILE *fp, BDB *fmdb,
+    struct core_data *cd, unsigned char core_type)
 {
 	unsigned short sval;
 
 	// X Coordinate
-	SREAD(&sval, fp);
+	SGET(&sval, fp, fmdb);
 	cd->x_coord = sval & CORE_X_COORD_MASK;
 
 	// ISO type
@@ -886,7 +967,7 @@ read_cd(FILE *fp, struct core_data *cd, unsigned char core_type)
 	}
 
 	// Y Coordinate
-	SREAD(&sval, fp);
+	SGET(&sval, fp, fmdb);
 	cd->y_coord = sval & CORE_Y_COORD_MASK;
 
 	// The presence of angular information is defined by the type of 
@@ -895,7 +976,7 @@ read_cd(FILE *fp, struct core_data *cd, unsigned char core_type)
 		return (READ_OK);
 
 	// Optional Core Angle
-	CREAD(&cd->angle, fp);
+	CGET(&cd->angle, fp, fmdb);
 
 	return (READ_OK);
 
@@ -907,12 +988,25 @@ err_out:
 }
 
 int
-read_dd(FILE *fp, struct delta_data *dd, unsigned char delta_type)
+read_cd(FILE *fp, struct core_data *cd, unsigned char core_type)
+{
+	return (internal_read_cd(fp, NULL, cd, core_type));
+}
+
+int
+scan_cd(BDB *fmdb, struct core_data *cd, unsigned char core_type)
+{
+	return (internal_read_cd(NULL, fmdb, cd, core_type));
+}
+
+static int
+internal_read_dd(FILE *fp, BDB *fmdb, struct delta_data *dd,
+    unsigned char delta_type)
 {
 	unsigned short sval;
 
 	// X Coordinate
-	SREAD(&sval, fp);
+	SGET(&sval, fp, fmdb);
 	dd->x_coord = sval & DELTA_X_COORD_MASK;
 
 	// ISO type
@@ -924,7 +1018,7 @@ read_dd(FILE *fp, struct delta_data *dd, unsigned char delta_type)
 	}
 
 	// Y Coordinate
-	SREAD(&sval, fp);
+	SGET(&sval, fp, fmdb);
 	dd->y_coord = sval & DELTA_Y_COORD_MASK;
 
 	// The presence of angular information is defined by the type of 
@@ -933,13 +1027,13 @@ read_dd(FILE *fp, struct delta_data *dd, unsigned char delta_type)
 		return (READ_OK);
 
 	// Angle One
-	CREAD(&dd->angle1, fp);
+	CGET(&dd->angle1, fp, fmdb);
 
 	// Angle Two
-	CREAD(&dd->angle2, fp);
+	CGET(&dd->angle2, fp, fmdb);
 
 	// Angle Three
-	CREAD(&dd->angle3, fp);
+	CGET(&dd->angle3, fp, fmdb);
 
 	return (READ_OK);
 
@@ -949,6 +1043,18 @@ eof_out:
 
 err_out:
 	return (READ_ERROR);
+}
+
+int
+read_dd(FILE *fp, struct delta_data *dd, unsigned char delta_type)
+{
+	return (internal_read_dd(fp, NULL, dd, delta_type));
+}
+
+int
+scan_dd(BDB *fmdb, struct delta_data *dd, unsigned char delta_type)
+{
+	return (internal_read_dd(NULL, fmdb, dd, delta_type));
 }
 
 int

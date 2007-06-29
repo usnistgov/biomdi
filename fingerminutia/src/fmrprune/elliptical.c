@@ -16,9 +16,10 @@
 #include <sys/queue.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <biomdimacro.h>
 #include <fmr.h>
 #include <fmrsort.h>
-#include <biomdimacro.h>
 
 #include "fmrprune.h"
 

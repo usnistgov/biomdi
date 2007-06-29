@@ -17,9 +17,10 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <biomdimacro.h>
 #include <fmr.h>
 #include <fmrsort.h>
-#include <biomdimacro.h>
 
 /*
  * Compare two minutiae records by the minutiae angle.

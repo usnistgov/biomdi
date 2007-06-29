@@ -40,6 +40,15 @@
 #define MAX_VERBOSITY_LEVEL	2
 
 /*
+ * A structure to represent the buffer that contains biometric data.
+ */
+struct biometric_data_buffer {
+	unsigned int		length;
+	void			*buf;
+};
+typedef struct biometric_data_buffer BDB;
+
+/*
  * Note that in order to use most of these macros, two labels, 'err_out'
  * and 'eof_out' must be defined within the function that uses the macro.
  * The presumption is that code starting at 'err_out' will unwind any state
@@ -82,8 +91,10 @@
 		}							\
 	} while (0)
 
-// Macros to read a single char, short, or int and convert from big-endian
-// to host native format
+/*
+ * Macros to read a single char, short, or int from a file and convert
+ * from big-endian to host native format.
+ */
 #define CREAD(ptr, stream)						\
 	do {								\
 		unsigned char __cval;					\
@@ -105,8 +116,90 @@
 		*ptr = ntohl(__lval);					\
 	} while (0)
 
-// Macros to write a single char, short, or int and convert from big-endian
-// to host native format. 
+/* 
+ * Copy an opaque object from a buffer.
+ */
+#define OSCAN(ptr, size, bdb)						\
+	do {								\
+		if (bdb->length == 0)					\
+			goto eof_out;					\
+		(void)memcpy(ptr, bdb->buf, size);			\
+		bdb->buf += size;					\
+		bdb->length -= size;					\
+	} while (0)
+
+/*
+ * Macros to copy a single char, short, or int from a buffer and convert
+ * from big-endian to host native format.
+ */
+#define CSCAN(ptr, bdb)							\
+	do {								\
+		(void)memcpy(ptr, bdb->buf, 1);				\
+		OSCAN(ptr, 1, bdb);					\
+	} while (0)
+
+#define SSCAN(ptr, bdb)							\
+	do {								\
+		unsigned short __sval;					\
+		OSCAN(&__sval, 2, bdb);					\
+		*ptr = ntohs(__sval);					\
+	} while (0)
+
+#define LSCAN(ptr, bdb)							\
+	do {								\
+		unsigned int __lval;					\
+		OSCAN(&__lval, 4, bdb);					\
+		*ptr = ntohl(__lval);					\
+	} while (0)
+
+/*
+ * Conditionally read from the correct data source, file or buffer.
+ */
+
+#define OGET(ptr, size, nmemb, stream, bdb)				\
+	do {								\
+		if (stream != NULL)					\
+			OREAD(ptr, size, nmemb, stream);		\
+		else							\
+			OSCAN(ptr, size*nmemb, bdb);			\
+	} while (0)
+
+#define CGET(ptr, stream, bdb)						\
+	do {								\
+		if (stream != NULL)					\
+			CREAD(ptr, stream);				\
+		else							\
+			CSCAN(ptr, bdb);				\
+	} while (0)
+
+#define SGET(ptr, stream, bdb)						\
+	do {								\
+		if (stream != NULL)					\
+			SREAD(ptr, stream);				\
+		else							\
+			SSCAN(ptr, bdb);				\
+	} while (0)
+
+#define LGET(ptr, stream, bdb)						\
+	do {								\
+		if (stream != NULL)					\
+			LREAD(ptr, stream);				\
+		else							\
+			LSCAN(ptr, bdb);				\
+	} while (0)
+
+/* 
+ * Copy an opaque object to a buffer.
+ */
+#define OCOPYT(ptr, size, buf)						\
+	do {								\
+		(void)memcpy(buf, ptr, size);				\
+	} while (0)
+
+/*
+ * Macros to write a single char, short, or int to a file, converting
+ * from host native format to big-endian.
+ */
 #define CWRITE(ptr, stream)						\
 	do {								\
 		unsigned char __cval = (unsigned char)(*ptr);		\
@@ -123,6 +216,27 @@
 	do {								\
 		unsigned int __ival = (unsigned long)htonl(*ptr);	\
 		OWRITE(&__ival, 4, 1, stream);				\
+	} while (0)
+
+/*
+ * Macros to copy a single char, short, or int to a buffer, converting
+ * from host native format to big-endian.
+ */
+#define CCOPYT(ptr, buf)						\
+	do {								\
+		(void)memcpy(buf, ptr, 1);				\
+	} while (0)
+
+#define SCOPYT(ptr, buf)						\
+	do {								\
+		unsigned short __sval = (unsigned short)htons(*ptr);	\
+		(void)memcpy(buf, &__sval, 2);				\
+	} while (0)
+
+#define LCOPYT(ptr, buf)						\
+	do {								\
+		unsigned int __lval = (unsigned long)htonl(*ptr);	\
+		(void)memcpy(buf, &__lval, 4);				\
 	} while (0)
 
 // Other common things to check and take action on error
