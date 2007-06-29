@@ -848,10 +848,11 @@ validate_fmr(struct finger_minutiae_record *fmr);
 
 /******************************************************************************/
 /* Read a single Finger View Minutiae Record from a file or memory buffer.    */
+/* Fields within the FILE and BDB structs are modified by this funciton.      */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
-/*   buf    Pointer to the memory buffer                                      */
+/*   fmdb   Pointer to the biometric data block containing minutiae data.     */
 /*   fvmr   Pointer to the Finger View Minutiae Record.                       */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -990,10 +991,11 @@ validate_fmd(struct finger_minutiae_data *fmd);
 
 /******************************************************************************/
 /* Read an entire Extended Data Block from a file or memory buffer.           */
+/* Fields within the FILE and BDB structs are modified by this funciton.      */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
-/*   buf    Pointer to the memory buffer                                      */
+/*   fmdb   Pointer to the biometric data block containing minutiae data.     */
 /*   fedb   Pointer to the Extended Data block.                               */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -1052,10 +1054,11 @@ validate_fedb(struct finger_extended_data_block *fedb);
 
 /******************************************************************************/
 /* Read a single Extended Data record from a file or a memory buffer.         */
+/* Fields within the FILE and BDB structs are modified by this funciton.      */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
-/*   buf    Pointer to the memory buffer                                      */
+/*   fmdb   Pointer to the biometric data block containing minutiae data.     */
 /*   fed    Pointer to the Extended Data record.                              */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -1118,10 +1121,11 @@ validate_fed(struct finger_extended_data *fed);
 /******************************************************************************/
 /* Functions to read an entire Ridge Count Data Block and a single Ridge      */
 /* Count Data record from a file or memory buffer.                            */
+/* Fields within the FILE and BDB structs are modified by this funciton.      */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
-/*   buf    Pointer to the memory buffer                                      */
+/*   fmdb   Pointer to the biometric data block containing minutiae data.     */
 /*   rcdb   Pointer to the Ridge Count Data Block record.                     */
 /*   rcd    Pointer to the Ridge Count Data record.                           */
 /*                                                                            */
@@ -1204,10 +1208,11 @@ validate_rcd(struct ridge_count_data *rcd);
 /******************************************************************************/
 /* Functions to read an entire Core and Delta Data Block, a single Core Data  */
 /* record, and a single Delta Data Record from a file.                        */
+/* Fields within the FILE and BDB structs are modified by this funciton.      */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp          The open file pointer.                                       */
-/*   buf         Pointer to a memory buffer to read instead of a file.        */
+/*   fmdb        Pointer to the biometric data block containing minutiae data.*/
 /*   cddb        Pointer to the Core and Delta Data Block record.             */
 /*   cd          Pointer to the Core Data record.                             */
 /*   core_type   The type of the Core Data.                                   */
