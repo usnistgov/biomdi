@@ -145,22 +145,22 @@ scan_fmd(BDB *fmdb, struct finger_minutiae_data *fmd)
  * Write ISO compact card finger minutiae.
  */
 static int
-write_iso_compact_fmd(FILE *fp, struct finger_minutiae_data *fmd)
+write_iso_compact_fmd(FILE *fp, BDB *fmdb, struct finger_minutiae_data *fmd)
 {
 	unsigned char cval;
 
 	// X Coord
 	cval = fmd->x_coord;
-	CWRITE(&cval, fp);
+	CPUT(&cval, fp, fmdb);
 
 	// Y Coord
 	cval = fmd->y_coord;
-	CWRITE(&cval, fp);
+	CPUT(&cval, fp, fmdb);
 
 	// Type/angle
 	cval = fmd->type << FMD_ISO_COMPACT_MINUTIA_TYPE_SHIFT;
 	cval = cval | (fmd->angle & FMD_ISO_COMPACT_MINUTIA_ANGLE_MASK);
-	CWRITE(&cval, fp);
+	CPUT(&cval, fp, fmdb);
 
 	return WRITE_OK;
 
@@ -172,7 +172,7 @@ err_out:
  * Write ANSI, ISO, and ISO normal card finger minutiae.
  */
 static int
-write_ansi_iso_fmd(FILE *fp, struct finger_minutiae_data *fmd)
+write_ansi_iso_fmd(FILE *fp, BDB *fmdb, struct finger_minutiae_data *fmd)
 {
 	unsigned short sval;
 	unsigned char cval;
@@ -180,20 +180,20 @@ write_ansi_iso_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 	// Type/X Coord
 	sval = (unsigned short)(fmd->type << FMD_MINUTIA_TYPE_SHIFT);
 	sval = sval | (fmd->x_coord & FMD_X_COORD_MASK);
-	SWRITE(&sval, fp);
+	SPUT(&sval, fp, fmdb);
 
 	// Y Coord/Reserved
 	sval = fmd->y_coord & FMD_Y_COORD_MASK;
-	SWRITE(&sval, fp);
+	SPUT(&sval, fp, fmdb);
 
 	// Minutia angle
 	cval = fmd->angle;
-	CWRITE(&cval, fp);
+	CPUT(&cval, fp, fmdb);
 
 	// Minutia quality
 	if (fmd->format_std != FMR_STD_ISO_NORMAL_CARD) {
 		cval = fmd->quality;
-		CWRITE(&cval, fp);
+		CPUT(&cval, fp, fmdb);
 	}
 
 	return WRITE_OK;
@@ -202,14 +202,22 @@ err_out:
 	return WRITE_ERROR;
 }
 
-
 int
 write_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 {
 	if (fmd->format_std == FMR_STD_ISO_COMPACT_CARD)
-		return (write_iso_compact_fmd(fp, fmd));
+		return (write_iso_compact_fmd(fp, NULL, fmd));
 	else
-		return (write_ansi_iso_fmd(fp, fmd));
+		return (write_ansi_iso_fmd(fp, NULL, fmd));
+}
+
+int
+push_fmd(BDB *fmdb, struct finger_minutiae_data *fmd)
+{
+	if (fmd->format_std == FMR_STD_ISO_COMPACT_CARD)
+		return (write_iso_compact_fmd(NULL, fmdb, fmd));
+	else
+		return (write_ansi_iso_fmd(NULL, fmdb, fmd));
 }
 
 int

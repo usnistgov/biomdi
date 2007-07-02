@@ -202,8 +202,8 @@ scan_fmr(BDB *fmdb, struct finger_minutiae_record *fmr)
 	return (internal_read_fmr(NULL, fmdb, fmr));
 }
 
-int
-write_fmr(FILE *fp, struct finger_minutiae_record *fmr)
+static int
+internal_write_fmr(FILE *fp, BDB *fmdb, struct finger_minutiae_record *fmr)
 {
 	unsigned short sval;
 	unsigned char cval;
@@ -215,13 +215,13 @@ write_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 
 		// Write the header
 		// Format ID
-		OWRITE(fmr->format_id, 1, FMR_FORMAT_ID_LEN, fp);
+		OPUT(fmr->format_id, 1, FMR_FORMAT_ID_LEN, fp, fmdb);
 
 		// Spec Version
-		OWRITE(fmr->spec_version, 1, FMR_SPEC_VERSION_LEN, fp);
+		OPUT(fmr->spec_version, 1, FMR_SPEC_VERSION_LEN, fp, fmdb);
 
 		if (fmr->format_std == FMR_STD_ISO) {
-			LWRITE(&fmr->record_length, fp);
+			LPUT(&fmr->record_length, fp, fmdb);
 		} else {
 			/* ANSI Record Length; if the length is greater than
 			 * what will fit in two bytes, store it in the next
@@ -229,45 +229,48 @@ write_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 			 */
 			if (fmr->record_length > FMR_ANSI_MAX_SHORT_LENGTH) {
 				sval = 0;
-				SWRITE(&sval, fp);
-				LWRITE(&fmr->record_length, fp);
+				SPUT(&sval, fp, fmdb);
+				LPUT(&fmr->record_length, fp, fmdb);
 			} else {
-				SWRITE(&fmr->record_length, fp);
+				SPUT(&fmr->record_length, fp, fmdb);
 			}
 
 			// CBEFF Product ID
-			SWRITE(&fmr->product_identifier_owner, fp);
-			SWRITE(&fmr->product_identifier_type, fp);
+			SPUT(&fmr->product_identifier_owner, fp, fmdb);
+			SPUT(&fmr->product_identifier_type, fp, fmdb);
 		}
 
 		// Capture Eqpt Compliance/Scanner ID
 		sval = (fmr->compliance << HDR_COMPLIANCE_SHIFT) |
 		    fmr->scanner_id;
-		SWRITE(&sval, fp);
+		SPUT(&sval, fp, fmdb);
 
 		// x image size
-		SWRITE(&fmr->x_image_size, fp);
+		SPUT(&fmr->x_image_size, fp, fmdb);
 
 		// y image size
-		SWRITE(&fmr->y_image_size, fp);
+		SPUT(&fmr->y_image_size, fp, fmdb);
 
 		// x resolution
-		SWRITE(&fmr->x_resolution, fp);
+		SPUT(&fmr->x_resolution, fp, fmdb);
 
 		// y resolution
-		SWRITE(&fmr->y_resolution, fp);
+		SPUT(&fmr->y_resolution, fp, fmdb);
 
 		// number of finger views
-		CWRITE(&fmr->num_views, fp);
+		CPUT(&fmr->num_views, fp, fmdb);
 
 		// reserved field
 		cval = 0;
-		CWRITE(&cval, fp);
+		CPUT(&cval, fp, fmdb);
 	}
 
 	// Write the finger views
 	TAILQ_FOREACH(fvmr, &fmr->finger_views, list) {
-		ret = write_fvmr(fp, fvmr);
+		if (fp != NULL)
+			ret = write_fvmr(fp, fvmr);
+		else
+			ret = push_fvmr(fmdb, fvmr);
 		if (ret != WRITE_OK)
 			ERR_OUT("Could not write FVMR");
 	}
@@ -276,6 +279,12 @@ write_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 
 err_out:
 	return WRITE_ERROR;
+}
+
+int
+write_fmr(FILE *fp, struct finger_minutiae_record *fmr)
+{
+	return (internal_write_fmr(fp, NULL, fmr));
 }
 
 int

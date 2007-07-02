@@ -43,11 +43,19 @@
  * A structure to represent the buffer that contains biometric data.
  */
 struct biometric_data_buffer {
-	unsigned int		length;
-	void			*buf;
+	unsigned int		bdb_size;	// Max size of the buffer
+	void			*bdb_start;	// Beginning read/write location
+	void			*bdb_end;	// Last read/write location
+	void			*bdb_current;	// Current read/write location
 };
 typedef struct biometric_data_buffer BDB;
 
+#define INIT_BDB(bdb, ptr, size)					\
+	do {								\
+		bdb->bdb_size = size;					\
+		bdb->bdb_start = bdb->bdb_current = ptr;		\
+		bdb->bdb_end = ptr + size;				\
+	} while (0)
 /*
  * Note that in order to use most of these macros, two labels, 'err_out'
  * and 'eof_out' must be defined within the function that uses the macro.
@@ -57,6 +65,9 @@ typedef struct biometric_data_buffer BDB;
  *
  */
 
+/*
+ * Read an opaque object from a file.
+ */
 #define OREAD(ptr, size, nmemb, stream)					\
 	do {								\
 		if (fread(ptr, size, nmemb, stream) < nmemb) {		\
@@ -68,16 +79,6 @@ typedef struct biometric_data_buffer BDB;
 			    ftell(stream), __FILE__, __LINE__);		\
 			goto err_out;					\
 		  }							\
-		}							\
-	} while (0)
-
-#define OWRITE(ptr, size, nmemb, stream)				\
-	do {								\
-		if (fwrite(ptr, size, nmemb, stream) < nmemb) {		\
-		  fprintf(stderr, 					\
-			    "Error writing at position %d from %s:%d\n",\
-			    ftell(stream), __FILE__, __LINE__);		\
-			goto err_out;					\
 		}							\
 	} while (0)
 
@@ -121,11 +122,10 @@ typedef struct biometric_data_buffer BDB;
  */
 #define OSCAN(ptr, size, bdb)						\
 	do {								\
-		if (bdb->length == 0)					\
+		if ((bdb->bdb_current + size) > bdb->bdb_end)		\
 			goto eof_out;					\
-		(void)memcpy(ptr, bdb->buf, size);			\
-		bdb->buf += size;					\
-		bdb->length -= size;					\
+		(void)memcpy(ptr, bdb->bdb_current, size);		\
+		bdb->bdb_current += size;				\
 	} while (0)
 
 /*
@@ -134,7 +134,6 @@ typedef struct biometric_data_buffer BDB;
  */
 #define CSCAN(ptr, bdb)							\
 	do {								\
-		(void)memcpy(ptr, bdb->buf, 1);				\
 		OSCAN(ptr, 1, bdb);					\
 	} while (0)
 
@@ -155,7 +154,6 @@ typedef struct biometric_data_buffer BDB;
 /*
  * Conditionally read from the correct data source, file or buffer.
  */
-
 #define OGET(ptr, size, nmemb, stream, bdb)				\
 	do {								\
 		if (stream != NULL)					\
@@ -188,12 +186,17 @@ typedef struct biometric_data_buffer BDB;
 			LSCAN(ptr, bdb);				\
 	} while (0)
 
-/* 
- * Copy an opaque object to a buffer.
+/*
+ * Write an opaque object to a file.
  */
-#define OCOPYT(ptr, size, buf)						\
+#define OWRITE(ptr, size, nmemb, stream)				\
 	do {								\
-		(void)memcpy(buf, ptr, size);				\
+		if (fwrite(ptr, size, nmemb, stream) < nmemb) {		\
+		  fprintf(stderr, 					\
+			    "Error writing at position %d from %s:%d\n",\
+			    ftell(stream), __FILE__, __LINE__);		\
+			goto err_out;					\
+		}							\
 	} while (0)
 
 /*
@@ -218,28 +221,77 @@ typedef struct biometric_data_buffer BDB;
 		OWRITE(&__ival, 4, 1, stream);				\
 	} while (0)
 
+/* 
+ * Copy an opaque object to a buffer.
+ */
+#define OPUSH(ptr, size, bdb)						\
+	do {								\
+		if ((bdb->bdb_current + size) > bdb->bdb_end)		\
+			goto err_out;					\
+		(void)memcpy(bdb->bdb_current, ptr, size);		\
+		bdb->bdb_current += size;				\
+	} while (0)
+
 /*
  * Macros to copy a single char, short, or int to a buffer, converting
  * from host native format to big-endian.
  */
-#define CCOPYT(ptr, buf)						\
+
+#define CPUSH(ptr, bdb)							\
 	do {								\
-		(void)memcpy(buf, ptr, 1);				\
+		OPUSH(ptr, 1, bdb);					\
 	} while (0)
 
-#define SCOPYT(ptr, buf)						\
+#define SPUSH(ptr, bdb)							\
 	do {								\
 		unsigned short __sval = (unsigned short)htons(*ptr);	\
-		(void)memcpy(buf, &__sval, 2);				\
+		OPUSH(&__sval, 2, bdb);					\
 	} while (0)
 
-#define LCOPYT(ptr, buf)						\
+#define LPUSH(ptr, bdb)							\
 	do {								\
 		unsigned int __lval = (unsigned long)htonl(*ptr);	\
-		(void)memcpy(buf, &__lval, 4);				\
+		OPUSH(&__lval, 4, bdb);					\
 	} while (0)
 
-// Other common things to check and take action on error
+/*
+ * Conditionally write to the correct data source, file or buffer.
+ */
+#define OPUT(ptr, size, nmemb, stream, bdb)				\
+	do {								\
+		if (stream != NULL)					\
+			OWRITE(ptr, size, nmemb, stream);		\
+		else							\
+			OPUSH(ptr, size*nmemb, bdb);			\
+	} while (0)
+
+#define CPUT(ptr, stream, bdb)						\
+	do {								\
+		if (stream != NULL)					\
+			CWRITE(ptr, stream);				\
+		else							\
+			CPUSH(ptr, bdb);				\
+	} while (0)
+
+#define SPUT(ptr, stream, bdb)						\
+	do {								\
+		if (stream != NULL)					\
+			SWRITE(ptr, stream);				\
+		else							\
+			SPUSH(ptr, bdb);				\
+	} while (0)
+
+#define LPUT(ptr, stream, bdb)						\
+	do {								\
+		if (stream != NULL)					\
+			LWRITE(ptr, stream);				\
+		else							\
+			LPUSH(ptr, bdb);				\
+	} while (0)
+
+/*
+ * Other common things to check and take action on error.
+*/
 #define OPEN_ERR_EXIT(fn)						\
 	do {								\
 		fprintf(stderr, "Could not open file %s: ", fn);	\

@@ -182,12 +182,14 @@ scan_fvmr(BDB *fmdb, struct finger_view_minutiae_record *fvmr)
 	return (internal_read_fvmr(NULL, fmdb, fvmr));
 }
 
-int
-write_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
+static int
+internal_write_fvmr(FILE *fp, BDB *fmdb,
+    struct finger_view_minutiae_record *fvmr)
 {
 	struct finger_minutiae_data *fmd;
 	unsigned char cval;
 	unsigned short sval;
+	int ret;
 
 	/* ISO normal and compact card formats don't have a finger view
 	 * header, so we will just write the minutiae data directly.
@@ -202,33 +204,53 @@ write_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 	}
 
 	// Finger number
-	CWRITE(&fvmr->finger_number, fp);
+	CPUT(&fvmr->finger_number, fp, fmdb);
 
 	// View number/impression type
 	cval = (fvmr->view_number << FVMR_VIEW_NUMBER_SHIFT) | 
 		fvmr->impression_type;
-	CWRITE(&cval, fp);
+	CPUT(&cval, fp, fmdb);
 
 	// Finger quality
-	CWRITE(&fvmr->finger_quality, fp);
+	CPUT(&fvmr->finger_quality, fp, fmdb);
 
 	// Number of minutiae
-	CWRITE(&fvmr->number_of_minutiae, fp);
+	CPUT(&fvmr->number_of_minutiae, fp, fmdb);
 
 	// Write each Finger Minutiae Data record
 	TAILQ_FOREACH(fmd, &fvmr->minutiae_data, list) {
-		if (write_fmd(fp, fmd) != WRITE_OK)
+		if (fp != NULL)
+			ret = write_fmd(fp, fmd);
+		else
+			ret = push_fmd(fmdb, fmd);
+		if (ret != WRITE_OK)
 			ERR_OUT("Could not write minutiae data");
 	}
 
 	// Write the extended data
-	if (write_fedb(fp, fvmr->extended) != WRITE_OK)
+	if (fp != NULL)
+		ret = write_fedb(fp, fvmr->extended);
+	else
+		ret = push_fedb(fmdb, fvmr->extended);
+	if (ret != WRITE_OK)
 		ERR_OUT("Could not write extended data block");
 
 	return WRITE_OK;
 
 err_out:
 	return WRITE_ERROR;
+}
+
+int
+write_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
+{
+	return (internal_write_fvmr(fp, NULL, fvmr));
+}
+
+int
+push_fvmr(BDB *fmdb, struct finger_view_minutiae_record *fvmr)
+{
+	return (internal_write_fvmr(NULL, fmdb, fvmr));
 }
 
 int

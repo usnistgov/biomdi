@@ -784,11 +784,14 @@ free_dd(struct delta_data *dd);
 /******************************************************************************/
 
 /******************************************************************************/
-/* Read a complete Finger Minutiae Record from a file, filling in the fields  *//* of the header record, including all of the Finger Views.                   */
+/* Read a complete Finger Minutiae Record from a file, or buffer, filling in  */
+/* the fields of the header record, including all of the Finger Views.        */
 /* This function does not do any validation of the data being read.           */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   fmdb   Pointer to the biometric data block containing minutiae data.     */
 /*   fmr    Pointer to the FMR.                                               */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -799,11 +802,16 @@ free_dd(struct delta_data *dd);
 int
 read_fmr(FILE *fp, struct finger_minutiae_record *fmr);
 
+int
+scan_fmr(BDB *fmdb, struct finger_minutiae_record *fmr);
+
 /******************************************************************************/
-/* Write a Finger Minutiae Record to a file.                                  */
+/* Write a Finger Minutiae Record to a file or memory buffer.                 */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   fmdb   Pointer to the biometric data block containing minutiae data.     */
 /*   fmr    Pointer to the Finger Minutiae Record.                            */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -812,6 +820,9 @@ read_fmr(FILE *fp, struct finger_minutiae_record *fmr);
 /******************************************************************************/
 int
 write_fmr(FILE *fp, struct finger_minutiae_record *fmr);
+
+int
+push_fmr(BDB *fmdb, struct finger_minutiae_record *fmr);
 
 /******************************************************************************/
 /* Print an entire finger Minutiae Record to a file in human-readable form.   */
@@ -848,7 +859,7 @@ validate_fmr(struct finger_minutiae_record *fmr);
 
 /******************************************************************************/
 /* Read a single Finger View Minutiae Record from a file or memory buffer.    */
-/* Fields within the FILE and BDB structs are modified by this funciton.      */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
@@ -867,10 +878,12 @@ int
 scan_fvmr(BDB *fmdb, struct finger_view_minutiae_record *fvmr);
 
 /******************************************************************************/
-/* Write a single Finger View Minutiae Record to a file.                      */
+/* Write a single Finger View Minutiae Record to a file or buffer.            */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   fmdb   Pointer to the biometric data block containing minutiae data.     */
 /*   fvmr   Pointer to the Finger View Minutiae Record.                       */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -879,6 +892,9 @@ scan_fvmr(BDB *fmdb, struct finger_view_minutiae_record *fvmr);
 /******************************************************************************/
 int
 write_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr);
+
+int
+push_fvmr(BDB *fmdb, struct finger_view_minutiae_record *fvmr);
 
 /******************************************************************************/
 /* Print a FVMR to a file in human-readable form.                             */
@@ -927,10 +943,12 @@ add_fmd_to_fvmr(struct finger_minutiae_data *fmd,
 /******************************************************************************/
 
 /******************************************************************************/
-/* Read a single Finger Minutiae Data record from a file.                     */
+/* Read a single Finger Minutiae Data record from a file or buffer.           */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   fmdb   Pointer to the biometric data block containing minutiae data.     */
 /*   fmd    Pointer to the Finger Minutiae Data record.                       */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -941,11 +959,16 @@ add_fmd_to_fvmr(struct finger_minutiae_data *fmd,
 int
 read_fmd(FILE *fp, struct finger_minutiae_data *fmd);
 
+int
+scan_fmd(BDB *fmdb, struct finger_minutiae_data *fmd);
+
 /******************************************************************************/
-/* Write a single Finger Minutiae Data record to a file.                      */
+/* Write a single Finger Minutiae Data record to a file or buffer.            */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   fmdb   Pointer to the biometric data block containing minutiae data.     */
 /*   fmd    Pointer to the Finger Minutiae Data record.                       */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -954,6 +977,9 @@ read_fmd(FILE *fp, struct finger_minutiae_data *fmd);
 /******************************************************************************/
 int
 write_fmd(FILE *fp, struct finger_minutiae_data *fmd);
+
+int
+push_fmd(BDB *fmdb, struct finger_minutiae_data *fmd);
 
 /******************************************************************************/
 /* Print a single Finger Minutiae Data record to a file in human-readable     */
@@ -991,7 +1017,7 @@ validate_fmd(struct finger_minutiae_data *fmd);
 
 /******************************************************************************/
 /* Read an entire Extended Data Block from a file or memory buffer.           */
-/* Fields within the FILE and BDB structs are modified by this funciton.      */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
@@ -1010,10 +1036,12 @@ int
 scan_fedb(BDB *fmdb, struct finger_extended_data_block *fedb);
 
 /******************************************************************************/
-/* Write an entire Extended Data Block to a file.                             */
+/* Write an entire Extended Data Block to a file or buffer.                   */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   fmdb   Pointer to the biometric data block containing minutiae data.     */
 /*   fedb   Pointer to the Extended Data block.                               */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -1022,6 +1050,9 @@ scan_fedb(BDB *fmdb, struct finger_extended_data_block *fedb);
 /******************************************************************************/
 int
 write_fedb(FILE *fp, struct finger_extended_data_block *fed);
+
+int
+push_fedb(BDB *fmdb, struct finger_extended_data_block *fed);
 
 /******************************************************************************/
 /* Print an entire Extended Data Block to a file in human-readable form.      */
@@ -1054,7 +1085,7 @@ validate_fedb(struct finger_extended_data_block *fedb);
 
 /******************************************************************************/
 /* Read a single Extended Data record from a file or a memory buffer.         */
-/* Fields within the FILE and BDB structs are modified by this funciton.      */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
@@ -1073,10 +1104,12 @@ int
 scan_fed(BDB *fmdb, struct finger_extended_data *fed);
 
 /******************************************************************************/
-/* Write a single Extended Data record to a file.                             */
+/* Write a single Extended Data record to a file or buffer.                   */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   fmdb   Pointer to the biometric data block containing minutiae data.     */
 /*   fed    Pointer to the Extended Data record.                              */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -1085,6 +1118,9 @@ scan_fed(BDB *fmdb, struct finger_extended_data *fed);
 /******************************************************************************/
 int
 write_fed(FILE *fp, struct finger_extended_data *fed);
+
+int
+push_fed(BDB *fmdb, struct finger_extended_data *fed);
 
 /******************************************************************************/
 /* Print a single Extended Data record to a file in human-readable form.      */
@@ -1121,7 +1157,7 @@ validate_fed(struct finger_extended_data *fed);
 /******************************************************************************/
 /* Functions to read an entire Ridge Count Data Block and a single Ridge      */
 /* Count Data record from a file or memory buffer.                            */
-/* Fields within the FILE and BDB structs are modified by this funciton.      */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
@@ -1148,10 +1184,12 @@ scan_rcd(BDB *fmdb, struct ridge_count_data *rcd);
 
 /******************************************************************************/
 /* Functions to write an entire Ridge Count Data Block, and a single Ridge    */
-/* Count Data record to a file.                                               */
+/* Count Data record to a file or buffer.                                     */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   fmdb   Pointer to the biometric data block containing minutiae data.     */
 /*   rcdb   Pointer to the Ridge Count Data Block record.                     */
 /*   rcd    Pointer to the Ridge Count Data record.                           */
 /*                                                                            */
@@ -1163,7 +1201,13 @@ int
 write_rcdb(FILE *fp, struct ridge_count_data_block *rcdb);
 
 int
+push_rcdb(BDB *fmdb, struct ridge_count_data_block *rcdb);
+
+int
 write_rcd(FILE *fp, struct ridge_count_data *rcd);
+
+int
+push_rcd(BDB *fmdb, struct ridge_count_data *rcd);
 
 /******************************************************************************/
 /* Functions to print an entire Ridge Count Data Block, and a single Ridge    */
@@ -1208,7 +1252,7 @@ validate_rcd(struct ridge_count_data *rcd);
 /******************************************************************************/
 /* Functions to read an entire Core and Delta Data Block, a single Core Data  */
 /* record, and a single Delta Data Record from a file.                        */
-/* Fields within the FILE and BDB structs are modified by this funciton.      */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp          The open file pointer.                                       */
@@ -1244,10 +1288,12 @@ scan_dd(BDB *fmdb, struct delta_data *dd, unsigned char delta_type);
 
 /******************************************************************************/
 /* Functions to write an entire Core Data Block, a single Core Data record,   */
-/* and a single Delta Data record to a file.                                  */
+/* and a single Delta Data record to a file or buffer.                        */
+/* Fields within the FILE and BDB structs are modified by these functions.    */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   fmdb   Pointer to the biometric data block containing minutiae data.     */
 /*   cddb   Pointer to the Core and Delta Data Block record.                  */
 /*   cd     Pointer to the Core Data record.                                  */
 /*   dd     Pointer to the Delta Data record.                                 */
@@ -1260,10 +1306,19 @@ int
 write_cddb(FILE *fp, struct core_delta_data_block *cddb);
 
 int
+push_cddb(BDB *fmdb, struct core_delta_data_block *cddb);
+
+int
 write_cd(FILE *fp, struct core_data *cd);
 
 int
+push_cd(BDB *fmdb, struct core_data *cd);
+
+int
 write_dd(FILE *fp, struct delta_data *dd);
+
+int
+push_dd(BDB *fmdb, struct delta_data *dd);
 
 /******************************************************************************/
 /* Functions to print an entire Core Data Block, and a single Core Data       */

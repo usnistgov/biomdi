@@ -26,9 +26,45 @@
 #define EXTENDED_DATA_HDR_LEN	4
 
 /******************************************************************************/
+/* Declare some internal routines for use later.                              */
+/******************************************************************************/
+static int
+internal_read_fed(FILE *fp, BDB *fmdb, struct finger_extended_data *fed);
+
+static int
+internal_write_fed(FILE *fp, BDB *fmdb, struct finger_extended_data *fed);
+
+static int
+internal_read_rcdb(FILE *fp, BDB *fmdb, struct ridge_count_data_block *rcdb);
+
+static int
+internal_write_rcdb(FILE *fp, BDB *fmdb, struct ridge_count_data_block *rcdb);
+
+static int
+internal_read_cddb(FILE *fp, BDB *fmdb, struct core_delta_data_block *cddb);
+
+static int
+internal_write_cddb(FILE *fp, BDB *fmdb, struct core_delta_data_block *cddb);
+
+static int
+internal_read_cd(FILE *fp, BDB *fmdb, struct core_data *cd,
+    unsigned char core_type);
+
+static int
+internal_write_cd(FILE *fp, BDB *fmdb, struct core_data *cd);
+
+static int
+internal_read_dd(FILE *fp, BDB *fmdb, struct delta_data *dd,
+    unsigned char delta_type);
+
+static int
+internal_write_dd(FILE *fp, BDB *fmdb, struct delta_data *dd);
+
+/******************************************************************************/
 /* Internal routines to convert numeric IDs to strings.                       */
 /******************************************************************************/
-char *fed_type_id_str(unsigned short type_id) 
+static char
+ *fed_type_id_str(unsigned short type_id) 
 {
 	switch (type_id) {
 
@@ -53,7 +89,7 @@ char *fed_type_id_str(unsigned short type_id)
 /******************************************************************************/
 /* Internal routines add a RCDB or CDDB to a FED.                             */
 /******************************************************************************/
-void
+static void
 add_rcdb_to_fed(struct ridge_count_data_block *rcdb,
 		struct finger_extended_data *fed)
 {
@@ -65,7 +101,7 @@ add_rcdb_to_fed(struct ridge_count_data_block *rcdb,
 	fed->rcdb = rcdb;
 }
 
-void
+static void
 add_cddb_to_fed(struct core_delta_data_block *cddb,
 		struct finger_extended_data *fed)
 {
@@ -153,10 +189,7 @@ internal_read_fedb(FILE *fp, BDB *fmdb, struct finger_extended_data_block *fedb)
 		if (new_fed(fedb->format_std, &fed, sval1, sval2) < 0)
 			ERR_OUT("Cannot create new extended data block");
 
-		if (fp != NULL)
-			ret = read_fed(fp, fed);
-		else
-			ret = scan_fed(fmdb, fed);
+		ret = internal_read_fed(fp, fmdb, fed);
 		if (ret == READ_EOF) {
 			if (fed->partial) {
 				add_fed_to_fedb(fed, fedb);
@@ -193,8 +226,9 @@ scan_fedb(BDB *fmdb, struct finger_extended_data_block *fedb)
 	return (internal_read_fedb(NULL, fmdb, fedb));
 }
 
-int
-write_fedb(FILE *fp, struct finger_extended_data_block *fedb)
+static int
+internal_write_fedb(FILE *fp, BDB *fmdb,
+    struct finger_extended_data_block *fedb)
 {
 	unsigned short sval;
 	struct finger_extended_data *fed;
@@ -205,7 +239,7 @@ write_fedb(FILE *fp, struct finger_extended_data_block *fedb)
 	} else {
 		sval = fedb->block_length;
 	}
-	SWRITE(&sval, fp);
+	SPUT(&sval, fp, fmdb);
 
 	// If no extended data block, then just return
 	if (fedb == NULL) {
@@ -213,13 +247,25 @@ write_fedb(FILE *fp, struct finger_extended_data_block *fedb)
 	}
 
 	TAILQ_FOREACH(fed, &fedb->extended_data, list) {
-		write_fed(fp, fed);
+		internal_write_fed(fp, fmdb, fed);
 	}
 
 	return (WRITE_OK);
 
 err_out:
 	return (WRITE_ERROR);
+}
+
+int
+write_fedb(FILE *fp, struct finger_extended_data_block *fedb)
+{
+	return (internal_write_fedb(fp, NULL, fedb));
+}
+
+int
+push_fedb(BDB *fmdb, struct finger_extended_data_block *fedb)
+{
+	return (internal_write_fedb(NULL, fmdb, fedb));
 }
 
 int
@@ -365,19 +411,13 @@ internal_read_fed(FILE *fp, BDB *fmdb, struct finger_extended_data *fed)
 	switch (fed->type_id) {
 
 	case FED_RIDGE_COUNT :
-		if (fp != NULL)
-			ret = read_rcdb(fp, fed->rcdb);
-		else
-			ret = scan_rcdb(fmdb, fed->rcdb);
+		ret = internal_read_rcdb(fp, fmdb, fed->rcdb);
 		if (!TAILQ_EMPTY(&fed->rcdb->ridge_counts))
 			fed->partial = TRUE;
 		break;
 
 	case FED_CORE_AND_DELTA :
-		if (fp != NULL)
-			ret = read_cddb(fp, fed->cddb);
-		else
-			ret = scan_cddb(fmdb, fed->cddb);
+		ret = internal_read_cddb(fp, fmdb, fed->cddb);
 		if ((!TAILQ_EMPTY(&fed->cddb->cores)) || 
 		    (!TAILQ_EMPTY(&fed->cddb->deltas)))
 			fed->partial = TRUE;
@@ -385,10 +425,11 @@ internal_read_fed(FILE *fp, BDB *fmdb, struct finger_extended_data *fed)
 
 	default :
 		// Unknown data type
-		OGET(fed->data, fed->length - EXTENDED_DATA_HDR_LEN, 1, fp, fmdb);
-					// The data length includes the 
-					// type ID and length sizes, so subtract
-					// them out
+		/* The data length includes the type ID and length sizes,
+		 * so subtract them out
+		 */
+		OGET(fed->data, fed->length - EXTENDED_DATA_HDR_LEN, 1,
+		    fp, fmdb);
 		break;
 	}
 		
@@ -413,32 +454,44 @@ scan_fed(BDB *fmdb, struct finger_extended_data *fed)
 	return (internal_read_fed(NULL, fmdb, fed));
 }
 
-int
-write_fed(FILE *fp, struct finger_extended_data *fed)
+static int
+internal_write_fed(FILE *fp, BDB *fmdb, struct finger_extended_data *fed)
 {
 	int ret = WRITE_OK;
 
-	SWRITE(&fed->type_id, fp);
-	SWRITE(&fed->length, fp);
+	SPUT(&fed->type_id, fp, fmdb);
+	SPUT(&fed->length, fp, fmdb);
 
 	switch (fed->type_id) {
 
 	case FED_RIDGE_COUNT :
-		return(write_rcdb(fp, fed->rcdb));
+		return(internal_write_rcdb(fp, fmdb, fed->rcdb));
 		break;
 
 	case FED_CORE_AND_DELTA :
-		return(write_cddb(fp, fed->cddb));
+		return(internal_write_cddb(fp, fmdb, fed->cddb));
 		break;
 
 	default :
-		OWRITE(fed->data, 1, fed->length - 4, fp);
+		OPUT(fed->data, 1, fed->length - 4, fp, fmdb);
 		break;
 	}
 	return (WRITE_OK);
 
 err_out:
 	return (WRITE_ERROR);
+}
+
+int
+write_fed(FILE *fp, struct finger_extended_data *fed)
+{
+	return (internal_write_fed(fp, NULL, fed));
+}
+
+int
+push_fed(BDB *fmdb, struct finger_extended_data *fed)
+{
+	return (internal_write_fed(NULL, fmdb, fed));
 }
 
 int
@@ -638,15 +691,18 @@ eof_out:
 	return (READ_EOF);
 }
 
-int
-write_rcdb(FILE *fp, struct ridge_count_data_block *rcdb)
+static int
+internal_write_rcdb(FILE *fp, BDB *fmdb, struct ridge_count_data_block *rcdb)
 {
 	int ret;
 	struct ridge_count_data *rcd;
 
 	CWRITE(&rcdb->method, fp);
 	TAILQ_FOREACH(rcd, &rcdb->ridge_counts, list) {
-		ret = write_rcd(fp, rcd);
+		if (fp != NULL)
+			ret = write_rcd(fp, rcd);
+		else
+			ret = push_rcd(fmdb, rcd);
 		if (ret != WRITE_OK)
 			ERR_OUT("Could not write ridge count data");
 	}
@@ -657,13 +713,35 @@ err_out:
 }
 
 int
+write_rcdb(FILE *fp, struct ridge_count_data_block *rcdb)
+{
+	return (internal_write_rcdb(fp, NULL, rcdb));
+}
+
+int
+push_rcdb(BDB *fmdb, struct ridge_count_data_block *rcdb)
+{
+	return (internal_write_rcdb(NULL, fmdb, rcdb));
+}
+
+int
 write_rcd(FILE *fp, struct ridge_count_data *rcd)
 {
 	CWRITE(&rcd->index_one, fp);
 	CWRITE(&rcd->index_two, fp);
 	CWRITE(&rcd->count, fp);
 	return (WRITE_OK);
+err_out:
+	return (WRITE_ERROR);
+}
 
+int
+push_rcd(BDB *fmdb, struct ridge_count_data *rcd)
+{
+	CPUSH(&rcd->index_one, fmdb);
+	CPUSH(&rcd->index_two, fmdb);
+	CPUSH(&rcd->count, fmdb);
+	return (WRITE_OK);
 err_out:
 	return (WRITE_ERROR);
 }
@@ -889,13 +967,9 @@ internal_read_cddb(FILE *fp, BDB *fmdb, struct core_delta_data_block *cddb)
 		if (ret != 0)
 			ERR_OUT("Could not allocate core data record");
 
-		if (fp != NULL) {
-			ret = read_cd(fp, cd, cddb->core_type);
-			if (ret == READ_EOF)
-				return (READ_EOF);
-		} else {
-			ret = scan_cd(fmdb, cd, cddb->core_type);
-		}
+		ret = internal_read_cd(fp, fmdb, cd, cddb->core_type);
+		if (ret == READ_EOF)
+			return (READ_EOF);
 		if (ret == READ_ERROR)
 			ERR_OUT("Could not read core data record");
 		add_cd_to_cddb(cd, cddb);
@@ -915,13 +989,9 @@ internal_read_cddb(FILE *fp, BDB *fmdb, struct core_delta_data_block *cddb)
 		if (ret != 0)
 			ERR_OUT("Could not allocate delta data record");
 
-		if (fp != NULL) {
-			ret = read_dd(fp, dd, cddb->delta_type);
-			if (ret == READ_EOF)
-				return (READ_EOF);
-		} else {
-			ret = scan_dd(fmdb, dd, cddb->delta_type);
-		}
+		ret = internal_read_dd(fp, fmdb, dd, cddb->delta_type);
+		if (ret == READ_EOF)
+			return (READ_EOF);
 		if (ret == READ_ERROR)
 			ERR_OUT("Could not read delta data record");
 		add_dd_to_cddb(dd, cddb);
@@ -949,8 +1019,8 @@ scan_cddb(BDB *fmdb, struct core_delta_data_block *cddb)
 }
 
 static int
-internal_read_cd(FILE *fp, BDB *fmdb,
-    struct core_data *cd, unsigned char core_type)
+internal_read_cd(FILE *fp, BDB *fmdb, struct core_data *cd,
+    unsigned char core_type)
 {
 	unsigned short sval;
 
@@ -1057,8 +1127,8 @@ scan_dd(BDB *fmdb, struct delta_data *dd, unsigned char delta_type)
 	return (internal_read_dd(NULL, fmdb, dd, delta_type));
 }
 
-int
-write_cddb(FILE *fp, struct core_delta_data_block *cddb)
+static int
+internal_write_cddb(FILE *fp, BDB *fmdb, struct core_delta_data_block *cddb)
 {
 	struct core_data *cd;
 	struct delta_data *dd;
@@ -1072,10 +1142,10 @@ write_cddb(FILE *fp, struct core_delta_data_block *cddb)
 		cval = (cddb->core_type << ANSI_CORE_TYPE_SHIFT) |
 		    cddb->num_cores;
 	}
-	CWRITE(&cval, fp);
+	CPUT(&cval, fp, fmdb);
 
 	TAILQ_FOREACH(cd, &cddb->cores, list) {
-		if (write_cd(fp, cd) != WRITE_OK)
+		if (internal_write_cd(fp, fmdb, cd) != WRITE_OK)
 			ERR_OUT("Could not write core data record");
 	}
 
@@ -1087,10 +1157,10 @@ write_cddb(FILE *fp, struct core_delta_data_block *cddb)
 		cval = (cddb->delta_type << ANSI_DELTA_TYPE_SHIFT) |
 		    cddb->num_deltas;
 	}
-	CWRITE(&cval, fp);
+	CPUT(&cval, fp, fmdb);
 
 	TAILQ_FOREACH(dd, &cddb->deltas, list) {
-		if (write_dd(fp, dd) != WRITE_OK)
+		if (internal_write_dd(fp, fmdb, dd) != WRITE_OK)
 			ERR_OUT("Could not write delta data record");
 	}
 	return (WRITE_OK);
@@ -1100,7 +1170,19 @@ err_out:
 }
 
 int
-write_cd(FILE *fp, struct core_data *cd)
+write_cddb(FILE *fp, struct core_delta_data_block *cddb)
+{
+	return (internal_write_cddb(fp, NULL, cddb));
+}
+
+int
+push_cddb(BDB *fmdb, struct core_delta_data_block *cddb)
+{
+	return (internal_write_cddb(NULL, fmdb, cddb));
+}
+
+static int
+internal_write_cd(FILE *fp, BDB *fmdb, struct core_data *cd)
 {
 	unsigned short sval;
 
@@ -1113,11 +1195,11 @@ write_cd(FILE *fp, struct core_data *cd)
 	} else {
 		sval = cd->x_coord;
 	}
-	SWRITE(&sval, fp);
-	SWRITE(&cd->y_coord, fp);
+	SPUT(&sval, fp, fmdb);
+	SPUT(&cd->y_coord, fp, fmdb);
 	if (cd->cddb->core_type != CORE_TYPE_ANGULAR)
 		return (WRITE_OK);
-	CWRITE(&cd->angle, fp);
+	CPUT(&cd->angle, fp, fmdb);
 
 	return (WRITE_OK);
 
@@ -1126,7 +1208,19 @@ err_out:
 }
 
 int
-write_dd(FILE *fp, struct delta_data *dd)
+write_cd(FILE *fp, struct core_data *cd)
+{
+	return (internal_write_cd(fp, NULL, cd));
+}
+
+int
+push_cd(BDB *fmdb, struct core_data *cd)
+{
+	return (internal_write_cd(NULL, fmdb, cd));
+}
+
+static int
+internal_write_dd(FILE *fp, BDB *fmdb, struct delta_data *dd)
 {
 	unsigned short sval;
 
@@ -1139,18 +1233,30 @@ write_dd(FILE *fp, struct delta_data *dd)
 	} else {
 		sval = dd->x_coord;
 	}
-	SWRITE(&sval, fp);
-	SWRITE(&dd->y_coord, fp);
+	SPUT(&sval, fp, fmdb);
+	SPUT(&dd->y_coord, fp, fmdb);
 	if (dd->cddb->delta_type != DELTA_TYPE_ANGULAR)
 		return (WRITE_OK);
-	CWRITE(&dd->angle1, fp);
-	CWRITE(&dd->angle2, fp);
-	CWRITE(&dd->angle3, fp);
+	CPUT(&dd->angle1, fp, fmdb);
+	CPUT(&dd->angle2, fp, fmdb);
+	CPUT(&dd->angle3, fp, fmdb);
 
 	return (WRITE_OK);
 
 err_out:
 	return (WRITE_ERROR);
+}
+
+int
+write_dd(FILE *fp, struct delta_data *dd)
+{
+	return (internal_write_dd(fp, NULL, dd));
+}
+
+int
+push_dd(BDB *fmdb, struct delta_data *dd)
+{
+	return (internal_write_dd(NULL, fmdb, dd));
 }
 
 static inline int
