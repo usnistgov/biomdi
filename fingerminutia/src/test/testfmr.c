@@ -8,6 +8,7 @@
  * about its quality, reliability, or any other characteristic.
  */
 #include <sys/queue.h>
+#include <sys/stat.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -20,14 +21,44 @@
 
 // Test program to exercise some of the FMR library functions.
 
+static void
+print_fmr_stats(FMR *fmr) {
+
+	int count;
+	int i;
+	struct finger_view_minutiae_record **fvmrs;
+
+	count = get_fvmr_count(fmr);
+	printf("FVMR count is %d\n", count);
+	fvmrs = (struct finger_view_minutiae_record **) malloc(
+		 count * sizeof(struct finger_view_minutiae_record **));
+	if (fvmrs == NULL) {
+		fprintf(stderr, "Memory allocation error.\n");
+		exit (EXIT_FAILURE);
+	}
+	get_fvmrs(fmr, fvmrs);
+	for (i = 0; i < count; i++) {
+		printf("FVMR %d has %d minutiae.\n", 
+			i, get_minutiae_count(fvmrs[i]));
+		printf("FVMR %d has %d core records.\n", 
+			i, get_core_record_count(fvmrs[i]));
+		printf("FVMR %d has %d delta records.\n", 
+			i, get_delta_record_count(fvmrs[i]));
+		printf("FVMR %d has %d ridge data records.\n", 
+			i, get_ridge_record_count(fvmrs[i]));
+	}
+}
+
 int main(int argc, char *argv[])
 {
-	char *usage = "usage: test_fmr <infile>";
+	char *usage = "usage: test_fmr <infile> (must be ANSI FMR)";
 	FILE *infp;
-	struct finger_minutiae_record *fmr;
-	struct finger_view_minutiae_record **fvmrs;
-	int count = 0;
-	int i;
+	FILE *outfp;
+	FMR *fmr;
+	char *buf;
+	BDB *fmdb;
+	struct stat sb;
+	char tempname[10];
 
 	if (argc != 2) {
 		printf("%s\n", usage);
@@ -45,27 +76,89 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "could not allocate input FMR\n");
 		exit(EXIT_FAILURE);
 	}
-	while (read_fmr(infp, fmr) == READ_OK) {
-		count = get_fvmr_count(fmr);
-		printf("FVMR count is %d\n", count);
-		fvmrs = (struct finger_view_minutiae_record **) malloc(
-			 count * sizeof(struct finger_view_minutiae_record **));
-		if (fvmrs == NULL) {
-			fprintf(stderr, "Memory allocation error.\n");
-			exit (EXIT_FAILURE);
-		}
-		get_fvmrs(fmr, fvmrs);
-		for (i = 0; i < count; i++) {
-			printf("FVMR %d has %d minutiae.\n", 
-				i, get_minutiae_count(fvmrs[i]));
-			printf("FVMR %d has %d core records.\n", 
-				i, get_core_record_count(fvmrs[i]));
-			printf("FVMR %d has %d delta records.\n", 
-				i, get_delta_record_count(fvmrs[i]));
-			printf("FVMR %d has %d ridge data records.\n", 
-				i, get_ridge_record_count(fvmrs[i]));
-		}
+	printf("Testing the read functions...\n");
+	if (read_fmr(infp, fmr) != READ_OK) {
+		fprintf(stderr, "could not read input FMR\n");
+		exit(EXIT_FAILURE);
 	}
+	print_fmr_stats(fmr);
+
+	/* Test the push functions by writing the buffer into a file, then
+	 * reading it back in.
+	 */
+	printf("\nTesting the push functions...\n");
+
+	buf = (void *)malloc(fmr->record_length);
+	if (buf == NULL) {
+		fprintf(stderr, "could not allocate buffer\n");
+		exit (EXIT_FAILURE);
+	}
+	fmdb = (BDB *)malloc(sizeof(BDB));
+	if (fmdb == NULL) {
+		fprintf(stderr, "could not allocate BDB\n");
+		exit (EXIT_FAILURE);
+	}
+	INIT_BDB(fmdb, buf, fmr->record_length);
+	if (push_fmr(fmdb, fmr) != WRITE_OK) {
+		fprintf(stderr, "could not push FMR\n");
+		exit (EXIT_FAILURE);
+	}
+
+	strcpy(tempname, "FMR.XXX");
+        outfp = fopen(mktemp(tempname), "w+b");
+        if (outfp == NULL) {
+                fprintf(stderr, "open of temp file failed: %s\n",
+                        strerror(errno));
+                exit (EXIT_FAILURE);
+        }
+	if (fwrite(fmdb->bdb_start, 1, fmdb->bdb_size, outfp) !=
+	    fmdb->bdb_size) {
+		fprintf(stderr, "write of temp file failed: %s\n",
+		    strerror(errno));
+		exit (EXIT_FAILURE);
+	}
+	free_fmr(fmr);
+	new_fmr(FMR_STD_ANSI, &fmr);
+	rewind(outfp);
+	if (read_fmr(outfp, fmr) != READ_OK) {
+		fprintf(stderr, "could not read generated output file\n");
+		exit(EXIT_FAILURE);
+	}
+	print_fmr_stats(fmr);
+	free_fmr(fmr);
+	fclose(outfp);
+	unlink(tempname);
+
+	/* Test the scan functions by reading the file into a buffer, and
+	 * scanning the FMR, then verifying it.
+	 */
+	printf("\nTesting the scan functions...\n");
+	if (fstat(fileno(infp), &sb) < 0) {
+		fprintf(stdout, "Could not get stats on input file.\n");
+		exit (EXIT_FAILURE);
+	}
+
+	free(buf);
+	buf = (void *)malloc(sb.st_size);
+	rewind(infp);
+	if (fread(buf, 1, sb.st_size, infp) != sb.st_size) {
+		fprintf(stderr, "could not read file\n");
+		exit (EXIT_FAILURE);
+	}
+	fclose(infp);
+
+	INIT_BDB(fmdb, buf, sb.st_size);
+
+	new_fmr(FMR_STD_ANSI, &fmr);
+	if (scan_fmr(fmdb, fmr) != READ_OK) {
+		fprintf(stderr, "could not scan FMR\n");
+		exit (EXIT_FAILURE);
+	}
+	print_fmr_stats(fmr);
+
+	free(buf);
+	free(fmdb);
+	free_fmr(fmr);
 
 	exit (EXIT_SUCCESS);
 }

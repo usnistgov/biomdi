@@ -288,6 +288,12 @@ write_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 }
 
 int
+push_fmr(BDB *fmdb, struct finger_minutiae_record *fmr)
+{
+	return (internal_write_fmr(NULL, fmdb, fmr));
+}
+
+int
 print_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 {
 	int ret;

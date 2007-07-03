@@ -697,7 +697,7 @@ internal_write_rcdb(FILE *fp, BDB *fmdb, struct ridge_count_data_block *rcdb)
 	int ret;
 	struct ridge_count_data *rcd;
 
-	CWRITE(&rcdb->method, fp);
+	CPUT(&rcdb->method, fp, fmdb);
 	TAILQ_FOREACH(rcd, &rcdb->ridge_counts, list) {
 		if (fp != NULL)
 			ret = write_rcd(fp, rcd);
