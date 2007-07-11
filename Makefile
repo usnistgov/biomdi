@@ -8,7 +8,7 @@
 # about its quality, reliability, or any other characteristic.
 #
 PWD := $(shell pwd)
-SUBDIRS := fingerminutia fingerimage facerecognition
+SUBDIRS := common fingerminutia fingerimage facerecognition
 OS := $(shell uname -s)
 
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)

@@ -19,9 +19,7 @@ else
 endif
 
 all:
-	@echo -n 'Please do "make install" to install the common BIOMDI '
-	@echo 'header files.'
-	@echo 'Admin access will probably be required.'
+	@echo 'Nothing to be done for "make all".'
 
 install:
 	install -m 644 -o $(ROOT) $(LOCALINC)/*.h $(INCPATH)
