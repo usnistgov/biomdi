@@ -71,7 +71,7 @@ typedef struct biometric_data_buffer BDB;
 #define OREAD(ptr, size, nmemb, stream)					\
 	do {								\
 		if (fread(ptr, size, nmemb, stream) < nmemb) {		\
-		  if (feof(fp)) {					\
+		  if (feof(stream)) {					\
 			goto eof_out;					\
 		  } else {						\
 		    fprintf(stderr, 					\
