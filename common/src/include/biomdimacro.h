@@ -43,7 +43,7 @@
  * A structure to represent the buffer that contains biometric data.
  */
 struct biometric_data_buffer {
-	unsigned int		bdb_size;	// Max size of the buffer
+	uint32_t		bdb_size;	// Max size of the buffer
 	void			*bdb_start;	// Beginning read/write location
 	void			*bdb_end;	// Last read/write location
 	void			*bdb_current;	// Current read/write location
@@ -93,26 +93,26 @@ typedef struct biometric_data_buffer BDB;
 	} while (0)
 
 /*
- * Macros to read a single char, short, or int from a file and convert
- * from big-endian to host native format.
+ * Macros to read a single 8-bit, 16-bit, or 32-bit unsigned value
+ * from a file and convert from big-endian to host native format.
  */
 #define CREAD(ptr, stream)						\
 	do {								\
-		unsigned char __cval;					\
+		uint8_t __cval;						\
 		OREAD(&__cval, 1, 1, stream);				\
 		*ptr = __cval;						\
 	} while (0)
 
 #define SREAD(ptr, stream)						\
 	do {								\
-		unsigned short __sval;					\
+		uint16_t __sval;					\
 		OREAD(&__sval, 2, 1, stream);				\
 		*ptr = ntohs(__sval);					\
 	} while (0)
 
 #define LREAD(ptr, stream)						\
 	do {								\
-		unsigned int __lval;					\
+		uint32_t __lval;					\
 		OREAD(&__lval, 4, 1, stream);				\
 		*ptr = ntohl(__lval);					\
 	} while (0)
@@ -129,8 +129,8 @@ typedef struct biometric_data_buffer BDB;
 	} while (0)
 
 /*
- * Macros to copy a single char, short, or int from a buffer and convert
- * from big-endian to host native format.
+ * Macros to copy a single 8-bit, 16-bit, or 32-bit unsigned value
+ * from a buffer and convert from big-endian to host native format.
  */
 #define CSCAN(ptr, bdb)							\
 	do {								\
@@ -139,14 +139,14 @@ typedef struct biometric_data_buffer BDB;
 
 #define SSCAN(ptr, bdb)							\
 	do {								\
-		unsigned short __sval;					\
+		uint16_t __sval;					\
 		OSCAN(&__sval, 2, bdb);					\
 		*ptr = ntohs(__sval);					\
 	} while (0)
 
 #define LSCAN(ptr, bdb)							\
 	do {								\
-		unsigned int __lval;					\
+		uint32_t __lval;					\
 		OSCAN(&__lval, 4, bdb);					\
 		*ptr = ntohl(__lval);					\
 	} while (0)
@@ -200,24 +200,24 @@ typedef struct biometric_data_buffer BDB;
 	} while (0)
 
 /*
- * Macros to write a single char, short, or int to a file, converting
- * from host native format to big-endian.
+ * Macros to write a single 8-bit, 16-bit, or 32-bit unsigned value
+ * to a file, converting from host native format to big-endian.
  */
 #define CWRITE(ptr, stream)						\
 	do {								\
-		unsigned char __cval = (unsigned char)(*ptr);		\
+		uint8_t __cval = (uint8_t)(*ptr);			\
 		OWRITE(&__cval, 1, 1, stream);				\
 	} while (0)
 
 #define SWRITE(ptr, stream)						\
 	do {								\
-		unsigned short __sval = (unsigned short)htons(*ptr);	\
+		uint16_t __sval = (uint16_t)htons(*ptr);		\
 		OWRITE(&__sval, 2, 1, stream);				\
 	} while (0)
 
 #define LWRITE(ptr, stream)						\
 	do {								\
-		unsigned int __ival = (unsigned long)htonl(*ptr);	\
+		uint32_t __ival = (uint32_t)htonl(*ptr);		\
 		OWRITE(&__ival, 4, 1, stream);				\
 	} while (0)
 
@@ -233,8 +233,8 @@ typedef struct biometric_data_buffer BDB;
 	} while (0)
 
 /*
- * Macros to copy a single char, short, or int to a buffer, converting
- * from host native format to big-endian.
+ * Macros to copy a single 8-bit, 16-bit, or 32-bit unsigned value
+ * into a buffer, converting from host native format to big-endian.
  */
 
 #define CPUSH(ptr, bdb)							\
@@ -244,13 +244,13 @@ typedef struct biometric_data_buffer BDB;
 
 #define SPUSH(ptr, bdb)							\
 	do {								\
-		unsigned short __sval = (unsigned short)htons(*ptr);	\
+		uint16_t __sval = (uint16_t)htons(*ptr);		\
 		OPUSH(&__sval, 2, bdb);					\
 	} while (0)
 
 #define LPUSH(ptr, bdb)							\
 	do {								\
-		unsigned int __lval = (unsigned long)htonl(*ptr);	\
+		uint32_t __lval = (uint32_t)htonl(*ptr);		\
 		OPUSH(&__lval, 4, bdb);					\
 	} while (0)
 

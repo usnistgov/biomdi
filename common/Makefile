@@ -23,3 +23,5 @@ all:
 
 install:
 	install -m 644 -o $(ROOT) $(LOCALINC)/*.h $(INCPATH)
+clean:
+	@echo 'Nothing to be done for "make clean".'
