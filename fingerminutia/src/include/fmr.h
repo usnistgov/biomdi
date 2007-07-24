@@ -60,8 +60,6 @@
 #define FALSE (0)
 #endif
 
-#define _POSIX_C_SOURCE	1
-
 #define FMR_STD_ANSI			1
 #define FMR_STD_ISO			2
 #define FMR_STD_ISO_NORMAL_CARD		3

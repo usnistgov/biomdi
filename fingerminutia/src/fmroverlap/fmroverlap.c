@@ -12,16 +12,17 @@
 /* produce some textual output containing the number of minutiae in each file */
 /* along with the number of minutiae in common.                               */
 /******************************************************************************/
+#include <sys/queue.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <strings.h>
 #include <unistd.h>
-#include <sys/queue.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 #include <biomdimacro.h>
 #include <fmr.h>

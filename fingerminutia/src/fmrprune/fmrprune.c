@@ -12,17 +12,18 @@
 /* produce an output file containg the specified amount of minutiae.          */
 /*                                                                            */
 /******************************************************************************/
+#include <sys/queue.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
-#include <sys/queue.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 #include <biomdimacro.h>
 #include <fmr.h>

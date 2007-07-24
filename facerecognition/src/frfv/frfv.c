@@ -21,6 +21,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 

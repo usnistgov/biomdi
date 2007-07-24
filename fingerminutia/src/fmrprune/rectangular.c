@@ -15,6 +15,7 @@
 /******************************************************************************/
 #include <sys/queue.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <biomdimacro.h>
 #include <fmr.h>
