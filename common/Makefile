@@ -10,8 +10,8 @@
 #
 # Top-level make file to install the BIOMDI common header files.
 #
+include common.mk
 LOCALINC := src/include
-INCPATH := /usr/local/include
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	ROOT = Administrator
 else
