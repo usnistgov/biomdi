@@ -12,19 +12,17 @@
 #
 include ../common.mk
 SOURCES = fmr.c fvmr.c fmd.c fedb.c polar.c random.c xy.c angle.c
+OBJECTS = fmr.o fvmr.o fmd.o fedb.o polar.o random.o xy.o angle.o
 
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
 	$(CC) -c $(CFLAGS) $(SOURCES)
-	libtool -dynamic -o libfmr.dylib -lc *.o -lSystemStubs
+	libtool -dynamic -o libfmr.dylib -lc $(OBJECTS) -lSystemStubs
 	$(CP) libfmr.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
-	$(CC) $(CFLAGS) -c fmr.c
-	$(CC) $(CFLAGS) -c fvmr.c
-	$(CC) $(CFLAGS) -c fmd.c
-	$(CC) $(CFLAGS) -c fedb.c
-	ar rs libfmr.a fmr.o fvmr.o fmd.o fedb.o
+	$(CC) $(CFLAGS) -c $(SOURCES)
+	ar rs libfmr.a $(OBJECTS)
 	ranlib libfmr.a
 	$(CC) -shared -o libfmr.dll -Wl,--out-implib=libfmr.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfmr.a -Wl,--no-whole-archive
 	$(CP) libfmr.a $(LOCALLIB)
