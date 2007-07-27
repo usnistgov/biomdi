@@ -53,7 +53,7 @@ typedef struct biometric_data_buffer BDB;
 #define INIT_BDB(bdb, ptr, size)					\
 	do {								\
 		(bdb)->bdb_size = size;					\
-		(bdb)->bdb_start = bdb->bdb_current = ptr;		\
+		(bdb)->bdb_start = (bdb)->bdb_current = ptr;		\
 		(bdb)->bdb_end = ptr + size;				\
 	} while (0)
 /*
@@ -122,10 +122,10 @@ typedef struct biometric_data_buffer BDB;
  */
 #define OSCAN(ptr, size, bdb)						\
 	do {								\
-		if ((bdb->bdb_current + size) > bdb->bdb_end)		\
+		if (((bdb)->bdb_current + size) > (bdb)->bdb_end)	\
 			goto eof_out;					\
-		(void)memcpy(ptr, bdb->bdb_current, size);		\
-		bdb->bdb_current += size;				\
+		(void)memcpy(ptr, (bdb)->bdb_current, size);		\
+		(bdb)->bdb_current += size;				\
 	} while (0)
 
 /*
@@ -226,10 +226,10 @@ typedef struct biometric_data_buffer BDB;
  */
 #define OPUSH(ptr, size, bdb)						\
 	do {								\
-		if ((bdb->bdb_current + size) > bdb->bdb_end)		\
+		if (((bdb)->bdb_current + size) > (bdb)->bdb_end)	\
 			goto err_out;					\
-		(void)memcpy(bdb->bdb_current, ptr, size);		\
-		bdb->bdb_current += size;				\
+		(void)memcpy((bdb)->bdb_current, ptr, size);		\
+		(bdb)->bdb_current += size;				\
 	} while (0)
 
 /*
