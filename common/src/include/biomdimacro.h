@@ -203,22 +203,21 @@ typedef struct biometric_data_buffer BDB;
  * Macros to write a single 8-bit, 16-bit, or 32-bit unsigned value
  * to a file, converting from host native format to big-endian.
  */
-#define CWRITE(ptr, stream)						\
+#define CWRITE(val, stream)						\
 	do {								\
-		uint8_t __cval = (uint8_t)(*ptr);			\
-		OWRITE(&__cval, 1, 1, stream);				\
+		OWRITE(&val, 1, 1, stream);				\
 	} while (0)
 
-#define SWRITE(ptr, stream)						\
+#define SWRITE(val, stream)						\
 	do {								\
-		uint16_t __sval = (uint16_t)htons(*ptr);		\
+		uint16_t __sval = (uint16_t)htons(val);			\
 		OWRITE(&__sval, 2, 1, stream);				\
 	} while (0)
 
-#define LWRITE(ptr, stream)						\
+#define LWRITE(val, stream)						\
 	do {								\
-		uint32_t __ival = (uint32_t)htonl(*ptr);		\
-		OWRITE(&__ival, 4, 1, stream);				\
+		uint32_t __lval = (uint32_t)htonl(val);			\
+		OWRITE(&__lval, 4, 1, stream);				\
 	} while (0)
 
 /* 
@@ -237,20 +236,20 @@ typedef struct biometric_data_buffer BDB;
  * into a buffer, converting from host native format to big-endian.
  */
 
-#define CPUSH(ptr, bdb)							\
+#define CPUSH(val, bdb)							\
 	do {								\
-		OPUSH(ptr, 1, bdb);					\
+		OPUSH(&val, 1, bdb);					\
 	} while (0)
 
-#define SPUSH(ptr, bdb)							\
+#define SPUSH(val, bdb)							\
 	do {								\
-		uint16_t __sval = (uint16_t)htons(*ptr);		\
+		uint16_t __sval = (uint16_t)htons(val);		\
 		OPUSH(&__sval, 2, bdb);					\
 	} while (0)
 
-#define LPUSH(ptr, bdb)							\
+#define LPUSH(val, bdb)							\
 	do {								\
-		uint32_t __lval = (uint32_t)htonl(*ptr);		\
+		uint32_t __lval = (uint32_t)htonl(val);		\
 		OPUSH(&__lval, 4, bdb);					\
 	} while (0)
 
@@ -265,28 +264,28 @@ typedef struct biometric_data_buffer BDB;
 			OPUSH(ptr, size*nmemb, bdb);			\
 	} while (0)
 
-#define CPUT(ptr, stream, bdb)						\
+#define CPUT(val, stream, bdb)						\
 	do {								\
 		if (stream != NULL)					\
-			CWRITE(ptr, stream);				\
+			CWRITE(val, stream);				\
 		else							\
-			CPUSH(ptr, bdb);				\
+			CPUSH(val, bdb);				\
 	} while (0)
 
-#define SPUT(ptr, stream, bdb)						\
+#define SPUT(val, stream, bdb)						\
 	do {								\
 		if (stream != NULL)					\
-			SWRITE(ptr, stream);				\
+			SWRITE(val, stream);				\
 		else							\
-			SPUSH(ptr, bdb);				\
+			SPUSH(val, bdb);				\
 	} while (0)
 
-#define LPUT(ptr, stream, bdb)						\
+#define LPUT(val, stream, bdb)						\
 	do {								\
 		if (stream != NULL)					\
-			LWRITE(ptr, stream);				\
+			LWRITE(val, stream);				\
 		else							\
-			LPUSH(ptr, bdb);				\
+			LPUSH(val, bdb);				\
 	} while (0)
 
 /*

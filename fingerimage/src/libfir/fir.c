@@ -165,25 +165,25 @@ write_fir(FILE *fp, struct finger_image_record *fir)
 	llval = fir->record_length >> 32;
 	sval = (unsigned short)llval;
 	lval = (unsigned long)fir->record_length;
-	SWRITE(&sval, fp);
-	LWRITE(&lval, fp);
+	SWRITE(sval, fp);
+	LWRITE(lval, fp);
                 
-	SWRITE(&fir->product_identifier_owner, fp);
-	SWRITE(&fir->product_identifier_type, fp);
+	SWRITE(fir->product_identifier_owner, fp);
+	SWRITE(fir->product_identifier_type, fp);
 
 	sval = (fir->compliance << HDR_COMPLIANCE_SHIFT) | fir->scanner_id;
-	SWRITE(&sval, fp);
+	SWRITE(sval, fp);
 
-	SWRITE(&fir->image_acquisition_level, fp);
-        CWRITE(&fir->num_fingers_or_palm_images, fp);
-        CWRITE(&fir->scale_units, fp);
-        SWRITE(&fir->x_scan_resolution, fp);
-        SWRITE(&fir->y_scan_resolution, fp);
-        SWRITE(&fir->x_image_resolution, fp);
-        SWRITE(&fir->y_image_resolution, fp);
-        CWRITE(&fir->pixel_depth, fp);
-        CWRITE(&fir->image_compression_algorithm, fp);
-        SWRITE(&fir->reserved, fp);
+	SWRITE(fir->image_acquisition_level, fp);
+        CWRITE(fir->num_fingers_or_palm_images, fp);
+        CWRITE(fir->scale_units, fp);
+        SWRITE(fir->x_scan_resolution, fp);
+        SWRITE(fir->y_scan_resolution, fp);
+        SWRITE(fir->x_image_resolution, fp);
+        SWRITE(fir->y_image_resolution, fp);
+        CWRITE(fir->pixel_depth, fp);
+        CWRITE(fir->image_compression_algorithm, fp);
+        SWRITE(fir->reserved, fp);
 
 	// Write the image views
 	TAILQ_FOREACH(fivr, &fir->finger_views, list) {

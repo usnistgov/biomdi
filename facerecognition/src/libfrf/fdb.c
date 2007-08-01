@@ -178,11 +178,11 @@ write_fdb(FILE *fp, struct facial_data_block *fdb)
 	struct feature_point_block *fpb;
 	unsigned int lval;
 
-	LWRITE(&fdb->block_length, fp);
-	SWRITE(&fdb->num_feature_points, fp);
-	CWRITE(&fdb->gender, fp);
-	CWRITE(&fdb->eye_color, fp);
-	CWRITE(&fdb->hair_color, fp);
+	LWRITE(fdb->block_length, fp);
+	SWRITE(fdb->num_feature_points, fp);
+	CWRITE(fdb->gender, fp);
+	CWRITE(fdb->eye_color, fp);
+	CWRITE(fdb->hair_color, fp);
 
 	// Convert the feature mask, stored as a value longer than
 	// what is needed.
@@ -190,14 +190,14 @@ write_fdb(FILE *fp, struct facial_data_block *fdb)
 	lval = htonl(lval);
 	OWRITE(&lval, 1, FEATURE_MASK_LEN, fp);
 
-	SWRITE(&fdb->expression, fp);
+	SWRITE(fdb->expression, fp);
 
-	CWRITE(&fdb->pose_angle_yaw, fp);
-	CWRITE(&fdb->pose_angle_pitch, fp);
-	CWRITE(&fdb->pose_angle_roll, fp);
-	CWRITE(&fdb->pose_angle_uncertainty_yaw, fp);
-	CWRITE(&fdb->pose_angle_uncertainty_pitch, fp);
-	CWRITE(&fdb->pose_angle_uncertainty_roll, fp);
+	CWRITE(fdb->pose_angle_yaw, fp);
+	CWRITE(fdb->pose_angle_pitch, fp);
+	CWRITE(fdb->pose_angle_roll, fp);
+	CWRITE(fdb->pose_angle_uncertainty_yaw, fp);
+	CWRITE(fdb->pose_angle_uncertainty_pitch, fp);
+	CWRITE(fdb->pose_angle_uncertainty_roll, fp);
 
 	// Write the Feature Point Blocks
 	TAILQ_FOREACH(fpb, &fdb->feature_points, list) {
@@ -207,14 +207,14 @@ write_fdb(FILE *fp, struct facial_data_block *fdb)
 	}
 
 	// Write the Image Information block
-	CWRITE(&fdb->face_image_type, fp);
-	CWRITE(&fdb->image_data_type, fp);
-	SWRITE(&fdb->width, fp);
-	SWRITE(&fdb->height, fp);
-	CWRITE(&fdb->image_color_space, fp);
-	CWRITE(&fdb->source_type, fp);
-	SWRITE(&fdb->device_type, fp);
-	SWRITE(&fdb->quality, fp);
+	CWRITE(fdb->face_image_type, fp);
+	CWRITE(fdb->image_data_type, fp);
+	SWRITE(fdb->width, fp);
+	SWRITE(fdb->height, fp);
+	CWRITE(fdb->image_color_space, fp);
+	CWRITE(fdb->source_type, fp);
+	SWRITE(fdb->device_type, fp);
+	SWRITE(fdb->quality, fp);
 
 	// Write the image data
 	if (fdb->image_data != NULL)

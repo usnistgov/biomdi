@@ -240,7 +240,7 @@ internal_write_fedb(FILE *fp, BDB *fmdb,
 	} else {
 		sval = fedb->block_length;
 	}
-	SPUT(&sval, fp, fmdb);
+	SPUT(sval, fp, fmdb);
 
 	// If no extended data block, then just return
 	if (fedb == NULL) {
@@ -460,8 +460,8 @@ internal_write_fed(FILE *fp, BDB *fmdb, struct finger_extended_data *fed)
 {
 	int ret = WRITE_OK;
 
-	SPUT(&fed->type_id, fp, fmdb);
-	SPUT(&fed->length, fp, fmdb);
+	SPUT(fed->type_id, fp, fmdb);
+	SPUT(fed->length, fp, fmdb);
 
 	switch (fed->type_id) {
 
@@ -698,7 +698,7 @@ internal_write_rcdb(FILE *fp, BDB *fmdb, struct ridge_count_data_block *rcdb)
 	int ret;
 	struct ridge_count_data *rcd;
 
-	CPUT(&rcdb->method, fp, fmdb);
+	CPUT(rcdb->method, fp, fmdb);
 	TAILQ_FOREACH(rcd, &rcdb->ridge_counts, list) {
 		if (fp != NULL)
 			ret = write_rcd(fp, rcd);
@@ -728,9 +728,9 @@ push_rcdb(BDB *fmdb, struct ridge_count_data_block *rcdb)
 int
 write_rcd(FILE *fp, struct ridge_count_data *rcd)
 {
-	CWRITE(&rcd->index_one, fp);
-	CWRITE(&rcd->index_two, fp);
-	CWRITE(&rcd->count, fp);
+	CWRITE(rcd->index_one, fp);
+	CWRITE(rcd->index_two, fp);
+	CWRITE(rcd->count, fp);
 	return (WRITE_OK);
 err_out:
 	return (WRITE_ERROR);
@@ -739,9 +739,9 @@ err_out:
 int
 push_rcd(BDB *fmdb, struct ridge_count_data *rcd)
 {
-	CPUSH(&rcd->index_one, fmdb);
-	CPUSH(&rcd->index_two, fmdb);
-	CPUSH(&rcd->count, fmdb);
+	CPUSH(rcd->index_one, fmdb);
+	CPUSH(rcd->index_two, fmdb);
+	CPUSH(rcd->count, fmdb);
 	return (WRITE_OK);
 err_out:
 	return (WRITE_ERROR);
@@ -1143,7 +1143,7 @@ internal_write_cddb(FILE *fp, BDB *fmdb, struct core_delta_data_block *cddb)
 		cval = (cddb->core_type << ANSI_CORE_TYPE_SHIFT) |
 		    cddb->num_cores;
 	}
-	CPUT(&cval, fp, fmdb);
+	CPUT(cval, fp, fmdb);
 
 	TAILQ_FOREACH(cd, &cddb->cores, list) {
 		if (internal_write_cd(fp, fmdb, cd) != WRITE_OK)
@@ -1158,7 +1158,7 @@ internal_write_cddb(FILE *fp, BDB *fmdb, struct core_delta_data_block *cddb)
 		cval = (cddb->delta_type << ANSI_DELTA_TYPE_SHIFT) |
 		    cddb->num_deltas;
 	}
-	CPUT(&cval, fp, fmdb);
+	CPUT(cval, fp, fmdb);
 
 	TAILQ_FOREACH(dd, &cddb->deltas, list) {
 		if (internal_write_dd(fp, fmdb, dd) != WRITE_OK)
@@ -1196,11 +1196,11 @@ internal_write_cd(FILE *fp, BDB *fmdb, struct core_data *cd)
 	} else {
 		sval = cd->x_coord;
 	}
-	SPUT(&sval, fp, fmdb);
-	SPUT(&cd->y_coord, fp, fmdb);
+	SPUT(sval, fp, fmdb);
+	SPUT(cd->y_coord, fp, fmdb);
 	if (cd->cddb->core_type != CORE_TYPE_ANGULAR)
 		return (WRITE_OK);
-	CPUT(&cd->angle, fp, fmdb);
+	CPUT(cd->angle, fp, fmdb);
 
 	return (WRITE_OK);
 
@@ -1234,13 +1234,13 @@ internal_write_dd(FILE *fp, BDB *fmdb, struct delta_data *dd)
 	} else {
 		sval = dd->x_coord;
 	}
-	SPUT(&sval, fp, fmdb);
-	SPUT(&dd->y_coord, fp, fmdb);
+	SPUT(sval, fp, fmdb);
+	SPUT(dd->y_coord, fp, fmdb);
 	if (dd->cddb->delta_type != DELTA_TYPE_ANGULAR)
 		return (WRITE_OK);
-	CPUT(&dd->angle1, fp, fmdb);
-	CPUT(&dd->angle2, fp, fmdb);
-	CPUT(&dd->angle3, fp, fmdb);
+	CPUT(dd->angle1, fp, fmdb);
+	CPUT(dd->angle2, fp, fmdb);
+	CPUT(dd->angle3, fp, fmdb);
 
 	return (WRITE_OK);
 

@@ -205,18 +205,18 @@ internal_write_fvmr(FILE *fp, BDB *fmdb,
 	}
 
 	// Finger number
-	CPUT(&fvmr->finger_number, fp, fmdb);
+	CPUT(fvmr->finger_number, fp, fmdb);
 
 	// View number/impression type
 	cval = (fvmr->view_number << FVMR_VIEW_NUMBER_SHIFT) | 
 		fvmr->impression_type;
-	CPUT(&cval, fp, fmdb);
+	CPUT(cval, fp, fmdb);
 
 	// Finger quality
-	CPUT(&fvmr->finger_quality, fp, fmdb);
+	CPUT(fvmr->finger_quality, fp, fmdb);
 
 	// Number of minutiae
-	CPUT(&fvmr->number_of_minutiae, fp, fmdb);
+	CPUT(fvmr->number_of_minutiae, fp, fmdb);
 
 	// Write each Finger Minutiae Data record
 	TAILQ_FOREACH(fmd, &fvmr->minutiae_data, list) {

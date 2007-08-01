@@ -222,7 +222,7 @@ internal_write_fmr(FILE *fp, BDB *fmdb, struct finger_minutiae_record *fmr)
 		OPUT(fmr->spec_version, 1, FMR_SPEC_VERSION_LEN, fp, fmdb);
 
 		if (fmr->format_std == FMR_STD_ISO) {
-			LPUT(&fmr->record_length, fp, fmdb);
+			LPUT(fmr->record_length, fp, fmdb);
 		} else {
 			/* ANSI Record Length; if the length is greater than
 			 * what will fit in two bytes, store it in the next
@@ -230,40 +230,40 @@ internal_write_fmr(FILE *fp, BDB *fmdb, struct finger_minutiae_record *fmr)
 			 */
 			if (fmr->record_length > FMR_ANSI_MAX_SHORT_LENGTH) {
 				sval = 0;
-				SPUT(&sval, fp, fmdb);
-				LPUT(&fmr->record_length, fp, fmdb);
+				SPUT(sval, fp, fmdb);
+				LPUT(fmr->record_length, fp, fmdb);
 			} else {
-				SPUT(&fmr->record_length, fp, fmdb);
+				SPUT(fmr->record_length, fp, fmdb);
 			}
 
 			// CBEFF Product ID
-			SPUT(&fmr->product_identifier_owner, fp, fmdb);
-			SPUT(&fmr->product_identifier_type, fp, fmdb);
+			SPUT(fmr->product_identifier_owner, fp, fmdb);
+			SPUT(fmr->product_identifier_type, fp, fmdb);
 		}
 
 		// Capture Eqpt Compliance/Scanner ID
 		sval = (fmr->compliance << HDR_COMPLIANCE_SHIFT) |
 		    fmr->scanner_id;
-		SPUT(&sval, fp, fmdb);
+		SPUT(sval, fp, fmdb);
 
 		// x image size
-		SPUT(&fmr->x_image_size, fp, fmdb);
+		SPUT(fmr->x_image_size, fp, fmdb);
 
 		// y image size
-		SPUT(&fmr->y_image_size, fp, fmdb);
+		SPUT(fmr->y_image_size, fp, fmdb);
 
 		// x resolution
-		SPUT(&fmr->x_resolution, fp, fmdb);
+		SPUT(fmr->x_resolution, fp, fmdb);
 
 		// y resolution
-		SPUT(&fmr->y_resolution, fp, fmdb);
+		SPUT(fmr->y_resolution, fp, fmdb);
 
 		// number of finger views
-		CPUT(&fmr->num_views, fp, fmdb);
+		CPUT(fmr->num_views, fp, fmdb);
 
 		// reserved field
 		cval = 0;
-		CPUT(&cval, fp, fmdb);
+		CPUT(cval, fp, fmdb);
 	}
 
 	// Write the finger views

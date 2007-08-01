@@ -152,16 +152,16 @@ write_iso_compact_fmd(FILE *fp, BDB *fmdb, struct finger_minutiae_data *fmd)
 
 	// X Coord
 	cval = fmd->x_coord;
-	CPUT(&cval, fp, fmdb);
+	CPUT(cval, fp, fmdb);
 
 	// Y Coord
 	cval = fmd->y_coord;
-	CPUT(&cval, fp, fmdb);
+	CPUT(cval, fp, fmdb);
 
 	// Type/angle
 	cval = fmd->type << FMD_ISO_COMPACT_MINUTIA_TYPE_SHIFT;
 	cval = cval | (fmd->angle & FMD_ISO_COMPACT_MINUTIA_ANGLE_MASK);
-	CPUT(&cval, fp, fmdb);
+	CPUT(cval, fp, fmdb);
 
 	return WRITE_OK;
 
@@ -181,20 +181,20 @@ write_ansi_iso_fmd(FILE *fp, BDB *fmdb, struct finger_minutiae_data *fmd)
 	// Type/X Coord
 	sval = (unsigned short)(fmd->type << FMD_MINUTIA_TYPE_SHIFT);
 	sval = sval | (fmd->x_coord & FMD_X_COORD_MASK);
-	SPUT(&sval, fp, fmdb);
+	SPUT(sval, fp, fmdb);
 
 	// Y Coord/Reserved
 	sval = fmd->y_coord & FMD_Y_COORD_MASK;
-	SPUT(&sval, fp, fmdb);
+	SPUT(sval, fp, fmdb);
 
 	// Minutia angle
 	cval = fmd->angle;
-	CPUT(&cval, fp, fmdb);
+	CPUT(cval, fp, fmdb);
 
 	// Minutia quality
 	if (fmd->format_std != FMR_STD_ISO_NORMAL_CARD) {
 		cval = fmd->quality;
-		CPUT(&cval, fp, fmdb);
+		CPUT(cval, fp, fmdb);
 	}
 
 	return WRITE_OK;

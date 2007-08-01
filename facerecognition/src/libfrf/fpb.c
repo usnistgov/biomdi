@@ -85,16 +85,16 @@ write_fpb(FILE *fp, struct feature_point_block *fpb)
 {
 	unsigned char cval;
 
-	CWRITE(&fpb->type, fp);
+	CWRITE(fpb->type, fp);
 
 	cval = (fpb->major_point << FRF_FEATURE_POINT_MAJOR_SHIFT) | 
 		fpb->minor_point;
-	CWRITE(&cval, fp);
+	CWRITE(cval, fp);
 
-	SWRITE(&fpb->x_coord, fp);
-	SWRITE(&fpb->y_coord, fp);
+	SWRITE(fpb->x_coord, fp);
+	SWRITE(fpb->y_coord, fp);
 
-	SWRITE(&fpb->reserved, fp);
+	SWRITE(fpb->reserved, fp);
 
         return WRITE_OK;
 

@@ -88,15 +88,15 @@ err_out:
 int
 write_fivr(FILE *fp, struct finger_image_view_record *fivr)
 {
-	LWRITE(&fivr->length, fp);
-	CWRITE(&fivr->finger_palm_position, fp);
-	CWRITE(&fivr->count_of_views, fp);
-	CWRITE(&fivr->view_number, fp);
-	CWRITE(&fivr->quality, fp);
-	CWRITE(&fivr->impression_type, fp);
-	SWRITE(&fivr->horizontal_line_length, fp);
-	SWRITE(&fivr->vertical_line_length, fp);
-	CWRITE(&fivr->reserved, fp);
+	LWRITE(fivr->length, fp);
+	CWRITE(fivr->finger_palm_position, fp);
+	CWRITE(fivr->count_of_views, fp);
+	CWRITE(fivr->view_number, fp);
+	CWRITE(fivr->quality, fp);
+	CWRITE(fivr->impression_type, fp);
+	SWRITE(fivr->horizontal_line_length, fp);
+	SWRITE(fivr->vertical_line_length, fp);
+	CWRITE(fivr->reserved, fp);
 	if (fivr->image_data != NULL) {
 		OWRITE(fivr->image_data, sizeof(char),
 			    fivr->length - FIVR_HEADER_LENGTH, fp);

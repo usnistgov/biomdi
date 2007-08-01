@@ -112,9 +112,9 @@ write_fb(FILE *fp, struct facial_block *fb)
 
 	OWRITE(fb->version_num, 1, FRF_VERSION_NUM_LENGTH, fp);
 
-	LWRITE(&fb->record_length, fp);
+	LWRITE(fb->record_length, fp);
 
-	SWRITE(&fb->num_faces, fp);
+	SWRITE(fb->num_faces, fp);
 
 	TAILQ_FOREACH(fdb, &fb->facial_data, list) {
 		ret = write_fdb(fp, fdb);
