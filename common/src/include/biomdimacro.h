@@ -205,7 +205,8 @@ typedef struct biometric_data_buffer BDB;
  */
 #define CWRITE(val, stream)						\
 	do {								\
-		OWRITE(&val, 1, 1, stream);				\
+		uint8_t __cval = (uint8_t)(val);			\
+		OWRITE(&__cval, 1, 1, stream);				\
 	} while (0)
 
 #define SWRITE(val, stream)						\
@@ -238,18 +239,19 @@ typedef struct biometric_data_buffer BDB;
 
 #define CPUSH(val, bdb)							\
 	do {								\
-		OPUSH(&val, 1, bdb);					\
+		uint8_t __cval = (uint8_t)(val);			\
+		OPUSH(&__cval, 1, bdb);					\
 	} while (0)
 
 #define SPUSH(val, bdb)							\
 	do {								\
-		uint16_t __sval = (uint16_t)htons(val);		\
+		uint16_t __sval = (uint16_t)htons(val);			\
 		OPUSH(&__sval, 2, bdb);					\
 	} while (0)
 
 #define LPUSH(val, bdb)							\
 	do {								\
-		uint32_t __lval = (uint32_t)htonl(val);		\
+		uint32_t __lval = (uint32_t)htonl(val);			\
 		OPUSH(&__lval, 4, bdb);					\
 	} while (0)
 
