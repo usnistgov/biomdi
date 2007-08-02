@@ -34,3 +34,29 @@ int ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length);
  */
 int ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
     const unsigned short xres, const unsigned short yres);
+
+/*
+ * Copy the minutiae from an ISO FVMR to an ANSI FVMR, altering
+ * the angle value according to the ANSI specification.
+ * Parameters:
+ *  ifvmr  - FVMR containing the finger minutiae data (FMD) records to copy
+ *  ofvmr  - FVMR to contain the copied and modified FMDs
+ *  length - Will contain the total length of the output FVMR
+ *           (header plus length of all FMDs)
+ */
+int iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length);
+
+/*
+ * Copy the minutiae from an ISO Compact Card FVMR to an ANSI FVMR, altering
+ * minutiae records. Alter the (x,y) coordinates to reflect 0.1 pixel per
+ * millimeter units.
+ * Parameters:
+ *  ifvmr  - FVMR containing the finger minutiae data (FMD) records to copy
+ *  ofvmr  - FVMR to contain the copied and modified FMDs
+ *  length - Will contain the total length of the output FVMR
+ *           (header plus length of all FMDs)
+ *  xres   - The X resolution of the fingerprint image.
+ *  yres   - The Y resolution of the fingerprint image.
+ */
+int isocc2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
+    const unsigned short xres, const unsigned short yres);
