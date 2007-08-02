@@ -29,9 +29,7 @@
 
 #include <biomdimacro.h>
 #include <fmr.h>
-
-#include "ansi2iso.h"
-#include "iso2ansi.h"
+#include <fmr2fmr.h>
 
 /******************************************************************************/
 /* Print a how-to-use the program message.                                    */

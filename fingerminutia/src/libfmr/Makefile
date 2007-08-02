@@ -11,8 +11,8 @@
 # form of linking libraries.
 #
 include ../common.mk
-SOURCES = fmr.c fvmr.c fmd.c fedb.c polar.c random.c xy.c angle.c
-OBJECTS = fmr.o fvmr.o fmd.o fedb.o polar.o random.o xy.o angle.o
+SOURCES = fmr.c fvmr.c fmd.c fedb.c polar.c random.c xy.c angle.c ansi2iso.c iso2ansi.c
+OBJECTS = fmr.o fvmr.o fmd.o fedb.o polar.o random.o xy.o angle.o ansi2iso.o iso2ansi.o
 
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
