@@ -28,10 +28,10 @@ all:
 	done
 
 install:
-	install -m 644 -o root $(LOCALINC)/*.h $(INCPATH)
-	install -m 755 -o root $(LOCALLIB)/* $(LIBPATH)
-	install -m 755 -o root $(LOCALBIN)/* $(BINPATH)
-	install -m 755 -o root $(LOCALMAN)/* $(MANPATH)
+	install -m 644 -o $(ROOT) $(LOCALINC)/*.h $(INCPATH)
+	install -m 755 -o $(ROOT) $(LOCALLIB)/* $(LIBPATH)
+	install -m 755 -o $(ROOT) $(LOCALBIN)/* $(BINPATH)
+	install -m 755 -o $(ROOT) $(LOCALMAN)/* $(MANPATH)
 
 clean:
 	@for subdir in $(SUBDIRS); do \
