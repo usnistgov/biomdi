@@ -56,6 +56,11 @@ typedef struct biometric_data_buffer BDB;
 		(bdb)->bdb_start = (bdb)->bdb_current = ptr;		\
 		(bdb)->bdb_end = ptr + size;				\
 	} while (0)
+
+#define REWIND_BDB(bdb)							\
+	do {								\
+		(bdb)->bdb_current = (bdb)->bdb_start;			\
+	} while (0)
 /*
  * Note that in order to use most of these macros, two labels, 'err_out'
  * and 'eof_out' must be defined within the function that uses the macro.
