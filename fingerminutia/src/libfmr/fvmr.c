@@ -198,7 +198,11 @@ internal_write_fvmr(FILE *fp, BDB *fmdb,
 	if ((fvmr->format_std == FMR_STD_ISO_NORMAL_CARD) ||
 	    (fvmr->format_std == FMR_STD_ISO_COMPACT_CARD)) {
 		TAILQ_FOREACH(fmd, &fvmr->minutiae_data, list) {
-			if (write_fmd(fp, fmd) != WRITE_OK)
+			if (fp != NULL)
+				ret = write_fmd(fp, fmd);
+			else
+				ret = push_fmd(fmdb, fmd);
+			if (ret != WRITE_OK)
 				ERR_OUT("Could not write minutiae data");
 		}
 		return WRITE_OK;
