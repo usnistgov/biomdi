@@ -16,8 +16,8 @@ struct minutia_sort_data {
 	int	distance;	// linear distance between two points
 	double	z;		// floating point distance
 	int	rand;		// a random number associated with the record
-	unsigned short maj_coord;	// The major coordinate
-	unsigned short min_coord;	// The minor coordinate
+	unsigned short	maj_coord;	// The major coordinate
+	unsigned short	min_coord;	// The minor coordinate
 };
 
 /*
@@ -65,10 +65,19 @@ void sort_fmd_by_xy(FMD **fmds, int mcount);
 void sort_fmd_by_yx(FMD **fmds, int mcount);
 
 /* sort_fmd_by_angle() modifies the input array by sorting the minutiae
- * according to Anlge. If two angles are equivalent, the sort order is
+ * according to Angle. If two angles are equivalent, the sort order is
  * indeterminate.
  * Parameters:
  *   fmds   : The array of pointers to the minutia data records.
  *   mcount : The number of minutiae.
  */
 void sort_fmd_by_angle(FMD **fmds, int mcount);
+
+/* sort_fmd_by_quality() modifies the input array by sorting the minutiae
+ * according to quality. If two quality values are equal, the sort order is
+ * indeterminate.
+ * Parameters:
+ *   fmds   : The array of pointers to the minutia data records.
+ *   mcount : The number of minutiae.
+ */
+void sort_fmd_by_quality(FMD **fmds, int mcount);
