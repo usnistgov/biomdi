@@ -213,7 +213,7 @@ sort_and_copy_fvmr(FVMR *src, FVMR *dst)
 
 	switch (sort_method) {
 	    case SORT_METHOD_POLAR:
-		sort_fmd_by_polar(fmds, mcount);
+		sort_fmd_by_polar(fmds, mcount, 0, 0, TRUE);
 		break;
 
 	    case SORT_METHOD_RANDOM:

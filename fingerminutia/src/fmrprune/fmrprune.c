@@ -304,7 +304,7 @@ copy_and_select_fvmr(FVMR *src, FVMR *dst, int mcount)
 		if (mcount > num)
 			mcount = num;
 		else
-			sort_fmd_by_polar(fmds, num);
+			sort_fmd_by_polar(fmds, num, 0, 0, TRUE);
 		break;
 
 	    case PRUNE_METHOD_ELLIPTICAL:

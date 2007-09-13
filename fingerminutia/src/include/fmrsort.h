@@ -30,13 +30,20 @@ struct minutia_sort_data {
  */
 
 /* sort_fmd_by_polar() modifies the input array by sorting the minutiae
- * using the Polar distance from the center of mass of the minutiae.
+ * using the Polar distance from either the center of mass of the minutiae,
+ * or the supplied coordinate.
  * Minutiae with a shorter distance value are stored at lower array entries.
  * Parameters:
  *   fmds   : The array of pointers to the minutia data records.
  *   mcount : The number of minutiae.
+ *   centx  : The coordinates of the center to use for minutiae. This
+ *   centy    is only used when the usecm parameter is false.
+ *   usecm  : If true, this routine will calculate the center of mass of
+ *            all minutiae and use that as the polar pruning point. Otherwise,
+ *            the supplied (x, y) coordinate is used.
  */
-void sort_fmd_by_polar(FMD **fmds, int mcount);
+void sort_fmd_by_polar(FMD **fmds, int mcount, unsigned short centx,
+    unsigned short centy, int usecm);
 
 /* sort_fmd_by_random() modifies the input array by sorting the minutiae
  * randomly.

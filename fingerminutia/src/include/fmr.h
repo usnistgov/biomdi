@@ -158,6 +158,11 @@
  * to copy the essential fields of the record, those fields that represent
  * actual finger minutiae information, and not accidental fields that are
  * used to internally manage the record.
+ * NOTE: The coordinate values are always stored as 16-bit values, for
+ * even for compact card formats.  The FMR library stores the CC coordinate
+ * as 16-bit, but the coordinate is truncated to 8 bits when written to
+ * a file or memory buffer. Therefore, sorting of CC minutiae can be
+ * done on the records as represented.
  */
 // Representation of a single finger minutiae data record
 #define FMD_DATA_LENGTH				6

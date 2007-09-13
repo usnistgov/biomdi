@@ -53,7 +53,8 @@ compare_by_polar(const void *m1, const void *m2)
 }
 
 void
-sort_fmd_by_polar(FMD **fmds, int mcount)
+sort_fmd_by_polar(FMD **fmds, int mcount, unsigned short centx,
+    unsigned short centy, int usecm)
 {
 	int m;
 	int x, y, x_delta, y_delta;
@@ -68,7 +69,12 @@ sort_fmd_by_polar(FMD **fmds, int mcount)
 	if (msds == NULL)
 		ALLOC_ERR_EXIT("Sorting criteria array");
 
-	find_center_of_minutiae_mass(fmds, mcount, &x, &y);
+	if (usecm) {
+		find_center_of_minutiae_mass(fmds, mcount, &x, &y);
+	} else {
+		x = centx;
+		y = centy;
+	}
 	for (m = 0; m < mcount; m++) {
 		x_delta = fmds[m]->x_coord - x;
 		y_delta = fmds[m]->y_coord - y;
