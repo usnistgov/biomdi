@@ -75,7 +75,6 @@ read_iso_compact_fmd(FILE *fp, BDB *fmdb, struct finger_minutiae_data *fmd)
 
 	return READ_OK;
 eof_out:
-	ERRP("EOF encountered in %s", __FUNCTION__);
 	return READ_EOF;
 err_out:
 	return READ_ERROR;
@@ -118,7 +117,6 @@ read_ansi_iso_fmd(FILE *fp, BDB *fmdb, struct finger_minutiae_data *fmd)
 	return READ_OK;
 
 eof_out:
-	ERRP("EOF encountered in %s", __FUNCTION__);
 	return READ_EOF;
 err_out:
 	return READ_ERROR;
