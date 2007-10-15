@@ -11,10 +11,9 @@
 /* This program will verify a M1 record contained in a file. The verification */
 /* involves using the FMR library to perform the verification as per the      */
 /* ANSI INCITS 378-2004 specification in addition to the constraints of the   */
-/* MINEX04 test specification.                                                */
+/* suite of MINEX test specifications.                                        */
 /* This program assumes that a single FMR is contained in the file, and       */
 /* therefore, the record length in the header should match the file size.     */
-/*                                                                            */
 /******************************************************************************/
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -31,7 +30,12 @@
 #include <biomdimacro.h>
 #include <fmr.h>
 
+#ifdef MINEX04
 #define MAX_REC_LEN	4500
+#elif (OMINEX || MINEX2)
+#define MAX_REC_LEN	800
+#endif
+#define MIN_REC_LEN	32
 #define MAX_RIDGE_COUNT	15
 #define IOERR_EXIT 	-1
 #define RECERR_EXIT	-2
@@ -39,7 +43,7 @@
 int piv_quality = 0;
 
 int
-minex04_verify(FILE *fp, struct finger_minutiae_record *fmr)
+minex_verify(FILE *fp, struct finger_minutiae_record *fmr)
 {
 	struct stat sb;
 	int ret = VALIDATE_OK;
@@ -66,13 +70,15 @@ minex04_verify(FILE *fp, struct finger_minutiae_record *fmr)
 		ret = VALIDATE_ERROR;
 	}
 
-	if(fmr->record_length > MAX_REC_LEN) {
-		ERRP("FMR record length greater than maximum %d", MAX_REC_LEN);
+	if(fmr->record_length<MIN_REC_LEN || fmr->record_length>MAX_REC_LEN) {
+		ERRP("FMR record length not in range [32,%d]", MAX_REC_LEN);
 		ret = VALIDATE_ERROR;
 	}
 
+#if (MINEX04 || OMINEX)
 	CSR(fmr->product_identifier_owner, 0, "Product ID Owner");
 	CSR(fmr->product_identifier_type, 0, "Product ID Type");
+#endif
 
 	CSR(fmr->num_views, 1, "Number of Finger Views");
 
@@ -90,10 +96,16 @@ minex04_verify(FILE *fp, struct finger_minutiae_record *fmr)
 		ERRP("There are no finger views");
 		return (VALIDATE_ERROR);
 	}
+#if (MINEX04)
 	if (fvmr->impression_type > 3) {
+#elif (OMINEX || MINEX2)
+	if (fvmr->impression_type != 0 && fvmr->impression_type != 2) {
+#endif
 		ERRP("Impression type is invalid");
 		ret = VALIDATE_ERROR;
 	}
+
+
 	if (fvmr->number_of_minutiae > 128) {
 		ERRP("Number of minutiae is invalid");
 		ret = VALIDATE_ERROR;
@@ -119,11 +131,13 @@ minex04_verify(FILE *fp, struct finger_minutiae_record *fmr)
 		}
 	}
 
+#if (MINEX04 || OMINEX)
 	// Check each minutia record
 	TAILQ_FOREACH(fmd, &fvmr->minutiae_data, list) {
 		CSR(fmd->quality, 0, "Minutia Quality");
 		// Check of type is done in libfmr
 	}
+#endif
 
 	// Check the extended data attached to the FVMR
 	if (fvmr->extended == NULL) {
@@ -201,17 +215,28 @@ minex04_verify(FILE *fp, struct finger_minutiae_record *fmr)
 int
 main(int argc, char *argv[])
 {
+#if (MINEX04)
 	char *usage = "usage: minexv [-p] <datafile>";
+#elif (OMINEX)
+	char *usage = "usage: minexov <datafile>";
+#else
+	char *usage = "usage: minex2v <datafile>";
+#endif
 	FILE *fp;
 	struct finger_minutiae_record *fmr;
 	int ch;
 	int exit_code = EXIT_SUCCESS;
 
+#if (MINEX04)
 	if ((argc != 2) && (argc != 3)) {
+#else
+	if (argc != 2) {
+#endif
 		fprintf(stderr, "%s\n", usage);
 		exit(EXIT_FAILURE);
 	}
 
+#if (MINEX04)
 	while ((ch = getopt(argc, argv, "p")) != -1) {
 		switch (ch) {
 			case 'p':
@@ -224,6 +249,11 @@ main(int argc, char *argv[])
 				break;
 		}
 	}
+#endif
+
+#if (OMINEX || MINEX2)
+	piv_quality=1;
+#endif
 
 	fp = fopen(argv[optind], "rb");
 	if (fp == NULL) {
@@ -253,7 +283,7 @@ main(int argc, char *argv[])
 		printf("----------------\n");
 		printf("MINEX Validation\n");
 		printf("----------------\n");
-		if (minex04_verify(fp, fmr) == VALIDATE_OK) {
+		if (minex_verify(fp, fmr) == VALIDATE_OK) {
 			fprintf(stdout, "Passes MINEX04 criteria.\n");
 		} else {
 			fprintf(stdout, "Does not pass MINEX04 criteria.\n");

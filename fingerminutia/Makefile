@@ -32,6 +32,8 @@ install:
 	install -m 755 -o $(ROOT) $(LOCALLIB)/* $(LIBPATH)
 	install -m 755 -o $(ROOT) $(LOCALBIN)/* $(BINPATH)
 	install -m 755 -o $(ROOT) $(LOCALMAN)/* $(MANPATH)
+	ln -sf $(MANPATH)/minexv.1 $(MANPATH)/minexov.1
+	ln -sf $(MANPATH)/minexv.1 $(MANPATH)/minex2v.1
 
 clean:
 	@for subdir in $(SUBDIRS); do \

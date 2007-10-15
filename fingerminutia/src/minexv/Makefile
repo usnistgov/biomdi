@@ -7,14 +7,22 @@
 # its use by other parties, and makes no guarantees, expressed or implied,
 # about its quality, reliability, or any other characteristic.
 #
-# The FMR library is built and linked statically with the minexv binary
-# so the MINEX-only checks can be compiled out of the library.
 #
 include ../common.mk
 LIBFMRSRC = ../libfmr/fedb.c ../libfmr/fmd.c ../libfmr/fmr.c ../libfmr/fvmr.c
-all: minexv.c $(LIBFMRSRC)
-	$(CC) -DMINEX $(CFLAGS) $(LIBFMRSRC) minexv.c -o $(LOCALBIN)/minexv
+
+
+all:	minexv minexov minex2v
+
+minexv: minexv.c $(LIBFMRSRC)
+	$(CC) -DMINEX $(CFLAGS) $(LIBFMRSRC) -DMINEX04 minexv.c -o $(LOCALBIN)/minexv
 	$(CP) minexv.1 $(LOCALMAN)
+
+minexov: minexv.c $(LIBFMRSRC)
+	$(CC) -DMINEX $(CFLAGS) $(LIBFMRSRC) -DOMINEX minexv.c -o $(LOCALBIN)/minexov
+
+minex2v: minexv.c $(LIBFMR)
+	$(CC) $(CFLAGS) -DMINEX2 minexv.c -lfmr -o $(LOCALBIN)/minex2v
 
 clean:
 	$(RM) *.o

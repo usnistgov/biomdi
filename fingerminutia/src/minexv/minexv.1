@@ -6,19 +6,33 @@
 .Nm minexv
 .Nd Verify that an M1 Finger Minutiae Format file complies with the NIST
 MINEX04 test criteria.
+.Pp
+.Nm minexov
+.Nd Verify that an M1 Finger Minutiae Format file complies with the NIST
+MINEX-Ongoing test criteria.
+.Pp
+.Nm minex2v
+.Nd Verify that an M1 Finger Minutiae Format file complies with the NIST
+MINEX-II test criteria.
 .Sh SYNOPSIS
-.Nm
+.Nm minexv
 .Op Fl p
+.Ar datafile
+.Nm minexov
+.Ar datafile
+.Nm minex2v
 .Ar datafile
 .Pp
 .Sh DESCRIPTION
 The
-.Nm
-command is used to verify a file containing an ANSI/INCITS 378-2004 
+.Nm minexv ,
+.Nm minexov , and
+.Nm minex2v
+commands are used to verify a file containing an ANSI/INCITS 378-2004 
 fingerprint minutiae record against the set of criteria proscribed by the
-NIST MINEX04 study. Verification includes checking the file against the
-requirements of the 378-2004 specification in addition to constraints
-provided by the MINEX04 study.
+NIST suite of MINEX studies. Verification includes checking the file against
+the requirements of the 378-2004 specification in addition to constraints
+provided by the MINEX study.
 .Pp
 The
 .Fl p
@@ -31,8 +45,8 @@ option is not given, then the MINEX04 mapping will be used with values
 100, 75, 50, 25, and 1.
 .Pp
 The output of the program is a set of text messages. ERROR messages are
-violations of the MINEX04 testing criteria. INFO messages indicate areas
-where the M1 record doesn't meet epxectations, but is not in technical
+violations of the particular testing criteria. INFO messages indicate areas
+where the M1 record doesn't meet expectations, but is not in technical
 violation. For example, when there are no Core or Delta records.
 .Pp
 .Sh EXAMPLES
@@ -57,8 +71,12 @@ Impression Type 6 is invalid.
 Finger Minutiae Record is invalid.
 .Ed
 .Sh SEE ALSO
+.Xr mkfmr 1 ,
+.Xr fmrv 1 ,
 .Xr prfmr 1 .
 .Sh HISTORY
 Created June 16th, 2005 by NIST.
 .Pp
 Add -p option June 15th, 2006 by NIST.
+.Pp
+Add minexov and minex2v versions of the program, October 15th, 2007 by NIST.
