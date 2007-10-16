@@ -128,7 +128,7 @@ internal_read_fvmr(FILE *fp, BDB *fmdb,
 
 	// Finger minutiae data
 	for (i = 0; i < fvmr->number_of_minutiae; i++) {
-		if (new_fmd(fvmr->format_std, &fmd, i) < 0)
+		if (new_fmd(fvmr->format_std, &fmd, i+1) < 0)
 			ERR_OUT("Could not allocate FMD %d", i);
 
 		if (fp != NULL)

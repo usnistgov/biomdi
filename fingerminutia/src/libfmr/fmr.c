@@ -339,7 +339,7 @@ print_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 	// Print the finger views
 	i = 1;
 	TAILQ_FOREACH(fvmr, &fmr->finger_views, list) {
-		fprintf(fp, "(%03d) ", i++);
+		fprintf(fp, "[%03d] ", i++);
 		ret = print_fvmr(stdout, fvmr);
 		if (ret != PRINT_OK)
 			ERR_OUT("Could not print FVMR");
