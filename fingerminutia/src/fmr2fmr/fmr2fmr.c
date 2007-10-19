@@ -8,11 +8,9 @@
  * about its quality, reliability, or any other characteristic.
  */
 /******************************************************************************/
-/* This program will transform certain values from an INCITS M1 record to     */
-/* ISO compact form, then back again. The purpose of this transformation is   */
-/* to simulate a fingerprint minutiae record that is converted from M1        */
-/* format to ISO compact, as when an FMR is placed on a smart card, then      */
-/* converted back for matching, etc.                                          */
+/* This program will transform a finger minutia record in one format to       */
+/* another, ANSI to ISO compact for for example. The type of input and        */
+/* output files are given on the command line.                                */
 /******************************************************************************/
 #include <errno.h>
 #include <fcntl.h>
@@ -39,7 +37,7 @@ usage()
 {
 	fprintf(stderr, 
 	    "usage:\n"
-	    "\tfmr2fmr -i <m1file> -ti <type> -o <outfile> -to <type>\n"
+	    "\tfmr2fmr -i <infile> -ti <type> -o <outfile> -to <type>\n"
 	    "\twhere:\n"
 	    "\t   -i:  Specifies the input FMR file\n"
 	    "\t   -ti: Specifies the input file type\n"
@@ -103,7 +101,7 @@ get_options(int argc, char *argv[])
 	i_opt = o_opt = ti_opt = to_opt = 0;
 	while ((ch = getopt(argc, argv, "i:o:t:")) != -1) {
 		/* Make sure we don't fall off the end of argv */
-		if (optind >= argc)
+		if (optind > argc)
 			goto err_usage_out;
 		switch (ch) {
 		    case 'i':
