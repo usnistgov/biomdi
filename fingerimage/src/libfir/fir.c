@@ -251,7 +251,7 @@ print_fir(FILE *fp, struct finger_image_record *fir)
 	i = 1;
 	TAILQ_FOREACH(fivr, &fir->finger_views, list) {
 		FPRINTF(fp, "(%03d) ", i++);
-		ret = print_fivr(stdout, fivr);
+		ret = print_fivr(fp, fivr);
 		if (ret != PRINT_OK)
 			ERR_OUT("Could not print FIVR");
 	}
