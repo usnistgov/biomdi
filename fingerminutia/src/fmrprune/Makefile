@@ -19,8 +19,10 @@ rectangular:	rectangular.c
 	$(CC) $(CFLAGS) -c $< -o rectangular.o
 
 fmrprune: $(SOURCES)
-	$(CC) $(CFLAGS) fmrprune.c $(OBJS) -lfmr -o $(LOCALBIN)/fmrprune
+	$(CC) $(CFLAGS) fmrprune.c $(OBJS) -lfmr -o fmrprune
+	$(CP) fmrprune $(LOCALBIN)
 	$(CP) fmrprune.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o
+	$(RM) fmrprune *.o
+	$(RM) -r *.dSYM

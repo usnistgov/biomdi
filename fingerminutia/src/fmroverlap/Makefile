@@ -9,8 +9,10 @@
 #
 include ../common.mk
 all: fmroverlap.c
-	$(CC) $(CFLAGS) fmroverlap.c -lm -lfmr -o $(LOCALBIN)/fmroverlap
+	$(CC) $(CFLAGS) fmroverlap.c -lm -lfmr -o fmroverlap
+	$(CP) fmroverlap $(LOCALBIN)
 	$(CP) fmroverlap.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o
+	$(RM) fmroverlap *.o
+	$(RM) -r *.dSYM

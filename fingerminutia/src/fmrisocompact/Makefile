@@ -9,8 +9,10 @@
 #
 include ../common.mk
 all: fmrisocompact.c
-	$(CC) $(CFLAGS) fmrisocompact.c -lm -lfmr -o $(LOCALBIN)/fmrisocompact
+	$(CC) $(CFLAGS) fmrisocompact.c -lm -lfmr -o fmrisocompact
+	$(CP) fmrisocompact $(LOCALBIN)
 	$(CP) fmrisocompact.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o
+	$(RM) fmrisocompact *.o
+	$(RM) -r *.dSYM

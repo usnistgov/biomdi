@@ -9,9 +9,11 @@
 #
 include ../common.mk
 all: fmrv.c
-	$(CC) $(CFLAGS) fmrv.c -lfmr -o $(LOCALBIN)/fmrv
+	$(CC) $(CFLAGS) fmrv.c -lfmr -o fmrv
+	$(CP) fmrv $(LOCALBIN)
 	$(CP) fmrv.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o
+	$(RM) fmrv *.o
 	$(RM) .gdb_history
+	$(RM) -r *.dSYM

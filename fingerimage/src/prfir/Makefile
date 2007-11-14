@@ -9,9 +9,11 @@
 #
 include ../common.mk
 all: prfir.c
-	$(CC) $(CFLAGS) prfir.c -lfir -o $(LOCALBIN)/prfir
+	$(CC) $(CFLAGS) prfir.c -lfir -o prfir
+	$(CP) prfir $(LOCALBIN)
 	$(CP) prfir.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o
+	$(RM) *.o prfir
 	$(RM) .gdb_history
+	$(RM) -r *.dSYM

@@ -9,9 +9,11 @@
 #
 include ../common.mk
 all: pgm2fir.cpp
-	$(CPP) $(CFLAGS) $? -lnetpbm -lfing -lwsq -llfs -ljpegl -lmlp -lfet -lcblas -lioutil -lutil -o $(LOCALBIN)/pgm2fir
+	$(CPP) $(CFLAGS) $? -lnetpbm -lfing -lwsq -llfs -ljpegl -lmlp -lfet -lcblas -lioutil -lutil -o pgm2fir
+	${CP} pgm2fir $(LOCALBIN)
 	${CP} pgm2fir.1 $(LOCALMAN)
 
 clean:
 	$(RM) *.o pgm2fir
 	$(RM) .gdb_history
+	$(RM) -r *.dSYM

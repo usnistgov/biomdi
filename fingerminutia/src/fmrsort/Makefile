@@ -10,8 +10,10 @@
 include ../common.mk
 SOURCES = fmrsort.c
 all: $(SOURCES)
-	$(CC) $(CFLAGS) $(SOURCES) -lfmr -o $(LOCALBIN)/fmrsort
+	$(CC) $(CFLAGS) $(SOURCES) -lfmr -o fmrsort
+	$(CP) fmrsort $(LOCALBIN)
 	$(CP) fmrsort.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o
+	$(RM) fmrsort *.o
+	$(RM) -r *.dSYM

@@ -9,9 +9,11 @@
 #
 include ../common.mk
 all: firv.c
-	$(CC) $(CFLAGS) firv.c -lfir -o $(LOCALBIN)/firv
+	$(CC) $(CFLAGS) firv.c -lfir -o firv
+	$(CP) firv $(LOCALBIN)
 	$(CP) firv.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o
+	$(RM) firv *.o
 	$(RM) .gdb_history
+	$(RM) -r *.dSYM

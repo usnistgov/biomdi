@@ -9,9 +9,11 @@
 #
 include ../common.mk
 all: mkfmr.c
-	$(CC) $(CFLAGS) mkfmr.c -lfmr -o $(LOCALBIN)/mkfmr
+	$(CC) $(CFLAGS) mkfmr.c -lfmr -o mkfmr
+	$(CP) mkfmr $(LOCALBIN)
 	$(CP) mkfmr.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o
+	$(RM) mkfmr *.o
 	$(RM) .gdb_history
+	$(RM) -r *.dSYM

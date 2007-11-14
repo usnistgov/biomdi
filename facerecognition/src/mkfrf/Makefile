@@ -9,8 +9,10 @@
 #
 include ../common.mk
 all: mkfrf.c
-	$(CC) $(CFLAGS) $? -lfrf -o $(LOCALBIN)/mkfrf
+	$(CC) $(CFLAGS) $? -lfrf -o mkfrf
+	$(CP) mkfrf $(LOCALBIN)
 	$(CP) mkfrf.1 $(LOCALMAN)
 
 clean:
 	$(RM) *.o mkfrf
+	$(RM) -r *.dSYM

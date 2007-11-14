@@ -9,9 +9,11 @@
 #
 include ../common.mk
 all: fmr2an2k.c
-	$(CC) $(CFLAGS) fmr2an2k.c -lfmr -lan2k -lioutil -lutil -o $(LOCALBIN)/fmr2an2k
+	$(CC) $(CFLAGS) fmr2an2k.c -lfmr -lan2k -lioutil -lutil -o fmr2an2k
+	$(CP) fmr2an2k $(LOCALBIN)
 	$(CP) fmr2an2k.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o
+	$(RM) fmr2an2k *.o
+	$(RM) -r *.dSYM
 	$(RM) .gdb_history

@@ -9,8 +9,10 @@
 #
 include ../common.mk
 all: mkfir.c
-	$(CC) $(CFLAGS) $? -lfir -o $(LOCALBIN)/mkfir
+	$(CC) $(CFLAGS) $? -lfir -o mkfir
+	$(CP) mkfir $(LOCALBIN)
 	$(CP) mkfir.1 $(LOCALMAN)
 
 clean:
 	$(RM) *.o mkfir
+	$(RM) -r *.dSYM

@@ -9,8 +9,10 @@
 #
 include ../common.mk
 all: prfrf.c
-	$(CC) $(CFLAGS) $? -lfrf -o $(LOCALBIN)/prfrf
+	$(CC) $(CFLAGS) $? -lfrf -o prfrf
+	$(CP) prfrf $(LOCALBIN)
 #	$(CP) prfrf.1 $(LOCALMAN)
 
 clean:
 	$(RM) *.o prfrf
+	$(RM) -r *.dSYM

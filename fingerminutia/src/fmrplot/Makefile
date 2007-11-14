@@ -9,8 +9,10 @@
 #
 include ../common.mk
 all: fmrplot.c
-	$(CC) $(CFLAGS) fmrplot.c -lfmr -lgd -ljpeg -lz -o $(LOCALBIN)/fmrplot
+	$(CC) $(CFLAGS) fmrplot.c -lfmr -lgd -ljpeg -lz -o fmrplot
+	$(CP) fmrplot $(LOCALBIN)
 	$(CP) fmrplot.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o
+	$(RM) fmrplot *.o
+	$(RM) -r *.dSYM
