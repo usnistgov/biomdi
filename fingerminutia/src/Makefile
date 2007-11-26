@@ -12,7 +12,7 @@
 #
 
 # The 'core' library and programs, that always build
-CORE := libfmr prfmr mkfmr fmrv fmroverlap fmrprune fmrsort fmr2fmr fmrisocompact minexv test
+CORE := libfmr prfmr mkfmr fmrv fmroverlap fmrprune fmrsort fmr2fmr fmrmod fmrisocompact minexv test
 
 # Programs dependent on NBIS; see http://fingerprint.nist.gov/NBIS/index.html
 NBIS := fmr2an2k an2k2fmr
