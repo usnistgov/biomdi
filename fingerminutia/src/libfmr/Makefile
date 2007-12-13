@@ -7,17 +7,25 @@
 # its use by other parties, and makes no guarantees, expressed or implied,
 # about its quality, reliability, or any other characteristic.
 #
-# Set a variable so we can check the OS name; Mac OS-X (Darwin) uses a different
-# form of linking libraries.
-#
 include ../common.mk
 SOURCES = fmr.c fvmr.c fmd.c fedb.c polar.c random.c xy.c angle.c quality.c ansi2iso.c iso2ansi.c
 OBJECTS = fmr.o fvmr.o fmd.o fedb.o polar.o random.o xy.o angle.o quality.o ansi2iso.o iso2ansi.o
 
+#
+# On OS-X, when using gcc 4.0 or later, the SystemStubs library must be
+# linked in. This may be true on other OS as well.
+#
+ifeq ($(OS), Darwin)
+#ifeq ($(findstring gcc-4, $(GCCV)), gcc-4)
+ifeq ($(GCCV), 4)
+EXTRALIBS := -lSystemStubs
+endif
+endif
+
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
 	$(CC) -c $(CFLAGS) $(SOURCES)
-	libtool -dynamic -o libfmr.dylib -lc $(OBJECTS) -lSystemStubs
+	libtool -dynamic -o libfmr.dylib -lc $(OBJECTS) $(EXTRALIBS)
 	$(CP) libfmr.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)

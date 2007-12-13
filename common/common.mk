@@ -36,6 +36,16 @@ RM := rm -f
 PWD := $(shell pwd)
 OS := $(shell uname -s)
 
+#
+# Set the GCC version, but right now all we care about is version 4
+#
+_GCCV := $(shell gcc --version)
+ifeq ($(findstring gcc-4, $(_GCCV)), gcc-4)
+GCCV := 4
+else
+GCCV := Unknown
+endif
+
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	ROOT = Administrator
 else
