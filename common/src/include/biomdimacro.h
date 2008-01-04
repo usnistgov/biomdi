@@ -296,6 +296,24 @@ typedef struct biometric_data_buffer BDB;
 	} while (0)
 
 /*
+ * Print INFO and ERROR messages to the appropriate place.
+ */
+
+#define INFOP(...)							\
+	do {								\
+		fprintf(stdout, "INFO: ");				\
+		fprintf(stdout, __VA_ARGS__);				\
+		fprintf(stdout, ".\n");					\
+	} while (0)
+
+#define ERRP(...)							\
+	do {								\
+		fprintf(stderr, "ERROR: ");				\
+		fprintf(stderr, __VA_ARGS__);				\
+		fprintf(stderr, ".\n");					\
+	} while (0)
+
+/*
  * Other common things to check and take action on error.
 */
 #define OPEN_ERR_EXIT(fn)						\
@@ -373,7 +391,21 @@ typedef struct biometric_data_buffer BDB;
 #define CRW(value, low, high, msg)					\
 	do {								\
 		if (((value) < (low)) || (value) > (high)) {		\
-			fprintf(stderr, "Warning: %s not in range\n", msg);\
+			INFOP("%s not in range", msg);\
+		}							\
+	} while (0)
+
+/*
+ * Check in Range and Set Return: Check if a value falls within a given
+ * integer range, and set variable 'ret' to indicate an error. Will print
+ * an optional message.
+ */
+#define CRSR(value, low, high, msg)					\
+	do {								\
+		if (((value) < (low)) || (value) > (high)) {		\
+			if(msg != NULL)					\
+				ERRP("%s not in range", msg);		\
+			ret = VALIDATE_ERROR;				\
 		}							\
 	} while (0)
 
@@ -386,8 +418,7 @@ typedef struct biometric_data_buffer BDB;
 	do {								\
 		if ((value) != (valid)) {				\
 			if(msg != NULL)					\
-			    fprintf(stderr,				\
-				"ERROR: %s not %d.\n", msg, valid);	\
+			    ERRP("%s not %d", msg, valid);	\
 			ret = VALIDATE_ERROR;				\
 		}							\
 	} while (0)							\
@@ -401,29 +432,10 @@ typedef struct biometric_data_buffer BDB;
 	do {								\
 		if ((value) == (invalid)) {				\
 			if(msg != NULL)					\
-			    fprintf(stderr,				\
-				"ERROR: %s invalid value %d.\n", msg, value);\
+			    ERRP( "%s invalid value %d", msg, value);	\
 			ret = VALIDATE_ERROR;				\
 		}							\
 	} while (0)							\
-
-/*
- * Print INFO and ERROR messages to the appropriate place.
- */
-
-#define INFOP(...)							\
-	do {								\
-		fprintf(stdout, "INFO: ");				\
-		fprintf(stdout, __VA_ARGS__);				\
-		fprintf(stdout, ".\n");					\
-	} while (0)
-
-#define ERRP(...)							\
-	do {								\
-		fprintf(stderr, "ERROR: ");				\
-		fprintf(stderr, __VA_ARGS__);				\
-		fprintf(stderr, ".\n");					\
-	} while (0)
 
 /*
  * SOME systems may not have the latest queue(3) package, so borrow some
