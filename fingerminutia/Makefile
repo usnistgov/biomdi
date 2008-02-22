@@ -27,7 +27,7 @@ all:
 		(cd $$subdir && $(MAKE) all) || exit 1; \
 	done
 
-install:
+install: installpaths
 	install -m 644 -o $(ROOT) $(LOCALINC)/*.h $(INCPATH)
 	install -m 755 -o $(ROOT) $(LOCALLIB)/* $(LIBPATH)
 	install -m 755 -o $(ROOT) $(LOCALBIN)/* $(BINPATH)

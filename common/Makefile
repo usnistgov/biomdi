@@ -21,7 +21,7 @@ endif
 all:
 	@echo 'Nothing to be done for "make all".'
 
-install:
+install: installpaths
 	install -m 644 -o $(ROOT) $(LOCALINC)/*.h $(INCPATH)
 clean:
 	@echo 'Nothing to be done for "make clean".'

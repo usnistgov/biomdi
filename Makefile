@@ -25,7 +25,6 @@ all:
 	done
 
 install:
-	install -m 644 -o $(ROOT) common/src/include/*.h $(INCPATH)
 	@for subdir in $(SUBDIRS); do \
 		(cd $$subdir && $(MAKE) install) || exit 1; \
 	done

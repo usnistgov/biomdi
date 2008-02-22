@@ -52,7 +52,20 @@ else
 	ROOT  = root
 endif
 
-#
+installpaths: $(INCPATH) $(LIBPATH) $(BINPATH) $(MANPATH)
+$(INCPATH):
+		@echo "$(INCPATH) does not exist";
+		exit 2
+$(LIBPATH):
+		@echo "$(LIBPATH) does not exist";
+		exit 2
+$(BINPATH):
+		@echo "$(BINPATH) does not exist";
+		exit 2
+$(MANPATH):
+		@echo "$(MANPATH) does not exist";
+		exit 2
+
 # If there are any 'non-standard' include or lib directories that need to
 # be searched prior to the 'standard' libraries, add the to the CFLAGS
 # variable.
