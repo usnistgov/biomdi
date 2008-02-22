@@ -8,13 +8,15 @@
 # about its quality, reliability, or any other characteristic.
 #
 include ../common.mk
-SOURCES = fmrmod.c
 
-all: fmrmod
+all:	fmrmod
 
-fmrmod: $(SOURCES)
-	$(CC) $(CFLAGS) fmrmod.c $(OBJS) -lfmr -o $(LOCALBIN)/fmrmod
-	$(CP) fmrmod.1 $(LOCALMAN)
+fmrmod: fmrmod.c
+	$(CC) $(CFLAGS) $? -lfmr -o $@
+	$(CP) $@ $(LOCALBIN)
+	$(CP) $@.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o
+	$(RM) *.o fmrmod
+	$(RM) -r *.dSYM
+	$(RM) .gdb_history
