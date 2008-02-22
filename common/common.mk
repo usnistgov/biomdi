@@ -8,6 +8,8 @@
 # about its quality, reliability, or any other characteristic.
 #
 
+.DEFAULT_GOAL = all
+
 # This set of directories is where the header files, libraries, programs,
 # and man pages are to be installed.
 INCPATH := /usr/local/include
