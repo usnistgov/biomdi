@@ -16,20 +16,22 @@
 /* This program uses the GD Graphics Library, last available at               */
 /* http://www.libgd.org and distributed in many ported packages.              */
 /******************************************************************************/
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/queue.h>
+
 #include <errno.h>
 #include <fcntl.h>
 #include <gd.h>
 #include <math.h>
-#include <sys/queue.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
-#include <fmr.h>
 #include <biomdimacro.h>
+#include <fmr.h>
 
 #define PLOTDIAM	8	// Minutiae circle plot diamter, in pixels
 #define PLOTLENGTH	12	// Minutiae tail plot length, in pixels
