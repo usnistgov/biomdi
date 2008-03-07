@@ -97,6 +97,7 @@ new_iih(IIH **iih)
 	liih = (IIH *)malloc(sizeof(IIH));
 	if (liih == NULL)
 		ALLOC_ERR_RETURN("Iris image header");
+	memset((void *)liih, 0, sizeof(IIH));
 	*iih = liih;
 }
 
@@ -116,6 +117,7 @@ new_ibsh(IBSH **ibsh)
 	libsh = (IBSH *)malloc(sizeof(IBSH));
 	if (libsh == NULL)
 		ALLOC_ERR_RETURN("Iris biometric subtype header");
+	memset((void *)libsh, 0, sizeof(IBSH));
 	TAILQ_INIT(&libsh->image_headers);
 	*ibsh = libsh;
 }
