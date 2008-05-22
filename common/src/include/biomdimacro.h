@@ -22,15 +22,15 @@
 #define READ_EOF	1
 #define READ_ERROR	2
 
-// Return codes for the write* functions
+/* Return codes for the write* functions */
 #define WRITE_OK	0
 #define WRITE_ERROR	1
 
-// Return codes for the print* functions
+/* Return codes for the print* functions */
 #define PRINT_OK	0
 #define PRINT_ERROR	1
 
-// Return codes for the validate* functions
+/* Return codes for the validate* functions */
 #define VALIDATE_OK	0
 #define VALIDATE_ERROR	1
 
@@ -50,22 +50,21 @@ struct biometric_data_buffer {
 };
 typedef struct biometric_data_buffer BDB;
 
-#define INIT_BDB(bdb, ptr, size)					\
-	do {								\
-		(bdb)->bdb_size = size;					\
-		(bdb)->bdb_start = (bdb)->bdb_current = ptr;		\
-		(bdb)->bdb_end = ptr + size;				\
-	} while (0)
+#define INIT_BDB(bdb, ptr, size) do {					\
+	(bdb)->bdb_size = size;						\
+	(bdb)->bdb_start = (bdb)->bdb_current = ptr;			\
+	(bdb)->bdb_end = ptr + size;					\
+} while (0)
 
-#define REWIND_BDB(bdb)							\
-	do {								\
-		(bdb)->bdb_current = (bdb)->bdb_start;			\
-	} while (0)
+#define REWIND_BDB(bdb)	do {						\
+	(bdb)->bdb_current = (bdb)->bdb_start;				\
+} while (0)
 
-#define DUMP_BDB(bdb)							\
-do {									\
+/*
+ * Dump the contents of a BDB to stdout, 16 octets per row, in Hex.
+ */
+#define DUMP_BDB(bdb) do {						\
 	int idx, len;							\
-	printf("\n");							\
 	len = (bdb)->bdb_current - (bdb)->bdb_start;			\
 	for (idx = 0; idx < len; idx++) {				\
 		printf("%02hhX ", ((uint8_t *)((bdb)->bdb_start))[idx]);\
