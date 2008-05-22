@@ -61,6 +61,19 @@ typedef struct biometric_data_buffer BDB;
 	do {								\
 		(bdb)->bdb_current = (bdb)->bdb_start;			\
 	} while (0)
+
+#define DUMP_BDB(bdb)							\
+do {									\
+	int idx, len;							\
+	printf("\n");							\
+	len = (bdb)->bdb_current - (bdb)->bdb_start;			\
+	for (idx = 0; idx < len; idx++) {				\
+		printf("%02hhX ", ((uint8_t *)((bdb)->bdb_start))[idx]);\
+		if (((idx+1) % 16) == 0)				\
+			printf("\n");					\
+	}								\
+} while (0)
+
 /*
  * Note that in order to use most of these macros, two labels, 'err_out'
  * and 'eof_out' must be defined within the function that uses the macro.
