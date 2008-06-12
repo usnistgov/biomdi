@@ -9,7 +9,7 @@
 #
 include ../common.mk
 all: an2k2fmr.c
-	$(CC) $(CFLAGS) $? -lfmr -lan2k -lioutil -lutil -o an2k2fmr
+	$(CC) $(CFLAGS) $? -lfmr -lan2k -o an2k2fmr
 	$(CP) an2k2fmr $(LOCALBIN)
 	$(CP) an2k2fmr.1 $(LOCALMAN)
 
