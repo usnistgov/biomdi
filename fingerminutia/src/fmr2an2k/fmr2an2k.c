@@ -35,19 +35,19 @@
 #include "fmr2an2k.h"
 #include <sys/param.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/queue.h>
 #include <an2k.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
 
-#include <fmr.h>
 #include <biomdimacro.h>
+#include <fmr.h>
 
 /******************************************************************************/
 /* Print a how-to-use the program message.                                    */
