@@ -412,7 +412,7 @@ print_iibdb(FILE *fp, IIBDB *iibdb)
 	    iibdb->record_header.biometric_subtype_count);
 	FPRINTF(fp, "Record Header Length\t\t: %d\n",
 	    iibdb->record_header.record_header_length);
-	FPRINTF(fp, "Iris Image Prpoerties:\n");
+	FPRINTF(fp, "Iris Image Properties:\n");
 	FPRINTF(fp, "\tHorizontal Orientation\t: %hhu (%s)\n",
 	    iibdb->record_header.horizontal_orientation,
 	    iid_code_to_str(IID_CODE_CLASS_ORIENTATION,
