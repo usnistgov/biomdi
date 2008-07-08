@@ -12,10 +12,12 @@
 
 # This set of directories is where the header files, libraries, programs,
 # and man pages are to be installed.
-INCPATH := /usr/local/include
-LIBPATH := /usr/local/lib
-BINPATH := /usr/local/bin
-MANPATH := /usr/local/man/man1
+
+PREFIX := /usr/local
+INCPATH := $(PREFIX)/include
+LIBPATH := $(PREFIX)/lib
+BINPATH := $(PREFIX)/bin
+MANPATH := $(PREFIX)/man/man1
 
 #
 # Each package that includes this common file can define these variables:
@@ -37,6 +39,7 @@ CP := cp -f
 RM := rm -f
 PWD := $(shell pwd)
 OS := $(shell uname -s)
+ARCH := $(shell uname -m)
 
 #
 # Set the GCC version, but right now all we care about is version 4
@@ -52,6 +55,14 @@ ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	ROOT = Administrator
 else
 	ROOT  = root
+endif
+
+ifeq ($(findstring amd64, $(ARCH)), amd64)
+	EXTRACFLAGS = -fPIC
+else
+	ifeq ($(findstring x86_64, $(ARCH)), x86_64)
+		EXTRACFLAGS = -fPIC
+	endif
 endif
 
 installpaths: $(INCPATH) $(LIBPATH) $(BINPATH) $(MANPATH)
@@ -72,4 +83,4 @@ $(MANPATH):
 # be searched prior to the 'standard' libraries, add the to the CFLAGS
 # variable.
 
-CFLAGS := -g $(COMMONINCOPT) -I$(LOCALINC) -I$(INCPATH) $(COMMONLIBOPT) -L$(LOCALLIB) -L$(LIBPATH)
+CFLAGS := -g $(COMMONINCOPT) -I$(LOCALINC) -I$(INCPATH) $(COMMONLIBOPT) -L$(LOCALLIB) -L$(LIBPATH) $(EXTRACFLAGS)
