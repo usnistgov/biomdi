@@ -186,8 +186,8 @@ struct finger_minutiae_data {
 typedef struct finger_minutiae_data FMD;
 #define COPY_FMD(src, dst)				\
 	bcopy(&src->fmd_startcopy, &dst->fmd_startcopy, \
-            (unsigned) ((caddr_t)&dst->fmd_endcopy -	\
-		(caddr_t)&dst->fmd_startcopy))
+            (unsigned) ((uint8_t *)&dst->fmd_endcopy -	\
+		(uint8_t *)&dst->fmd_startcopy))
 
 // Representation of the Ridge Count Format
 #define RIDGE_COUNT_DATA_LENGTH		3
@@ -204,8 +204,8 @@ struct ridge_count_data {
 typedef struct ridge_count_data RCD;
 #define COPY_RCD(src, dst)				\
 	bcopy(&src->rcd_startcopy, &dst->rcd_startcopy, \
-            (unsigned) ((caddr_t)&dst->rcd_endcopy -	\
-		(caddr_t)&dst->rcd_startcopy))
+            (unsigned) ((uint8_t *)&dst->rcd_endcopy -	\
+		(uint8_t *)&dst->rcd_startcopy))
 
 #define RIDGE_COUNT_HEADER_LENGTH	1
 struct ridge_count_data_block {
@@ -233,8 +233,8 @@ struct core_data {
 typedef struct core_data CD;
 #define COPY_CD(src, dst)				\
 	bcopy(&src->cd_startcopy, &dst->cd_startcopy,	\
-            (unsigned) ((caddr_t)&dst->cd_endcopy -	\
-		(caddr_t)&dst->cd_startcopy))
+            (unsigned) ((uint8_t *)&dst->cd_endcopy -	\
+		(uint8_t *)&dst->cd_startcopy))
 
 // Representation of the Delta Format
 #define DELTA_DATA_MIN_LENGTH		4
@@ -256,8 +256,8 @@ struct delta_data {
 typedef struct delta_data DD;
 #define COPY_DD(src, dst)				\
 	bcopy(&src->dd_startcopy, &dst->dd_startcopy,	\
-            (unsigned) ((caddr_t)&dst->dd_endcopy -	\
-		(caddr_t)&dst->dd_startcopy))
+            (unsigned) ((uint8_t *)&dst->dd_endcopy -	\
+		(uint8_t *)&dst->dd_startcopy))
 
 #define CORE_DATA_HEADER_LENGTH		1
 struct core_delta_data_block {
@@ -275,8 +275,8 @@ struct core_delta_data_block {
 typedef struct core_delta_data_block CDDB;
 #define COPY_CDDB(src, dst)					\
 	bcopy(&src->cddb_startcopy, &dst->cddb_startcopy,	\
-            (unsigned) ((caddr_t)&dst->cddb_endcopy -		\
-		(caddr_t)&dst->cddb_startcopy))
+            (unsigned) ((uint8_t *)&dst->cddb_endcopy -		\
+		(uint8_t *)&dst->cddb_startcopy))
 
 // Representation of a single finger view extended data record. A FED is
 // one of three types: a Ridge Count, Core/Delta, or Unknown Data type.
@@ -302,8 +302,8 @@ struct finger_extended_data {
 typedef struct finger_extended_data FED;
 #define COPY_FED(src, dst)				\
 	bcopy(&src->fed_startcopy, &dst->fed_startcopy,	\
-            (unsigned) ((caddr_t)&dst->fed_endcopy -	\
-		(caddr_t)&dst->fed_startcopy))
+            (unsigned) ((uint8_t *)&dst->fed_endcopy -	\
+		(uint8_t *)&dst->fed_startcopy))
 
 // Representation of the entire finger view extended data block, which
 // is comprised of multiple extended data items
@@ -321,8 +321,8 @@ struct finger_extended_data_block {
 typedef struct finger_extended_data_block FEDB;
 #define COPY_FEDB(src, dst)					\
 	bcopy(&src->fedb_startcopy, &dst->fedb_startcopy,	\
-            (unsigned) ((caddr_t)&dst->fedb_endcopy -		\
-		(caddr_t)&dst->fedb_startcopy))
+            (unsigned) ((uint8_t *)&dst->fedb_endcopy -		\
+		(uint8_t *)&dst->fedb_startcopy))
 
 // Representation of the Finger View Minutiae Record combined with the 
 // optional Extended Data
@@ -350,8 +350,8 @@ struct finger_view_minutiae_record {
 typedef struct finger_view_minutiae_record FVMR;
 #define COPY_FVMR(src, dst)					\
 	bcopy(&src->fvmr_startcopy, &dst->fvmr_startcopy,	\
-            (unsigned) ((caddr_t)&dst->fvmr_endcopy -		\
-		(caddr_t)&dst->fvmr_startcopy))
+            (unsigned) ((uint8_t *)&dst->fvmr_endcopy -		\
+		(uint8_t *)&dst->fvmr_startcopy))
 
 // Representation of an entire Finger Minutiae Record
 #define	FMR_ANSI_SMALL_HEADER_TYPE		1
@@ -398,8 +398,8 @@ struct finger_minutiae_record {
 typedef struct finger_minutiae_record FMR;
 #define COPY_FMR(src, dst)				\
 	bcopy(&src->fmr_startcopy, &dst->fmr_startcopy,	\
-            (unsigned) ((caddr_t)&dst->fmr_endcopy -	\
-		(caddr_t)&dst->fmr_startcopy))
+            (unsigned) ((uint8_t *)&dst->fmr_endcopy -	\
+		(uint8_t *)&dst->fmr_startcopy))
 
 /******************************************************************************/
 /* Define the interface for managing the various pieces of a Finger Minutiae  */
