@@ -25,13 +25,16 @@
  * ANSI representation. The quality value is set to the unknown value.
  */
 int
-iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length)
+iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
+    const unsigned short xres, const unsigned short yres)
 {
 	FMD **ifmds = NULL;
 	FMD *ofmd;
 	int m, mcount;
 	double theta;
 	double conversion_factor;
+	double xcm, ycm;
+	double xunits, yunits;
 
 	COPY_FVMR(ifvmr, ofvmr);
 	*length = FVMR_HEADER_LENGTH;
@@ -53,7 +56,23 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length)
 	for (m = 0; m < mcount; m++) {
 		if (new_fmd(FMR_STD_ANSI, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
-		COPY_FMD(ifmds[m], ofmd);
+
+		if (ofvmr->format_std == FMR_STD_ISO) {
+			COPY_FMD(ifmds[m], ofmd);
+		/* Convert the minutiae using fixed normal card resolution */
+		} else {
+			/* ISO NC is 0.01 p/mm, so convert to 1 p/mm */
+			xunits = (double)ifmds[m]->x_coord * 0.01;
+			yunits = (double)ifmds[m]->y_coord * 0.01;
+
+			/* Convert from p/mm to p/cm */
+			xcm = (xunits * xres) / 10.0;
+			ycm = (yunits * yres) / 10.0;
+
+			ofmd->x_coord = (unsigned short)(0.5 + xcm);
+			ofmd->y_coord = (unsigned short)(0.5 + ycm);
+
+		}
 		theta = round(conversion_factor * (double)(ifmds[m]->angle));
 		ofmd->angle = (unsigned char)(round(theta / 2));
 		ofmd->quality = FMD_UNKNOWN_MINUTIA_QUALITY;
@@ -113,8 +132,6 @@ isocc2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 		yunits = (double)ifmds[m]->y_coord * 0.1;
 
 		/* Convert from p/mm to p/cm */
-		// XXX The minutiae order needs to be considered here
-		// XXX because the CC coord system wraps around
 		xcm = (xunits * xres) / 10.0;
 		ycm = (yunits * yres) / 10.0;
 

@@ -16,8 +16,11 @@
  *  ofvmr  - FVMR to contain the copied and modified FMDs
  *  length - Will contain the total length of the output FVMR
  *           (header plus length of all FMDs)
+ *  xres   - X resolution of input image
+ *  yres   - Y resolution of input image
  */
-int ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length);
+int ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
+    const unsigned short xres, const unsigned short yres);
 
 /*
  * Copy the minutiae from an ANSI FVMR to an ISO Compact Card FVMR, altering
@@ -43,8 +46,11 @@ int ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
  *  ofvmr  - FVMR to contain the copied and modified FMDs
  *  length - Will contain the total length of the output FVMR
  *           (header plus length of all FMDs)
+ *  xres   - X resolution of input image
+ *  yres   - Y resolution of input image
  */
-int iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length);
+int iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
+    const unsigned short xres, const unsigned short yres);
 
 /*
  * Copy the minutiae from an ISO Compact Card FVMR to an ANSI FVMR, altering

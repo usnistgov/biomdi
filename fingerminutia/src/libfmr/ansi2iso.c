@@ -20,13 +20,17 @@
 #include <fmr.h>
 
 int
-ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length)
+ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
+    const unsigned short xres, const unsigned short yres)
 {
 	FMD **ifmds = NULL;
 	FMD *ofmd;
 	int m, mcount;
 	double isotheta;
 	double conversion_factor;
+	double x, y;
+	double xmm, ymm;
+	double xunits, yunits;
 	int theta;
 
 	COPY_FVMR(ifvmr, ofvmr);
@@ -49,7 +53,28 @@ ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length)
 		 */
 		if (new_fmd(ofvmr->format_std, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
-		COPY_FMD(ifmds[m], ofmd);
+		if (ofvmr->format_std == FMR_STD_ISO) {
+			COPY_FMD(ifmds[m], ofmd);
+		/* Convert the minutiae using fixed normal card resolution */
+		} else {
+			x = (double)ifmds[m]->x_coord;
+			y = (double)ifmds[m]->y_coord;
+
+			/* millimeters, because INCITS 378 resolution 
+			 * values are in pixels per centimeter */
+			xmm = 10.0 * x / (double)xres;
+			ymm = 10.0 * y / (double)yres;
+
+			/* units of 0.01 pix per mm which is the normal
+			 * card format's hardwired sampling freq */
+ 			xunits = xmm / 0.01;
+ 			yunits = ymm / 0.01;
+
+			/* round the values - this is what would be
+			 * stored in "typical" say 500 dpi operation */
+ 			ofmd->x_coord = (unsigned short)(0.5 + xunits);
+ 			ofmd->y_coord = (unsigned short)(0.5 + yunits);
+		}
 		theta = 2 * (int)ifmds[m]->angle;
 		isotheta = round(conversion_factor * (double)theta);
 		ofmd->angle = (unsigned char)isotheta;
@@ -115,6 +140,7 @@ ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 		x = (double)ifmds[m]->x_coord;
 		y = (double)ifmds[m]->y_coord;
 
+		/* Convert the minutiae using fixed compact card resolution */
 		/* millimeters, because INCITS 378 resolution 
 		 * values are in pixels per centimeter */
 		xmm = 10.0 * x / (double)xres;
@@ -125,8 +151,7 @@ ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
  		xunits = xmm / 0.1;
  		yunits = ymm / 0.1;
 
-		/* round the values - this is what would be
-		 * stored in "typical" say 500 dpi operation */
+		/* round the values */
  		ofmd->x_coord = (unsigned short)(0.5 + xunits);
  		ofmd->y_coord = (unsigned short)(0.5 + yunits);
 
