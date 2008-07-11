@@ -57,11 +57,11 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 		if (new_fmd(FMR_STD_ANSI, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
 
-		if (ofvmr->format_std == FMR_STD_ISO) {
-			COPY_FMD(ifmds[m], ofmd);
-		/* Convert the minutiae using fixed normal card resolution */
-		} else {
-			/* ISO NC is 0.01 p/mm, so convert to 1 p/mm */
+		COPY_FMD(ifmds[m], ofmd);
+		if (ifvmr->format_std == FMR_STD_ISO_NORMAL_CARD) {
+			/* Convert the minutiae using fixed normal card
+			 * resolution; ISO NC is 0.01 p/mm, so convert
+			 * to 1 p/mm */
 			xunits = (double)ifmds[m]->x_coord * 0.01;
 			yunits = (double)ifmds[m]->y_coord * 0.01;
 
@@ -71,7 +71,6 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 
 			ofmd->x_coord = (unsigned short)(0.5 + xcm);
 			ofmd->y_coord = (unsigned short)(0.5 + ycm);
-
 		}
 		theta = round(conversion_factor * (double)(ifmds[m]->angle));
 		ofmd->angle = (unsigned char)(round(theta / 2));

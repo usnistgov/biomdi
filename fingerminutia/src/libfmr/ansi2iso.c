@@ -53,10 +53,12 @@ ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 		 */
 		if (new_fmd(ofvmr->format_std, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
-		if (ofvmr->format_std == FMR_STD_ISO) {
-			COPY_FMD(ifmds[m], ofmd);
-		/* Convert the minutiae using fixed normal card resolution */
-		} else {
+
+		COPY_FMD(ifmds[m], ofmd);
+		if (ofvmr->format_std == FMR_STD_ISO_NORMAL_CARD) {
+			/* Convert the minutiae using fixed normal card
+			 * resolution.
+			 */
 			x = (double)ifmds[m]->x_coord;
 			y = (double)ifmds[m]->y_coord;
 
