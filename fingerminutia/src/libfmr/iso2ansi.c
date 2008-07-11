@@ -74,6 +74,10 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 		}
 		theta = round(conversion_factor * (double)(ifmds[m]->angle));
 		ofmd->angle = (unsigned char)(round(theta / 2));
+		/* Check the edge condition where theta rounds greater than
+		 * max angle value */
+		if (ofmd->angle > FMD_MAX_MINUTIA_ANGLE)
+			ofmd->angle = FMD_MAX_MINUTIA_ANGLE;
 		ofmd->quality = FMD_UNKNOWN_MINUTIA_QUALITY;
 		add_fmd_to_fvmr(ofmd, ofvmr);
 		*length += FMD_DATA_LENGTH;

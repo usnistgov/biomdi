@@ -134,10 +134,13 @@ ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 
 		/* The ISO minutia record has 6 bits for the angle, so
 		 * we have 64 possible values to represent 360 degrees.
+		 * Also check the edge condition when hitting the max value.
 		 */
 		theta = 2 * (int)ifmds[m]->angle;
 		isotheta = round(conversion_factor * (double)theta);
 		ofmd->angle = (unsigned char)isotheta;
+		if (isotheta > FMD_MAX_MINUTIA_ISOCC_ANGLE)
+			ofmd->angle = FMD_MAX_MINUTIA_ISOCC_ANGLE;
 
 		x = (double)ifmds[m]->x_coord;
 		y = (double)ifmds[m]->y_coord;
