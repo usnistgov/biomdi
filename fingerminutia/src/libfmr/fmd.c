@@ -239,18 +239,26 @@ validate_fmd(struct finger_minutiae_data *fmd)
 	unsigned short coord;
 	int ret = VALIDATE_OK;
 
-	// The coordinates must lie within the scanned image
-	coord = fmd->fvmr->fmr->x_image_size - 1;
-	if (fmd->x_coord > coord) {
-	  ERRP("X-coordinate (%u) of Finger Minutia Data lies outside image",
-		fmd->x_coord);
-		ret = VALIDATE_ERROR;
-	}
-	coord = fmd->fvmr->fmr->y_image_size - 1;
-	if (fmd->y_coord > coord) {
-	  ERRP("Y-coordinate (%u) of Finger Minutia Data lies outside image",
-		fmd->y_coord);
-		ret = VALIDATE_ERROR;
+	/*
+	 * Checking for coord inside image only makes sense when we have
+	 * the image size.
+	 */
+	if ((fmd->format_std == FMR_STD_ANSI) ||
+	    (fmd->format_std == FMR_STD_ISO)) {
+
+		// The coordinates must lie within the scanned image
+		coord = fmd->fvmr->fmr->x_image_size - 1;
+		if (fmd->x_coord > coord) {
+		  ERRP("X-coordinate (%u) of Finger Minutia lies outside image",
+			fmd->x_coord);
+			ret = VALIDATE_ERROR;
+		}
+		coord = fmd->fvmr->fmr->y_image_size - 1;
+		if (fmd->y_coord > coord) {
+		  ERRP("Y-coordinate (%u) of Finger Minutia lies outside image",
+			fmd->y_coord);
+			ret = VALIDATE_ERROR;
+		}
 	}
 	
 	// Minutia type is one of these values
@@ -263,14 +271,9 @@ validate_fmd(struct finger_minutiae_data *fmd)
 
 	// Reserved field must be '00'
 	if (fmd->reserved != 0) {
-		ERRP("Minutia Reserved is %u, should be '00'",
-			fmd->quality, FMD_MIN_MINUTIA_ANGLE,
-			    FMD_MAX_MINUTIA_ANGLE);
+		ERRP("Minutia Reserved is %u, should be '00'", fmd->reserved);
 		ret = VALIDATE_ERROR;
 	}
-
-	// Position; XXX should this be reasonably related to the 
-	// size/resolution?
 
 	// Angle
 	if (fmd->format_std == FMR_STD_ANSI) {
