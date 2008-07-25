@@ -13,6 +13,7 @@
 /******************************************************************************/
 #include <sys/queue.h>
 
+#include <math.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -20,6 +21,59 @@
 
 #include <biomdimacro.h>
 #include <fmr.h>
+
+/*
+ * Convert from angle represntation in units to degrees.
+ */
+static int
+fmd_convert_angle(FMD *fmd)
+{
+	double theta;
+
+	switch (fmd->format_std) {
+		case FMR_STD_ANSI:
+			return ((int)fmd->angle * FMD_ANSI_ANGLE_UNIT);
+			break;			/* not reached */
+		case FMR_STD_ISO:
+		case FMR_STD_ISO_NORMAL_CARD:
+			theta = round((double)FMD_ISO_ANGLE_UNIT *
+			    (double)fmd->angle);
+			return ((int)theta);
+			break;			/* not reached */
+		case FMR_STD_ISO_COMPACT_CARD:
+			theta = round((double)FMD_ISOCC_ANGLE_UNIT *
+			    (double)fmd->angle);
+			return ((int)theta);
+			break;			/* not reached */
+		default:
+			ERRP("%s called with incorrect standard type.\n:",
+				__FUNCTION__);
+			return (0);
+			break;			/* not reached */
+	}
+}
+
+/*
+ * Convert the minutia type to human-readable string.
+ */
+static char *
+fmd_type_string(FMD *fmd)
+{
+	switch (fmd->type) {
+		case FMD_MINUTIA_TYPE_OTHER:
+			return ("Other");
+			break;			/* not reached */
+		case FMD_MINUTIA_TYPE_RIDGE_ENDING:
+			return ("Ridge Ending");
+			break;			/* not reached */
+		case FMD_MINUTIA_TYPE_BIFURCATION:
+			return ("Bifurcation");
+			break;			/* not reached */
+		default:
+			return ("Unknown");
+			break;			/* not reached */
+	}
+}
 
 int
 new_fmd(unsigned int format_std, struct finger_minutiae_data **fmd,
@@ -223,9 +277,11 @@ int
 print_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 {
 	fprintf(fp, "Finger Minutiae Data:\n");
-	fprintf(fp, "\tType\t\t: 0x%01x\n", fmd->type);
+	fprintf(fp, "\tType\t\t: 0x%01x (%s)\n", fmd->type,
+	    fmd_type_string(fmd));
 	fprintf(fp, "\tCoordinate\t: (%u,%u)\n", fmd->x_coord, fmd->y_coord);
-	fprintf(fp, "\tAngle\t\t: %u\n", fmd->angle);
+	fprintf(fp, "\tAngle\t\t: %u (%u degrees)\n",
+	    fmd->angle, fmd_convert_angle(fmd));
 	if ((fmd->format_std == FMR_STD_ANSI) ||
 	    (fmd->format_std == FMR_STD_ISO))
 		fprintf(fp, "\tQuality\t\t: %u\n", fmd->quality);

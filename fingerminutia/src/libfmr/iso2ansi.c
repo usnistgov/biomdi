@@ -49,10 +49,9 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 		ERR_OUT("getting FMDs from FVMR");
 
 	/* The ISO minutia record uses all possible values for the
-	 * angle, so we have 256 possible values to represent 360
-	 * degrees.
+	 * angle, so convert from units to actual theta values.
 	 */
-	conversion_factor = (360.0 / 256.0);
+	conversion_factor = FMD_ISO_ANGLE_UNIT;
 	for (m = 0; m < mcount; m++) {
 		if (new_fmd(FMR_STD_ANSI, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
@@ -73,7 +72,7 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 			ofmd->y_coord = (unsigned short)(0.5 + ycm);
 		}
 		theta = round(conversion_factor * (double)(ifmds[m]->angle));
-		ofmd->angle = (unsigned char)(round(theta / 2));
+		ofmd->angle = (unsigned char)(round(theta / FMD_ANSI_ANGLE_UNIT));
 		/* Check the edge condition where theta rounds greater than
 		 * max angle value */
 		if (ofmd->angle > FMD_MAX_MINUTIA_ANGLE)
@@ -120,14 +119,14 @@ isocc2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 	if (get_minutiae(ifvmr, ifmds) != mcount)
 		ERR_OUT("getting FMDs from FVMR");
 
-	conversion_factor = (360.0 / 64.0);
+	conversion_factor = FMD_ISOCC_ANGLE_UNIT;
 	for (m = 0; m < mcount; m++) {
 		if (new_fmd(FMR_STD_ANSI, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
 		COPY_FMD(ifmds[m], ofmd);
 		theta = conversion_factor * (double)(ifmds[m]->angle);
 		theta = round(theta + 0.5);
-		ofmd->angle = (unsigned char)(round(theta / 2));
+		ofmd->angle = (unsigned char)(round(theta / FMD_ANSI_ANGLE_UNIT));
 		ofmd->quality = FMD_UNKNOWN_MINUTIA_QUALITY;
 
 		/* ISO CC is 0.1 p/mm, so convert to 1 p/mm */

@@ -45,11 +45,11 @@ ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 	if (get_minutiae(ifvmr, ifmds) != mcount)
 		ERR_OUT("getting FMDs from FVMR");
 
-	conversion_factor = (256.0 / 360.0);
+	conversion_factor = 1 / FMD_ISO_ANGLE_UNIT;
 	for (m = 0; m < mcount; m++) {
-		/* The ISO minutia record uses all possible values for the
-		 * angle, so we have 256 possible values to represent 360
-		 * degrees.
+		/* The ISO minutia record units are different than ANSI, so
+		 * convert from ANSI units to degrees, then from degrees
+		 * to ISO units.
 		 */
 		if (new_fmd(ofvmr->format_std, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
@@ -77,7 +77,7 @@ ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
  			ofmd->x_coord = (unsigned short)(0.5 + xunits);
  			ofmd->y_coord = (unsigned short)(0.5 + yunits);
 		}
-		theta = 2 * (int)ifmds[m]->angle;
+		theta = FMD_ANSI_ANGLE_UNIT * (int)ifmds[m]->angle;
 		isotheta = round(conversion_factor * (double)theta);
 		ofmd->angle = (unsigned char)isotheta;
 		add_fmd_to_fvmr(ofmd, ofvmr);
@@ -126,17 +126,18 @@ ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 	if (get_minutiae(ifvmr, ifmds) != mcount)
 		ERR_OUT("getting FMDs from FVMR");
 
-	conversion_factor = (64.0 / 360.0);
+	conversion_factor = 1 / FMD_ISOCC_ANGLE_UNIT;
 	for (m = 0; m < mcount; m++) {
 		if (new_fmd(FMR_STD_ISO_COMPACT_CARD, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
 		COPY_FMD(ifmds[m], ofmd);
 
-		/* The ISO minutia record has 6 bits for the angle, so
-		 * we have 64 possible values to represent 360 degrees.
+		/* The ISO minutia record units are different than ANSI,
+		 * so we have to convert from ANSI units to degrees, then
+		 * from degrees to ISO units.
 		 * Also check the edge condition when hitting the max value.
 		 */
-		theta = 2 * (int)ifmds[m]->angle;
+		theta = FMD_ANSI_ANGLE_UNIT * (int)ifmds[m]->angle;
 		isotheta = round(conversion_factor * (double)theta);
 		ofmd->angle = (unsigned char)isotheta;
 		if (isotheta > FMD_MAX_MINUTIA_ISOCC_ANGLE)

@@ -108,6 +108,11 @@
 #define FMD_MAX_MINUTIA_ISONC_ANGLE	255
 #define FMD_MAX_MINUTIA_ISOCC_ANGLE	63
 
+// What each unit of angle represents in terms of degrees
+#define FMD_ANSI_ANGLE_UNIT		(2)
+#define FMD_ISO_ANGLE_UNIT		(360.0 / 256.0)
+#define FMD_ISOCC_ANGLE_UNIT		(360.0 / 64.0)
+
 // Types of Minutia
 #define FMD_MINUTIA_TYPE_OTHER		0
 #define FMD_MINUTIA_TYPE_RIDGE_ENDING	1
