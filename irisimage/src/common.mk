@@ -11,6 +11,15 @@ LOCALINC := ../include
 LOCALLIB := ../../lib
 LOCALBIN := ../../bin
 LOCALMAN := ../../man
-COMMONINCOPT := -I../../../common/src/include
+#
+# Two variables are used within the common.mk file from the common package:
+#     COMMONINCOPT can be appended to add include directories, such as 
+#                  /opt/local/include
+#     COMMONLIBOPT can be appeneded to add library directories.
+#
+# Examples are below:
+#
+#COMMONINCOPT := -I/opt/local/include
+#COMMONLIBOPT := -L/opt/local/lib
 
 include ../../../common/common.mk

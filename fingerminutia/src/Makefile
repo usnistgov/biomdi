@@ -14,13 +14,25 @@
 # The 'core' library and programs, that always build
 CORE := libfmr prfmr mkfmr fmrv fmroverlap fmrprune fmrsort fmr2fmr fmrmod fmrisocompact minexv test
 
+#
 # Programs dependent on NBIS; see http://fingerprint.nist.gov/NBIS/index.html
+# Requires that the NBIS include and library paths be added to the
+# COMMONINCOPT and COMMONLIBOPT directories, respectively, in the common.mk
+# file in this project.
+#
 NBIS := fmr2an2k an2k2fmr
 
+#
 # Programs dependent on the GD graphics library
+# Requires that the GD include and library paths be added to the
+# COMMONINCOPT and COMMONLIBOPT directories, respectively, in the common.mk
+# file in this project.
+#
 GD := fmrplot
 
 SUBDIRS := $(CORE)
+
+#SUBDIRS := $(CORE) $(GD)
 
 # If you have the NIST NBIS distribution, use this SUBDIRS line to build
 # the NIST/ANSI 2000 minutiae convertor programs.
