@@ -71,26 +71,28 @@ Decimal number of minutiae
 .It Fl x\ \&xytinfo
 Specifies the file containing the minutiae info in coordinate/angle (X-Y-Theta)
 format. Each minutiae is given on a single line, in this form:
-.Bl -tag -width "Angle " -compact
+.Bl -tag -width "Quality " -compact
 .It Cm Index
 Decimal index number; this is for convenience only as it is not part of the 
 minutia record.
+.It Cm Type 
+Decimal minutiae type:
+.Bl -tag -width "AA " -compact
+.It Cm 0
+Other
+.It Cm 1
+Ridge Ending
+.It Cm 2
+Bifurcation
+.El
 .It Cm X 
 Decimal X coordinate
 .It Cm Y 
 Decimal Y coordinate
 .It Cm Angle 
 Decimal angle (theta)
-.It Cm Type 
-Decimal minutiae type:
-.Bl -tag -width "AA " -compact
-.It Cm 00
-Other
-.It Cm 01
-Ridge Ending
-.It Cm 10
-Bifurcation
-.El
+.It Cm Quality
+Decimal minutia quality
 .El
 .It Fl r\ \&ridgeinfo
 Specifies the file containing ridge count data, multiple lines. The first line:
@@ -154,9 +156,10 @@ Decimal angle three, if delta type is not '00'; otherwise, not present
 .It Fl p
 causes the created M1 record to be printed to the screen
 .El
+.Pp
 Each of the data files, except the header, can contain information for
-multiple finger views. In this manner, multiple views for a single
-minutiae record can be created.
+multiple finger views, allowing more than one view to be contained in the
+single minutiae record that is created.
 .Sh EXAMPLES
 \'mkfmr -h hdr.txt -f fvmr.txt -x xyt.txt -o m1.raw'
 .Pp
@@ -180,10 +183,10 @@ Example FVMR info file:
 .Pp
 Example minutiae data file:
 .Bd -literal -compact
-1 25 383 135 1
-2 38 297 118 2
-3 46 222 112 1
-4 53 346 129 1
+1 1 25 383 135 80
+2 2 38 297 118 60
+3 1 46 222 112 90
+4 1 53 346 129 30
 .Ed
 .Pp
 Example ridge count data file:
@@ -222,10 +225,10 @@ FVMR:
 .Pp
 Minutiae:
 .Bd -literal -compact
-1 25 383 135 1
-2 38 297 118 2
-1 46 222 112 1
-1 53 346 129 1
+1 1 25 383 135 90
+2 2 38 297 118 80
+3 2 46 222 112 60
+4 0 53 346 129 100
 .Ed
 .Pp
 Ridge count:

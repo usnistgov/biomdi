@@ -110,15 +110,15 @@ load_fmds(FILE *fp, struct finger_view_minutiae_record *fvmr)
 	struct finger_minutiae_data *fmd;
 
 	// File format is, decimal values:
-	// index x y theta type
+	// index type x y theta quality
 	//
 	for (i = 0; i < fvmr->number_of_minutiae; i++) {
 		if (new_fmd(FMR_STD_ANSI, &fmd, i) < 0)
 			ALLOC_ERR_RETURN("FMD for XYT data");
 
-		if (fscanf(fp, "%u %hu %hu %hhu %hhu",
-		    &index, &fmd->x_coord, &fmd->y_coord, &fmd->angle,
-		    &fmd->type) < 0)
+		if (fscanf(fp, "%u %hhu %hu %hu %hhu %hhu",
+		    &index, &fmd->type, &fmd->x_coord, &fmd->y_coord,
+		    &fmd->angle, &fmd->quality) < 0)
 			READ_ERR_RETURN("XYT");
 		add_fmd_to_fvmr(fmd, fvmr);
 		total_length += FMD_DATA_LENGTH;
