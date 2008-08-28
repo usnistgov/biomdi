@@ -4,13 +4,14 @@
 .Os Mac OS X       
 .Sh NAME
 .Nm mkfir
-.Nd Create ANSI/INCITS 381-2004 Finger Image Format Records
+.Nd Create Finger Image Format Records
 .Sh SYNOPSIS
 .Nm
 .Fl h
 .Ar hdrinfo
 .Fl f
 .Ar fivrinfo
+.Oo Fl to Ar type Oc
 .Fl o
 .Ar outfile
 .Op Fl p
@@ -18,14 +19,9 @@
 .Sh DESCRIPTION
 The
 .Nm
-command is used to create a ANSI/ICITS 381-2004 compliant Finger Image-Based
+command is used to create ANSI or ISO compliant Finger Image-Based
 records from a set of ASCII text files and images. The resulting
 records are written to the output file.
-.Pp
-.Pp
-.Bd -literal
-mkfir -h hdr.txt -f fivr.txt -o 381.raw
-.Ed
 .Pp
 The options are as follows:
 .Bl -tag -width -indent
@@ -95,6 +91,17 @@ Decimal
 .Pp
 The second line of the pair contains the name of the raster image file.
 .Pp
+.It Fl to\ \&type
+Specifies the output file type.
+.Pp
+Valid types for the output file are:
+.Bl -tag -width "ANSI" -compact
+.It Cm ANSI
+ANSI/INCITS 381-2004 format;
+.It Cm ISO
+ISO/IEC 19794-4:2005 format.
+.El
+The default output type is ANSI.
 .It Fl o
 specifies the name of the output file.
 .Pp
@@ -107,10 +114,13 @@ are read by
 .Nm
 but not used as these field values are calculated.
 .Sh EXAMPLES
-\'mkfir -h hdr.txt -f fivr.txt -o fir.raw'
+mkfir -h hdr.txt -f fivr.txt -o fir.raw
 .Pp
-Produces a file containing the finger image record(s).
+Produces a file containing the finger image record(s) in ANSI format.
 .Pp
+mkfir -h hdr.txt -f fivr.txt -to ISO -o fir.raw
+.Pp
+Produces a file containing the finger image record(s) in ISO format.
 .Sh FILES
 Example header file:
 .Bd -literal -compact
@@ -126,5 +136,13 @@ rfing.jpg
 .Ed
 .Sh SEE ALSO
 .Xr prfir 1 .
+.Sh STANDARDS
+``Finger Image-Based Data Interchange Format'', ANSI/INCITS 381-2004,
+May 13, 2004.
+.Pp
+``Information technology - Biometrita interchange formats - Part 4:
+Finger image data'', ISO/IEC 19794-4:2004, 2005-06-01.
 .Sh HISTORY
 Created August 15th, 2006 by NIST.
+.Pp
+Added support for ISO format, August 28 2008 by NIST.

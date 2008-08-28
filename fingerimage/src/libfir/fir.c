@@ -47,18 +47,26 @@ comp_algo_to_str(short algo)
 /* Implement the interface for allocating and freeing finger image records    */
 /******************************************************************************/
 int
-new_fir(struct finger_image_record **fir)
+new_fir(unsigned int format_std, struct finger_image_record **fir)
 {
 	struct finger_image_record *lfir;
 
+	switch (format_std) {
+		case FIR_STD_ANSI:
+		case FIR_STD_ISO:
+			break;
+		default:
+			ALLOC_ERR_RETURN("Invalid record standard type");
+			break;
+	}
 	lfir = (struct finger_image_record *)malloc(
 	    sizeof(struct finger_image_record));
-	if (lfir == NULL) {
-		perror("Failed allocating memory for FIR");
-		return (-1);
-	}
+	if (lfir == NULL)
+		ALLOC_ERR_RETURN("Failed allocating memory for FIR");
+
 	memset((void *)lfir, 0, sizeof(struct finger_image_record));
 	TAILQ_INIT(&lfir->finger_views);
+	lfir->format_std = format_std;
 	*fir = lfir;
 	return (0);
 }
@@ -105,8 +113,10 @@ read_fir(FILE *fp, struct finger_image_record *fir)
 	llval = llval << 32;
 	fir->record_length += llval;
 
-	SREAD(&fir->product_identifier_owner, fp);
-	SREAD(&fir->product_identifier_type, fp);
+	if (fir->format_std == FIR_STD_ANSI) {
+		SREAD(&fir->product_identifier_owner, fp);
+		SREAD(&fir->product_identifier_type, fp);
+	}
 
 	// Capture Eqpt Compliance/Scanner ID
 	SREAD(&sval, fp);
@@ -167,9 +177,11 @@ write_fir(FILE *fp, struct finger_image_record *fir)
 	lval = (unsigned long)fir->record_length;
 	SWRITE(sval, fp);
 	LWRITE(lval, fp);
-                
-	SWRITE(fir->product_identifier_owner, fp);
-	SWRITE(fir->product_identifier_type, fp);
+
+	if (fir->format_std == FIR_STD_ANSI) {
+		SWRITE(fir->product_identifier_owner, fp);
+		SWRITE(fir->product_identifier_type, fp);
+	}
 
 	sval = (fir->compliance << HDR_COMPLIANCE_SHIFT) | fir->scanner_id;
 	SWRITE(sval, fp);
@@ -210,8 +222,12 @@ print_fir(FILE *fp, struct finger_image_record *fir)
 	    fir->format_id, fir->spec_version);
 
 	FPRINTF(fp, "Record Length\t\t\t: %llu\n", fir->record_length);
-	FPRINTF(fp, "CBEFF Product ID\t\t: 0x%04x%04x\n",
-	    fir->product_identifier_owner, fir->product_identifier_type);
+
+	if (fir->format_std == FIR_STD_ANSI) {
+		FPRINTF(fp, "CBEFF Product ID\t\t: 0x%04x%04x\n",
+		    fir->product_identifier_owner,
+		    fir->product_identifier_type);
+	}
 
 	FPRINTF(fp, "Capture Eqpt\t\t\t: Compliance, ");
 	if (fir->compliance == 0) {
@@ -265,6 +281,7 @@ int
 validate_fir(struct finger_image_record *fir)
 {
 	int ret = VALIDATE_OK;
+	int hdr_len;
 
 	if (strncmp(fir->format_id, FIR_FORMAT_ID, FIR_FORMAT_ID_LEN) != 0) {
 		ERRP("Header format ID is [%s], should be [%s]",
@@ -276,15 +293,20 @@ validate_fir(struct finger_image_record *fir)
 		    fir->spec_version, FIR_SPEC_VERSION);
 		ret = VALIDATE_ERROR;
 	}
-	if (fir->record_length < FIR_HEADER_LENGTH +
+	if (fir->format_std == FIR_STD_ANSI)
+		hdr_len = FIR_ANSI_HEADER_LENGTH;
+	else
+		hdr_len = FIR_ISO_HEADER_LENGTH;
+	if (fir->record_length < hdr_len +
 	    (fir->num_fingers_or_palm_images * FIVR_HEADER_LENGTH)) {
-		ERRP("Record length is too short, minimum is %d",
-		    FIR_MIN_RECORD_LENGTH);
+		ERRP("Record length is too short, minimum is %d", hdr_len);
 		ret = VALIDATE_ERROR;
 	}
-	if (fir->product_identifier_owner == 0) {
-		ERRP("Product ID Owner is zero");
-		ret = VALIDATE_ERROR;
+	if (fir->format_std == FIR_STD_ANSI) {
+		if (fir->product_identifier_owner == 0) {
+			ERRP("Product ID Owner is zero");
+			ret = VALIDATE_ERROR;
+		}
 	}
 	if ((fir->image_acquisition_level != 10) &&
 	    (fir->image_acquisition_level != 20) &&
@@ -371,3 +393,14 @@ get_fivrs(struct finger_image_record *fir,
 	}
 	return (count);
 }
+
+int
+fir_stdstr_to_type(char *stdstr)
+{
+	if (strcmp(stdstr, "ANSI") == 0)
+		return (FIR_STD_ANSI);
+	if (strcmp(stdstr, "ISO") == 0)
+		return (FIR_STD_ISO);
+	return (-1);
+}
+

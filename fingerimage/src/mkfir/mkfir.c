@@ -38,6 +38,17 @@
 
 int total_length = 0;
 
+static void
+usage()
+{
+	fprintf(stderr,
+	    "usage: mkfir -h <headerfile> -f <fivrfile> [-p] [-to <type>]"
+	    " -o <datafile>\n"
+	    "\twhere -h, -f, and -o are required\n"
+	    "\t -to <type> is one of ISO | ANSI\n");
+	exit (EXIT_FAILURE);
+}
+
 /******************************************************************************/
 /* Load the FIR header info from a text file and set the fields in the finger */
 /* image record (FIR).  This is the general record header.                    */
@@ -80,7 +91,10 @@ load_hdr(FILE *fp, struct finger_image_record *fir)
 	// NULL-terminate the version number
 	fir->spec_version[3] = 0x00;
 
-	total_length += FIR_HEADER_LENGTH;
+	if (fir->format_std == FIR_STD_ANSI)
+		total_length += FIR_ANSI_HEADER_LENGTH;
+	else
+		total_length += FIR_ISO_HEADER_LENGTH;
 	return (READ_OK);
 }
 
@@ -156,43 +170,52 @@ load_fivr(FILE *fp, struct finger_image_record *fir)
 	return (READ_OK);
 }
 
-void
-usage(void)
-{
-	printf("usage:\n");
-	printf("\tmkfir -h <headerfile> -f <fivrfile> -o <outfile> [-p]\n");
-	printf("\twhere -h, -f, and -o are required.\n");
-}
-
 int
 main(int argc, char *argv[])
 {
 	FILE *out_fp;	// for the output file
 	FILE *hdr_fp;	// the header input file
 	FILE *fivr_fp;	// the finger image view record files
-	int h_opt, f_opt, o_opt, p_opt;
+	int h_opt, f_opt, o_opt, to_opt, p_opt;
 	struct finger_image_record *fir;
 	struct stat sb;
 	char ch;
 	int i, j;
 	int ret, exit_code;
+	int out_type;
+	char pm;
 
 	exit_code = EXIT_SUCCESS;
-	h_opt = f_opt = o_opt = p_opt = 0;
-	while ((ch = getopt(argc, argv, "h:f:o:p")) != -1) {
+	h_opt = f_opt = o_opt = to_opt = p_opt = 0;
+	out_type = FIR_STD_ANSI;
+	while ((ch = getopt(argc, argv, "h:f:o:t:p")) != -1) {
 		switch (ch) {
 			case 'h':
 				if ((hdr_fp = fopen(optarg, "r")) == NULL)
 					OPEN_ERR_EXIT(optarg);
 				h_opt = 1;
 				break;
-
 			case 'f':
 				if ((fivr_fp = fopen(optarg, "r")) == NULL)
 					OPEN_ERR_EXIT(optarg);
 				f_opt = 1;
 				break;
-
+			case 't':
+				pm = *(char *)optarg;
+				switch (pm) {
+					case 'o':
+						out_type = fir_stdstr_to_type(
+						    argv[optind]);
+						if (out_type < 0)
+							usage();
+						optind++;
+						to_opt++;
+						break;
+					default:
+						usage();
+						break;	/* not reached */
+				}
+				break;
 			case 'o':
 				if (stat(optarg, &sb) == 0)
 					ERR_EXIT("File '%s' exists, remove it first.\n", optarg);
@@ -201,24 +224,19 @@ main(int argc, char *argv[])
 					OPEN_ERR_EXIT(optarg);
 				o_opt = 1;
 				break;
-
 			case 'p':
 				p_opt = 1;
 				break;
-
 			default:
 				usage();
-				exit(EXIT_FAILURE);
 				break;
 		}
 	}
-	if ((h_opt && f_opt && o_opt) == 0) {
+	if ((h_opt && f_opt && o_opt) == 0)
 		usage();
-		exit(EXIT_FAILURE);
-	}
 
 	// Read in the file containing the header information
-	if (new_fir(&fir) < 0)
+	if (new_fir(out_type, &fir) < 0)
 		ALLOC_ERR_EXIT("Finger Image Record (general header)");
 
 	if (load_hdr(hdr_fp, fir) != READ_OK) {

@@ -39,6 +39,9 @@
 #define FALSE (0)
 #endif
 
+#define FIR_STD_ANSI	1
+#define FIR_STD_ISO	2
+
 // The identifier that must appear at the beginning of the record header
 #define FIR_FORMAT_ID 		"FIR"
 #define FIR_FORMAT_ID_LEN 	4
@@ -53,6 +56,7 @@
 #define FIR_MIN_VIEW_COUNT	1
 #define FIR_MAX_VIEW_COUNT	255
 struct finger_image_view_record {
+#define fivr_startcopy
 	unsigned int				length;
 	unsigned char				finger_palm_position;
 	unsigned char				count_of_views;
@@ -67,6 +71,7 @@ struct finger_image_view_record {
 
 	// Pointer to the image data that is read from the record
 	char					*image_data;
+#define fivr_endcopy
 	TAILQ_ENTRY(finger_image_view_record)	list;
 	struct finger_image_record		*fir;	// back pointer to the
 							// parent record
@@ -74,7 +79,8 @@ struct finger_image_view_record {
 typedef struct finger_image_view_record FIVR;
 
 // Representation of an entire Finger Image General Record Header
-#define FIR_HEADER_LENGTH	36
+#define FIR_ANSI_HEADER_LENGTH	36
+#define FIR_ISO_HEADER_LENGTH	32
 #define FIR_RECORD_LENGTH_LEN	6
 #define FIR_SCALE_UNITS_INCH	1
 #define FIR_SCALE_UNITS_CM	2
@@ -83,6 +89,8 @@ typedef struct finger_image_view_record FIVR;
 #define FIR_MAX_PIXEL_DEPTH		16
 
 struct finger_image_record {
+	unsigned int				format_std;
+#define fir_startcopy
 	// Representation of the FIR header
 	char					format_id[4];
 	char					spec_version[4];
@@ -101,6 +109,7 @@ struct finger_image_record {
 	unsigned char				pixel_depth;
 	unsigned char				image_compression_algorithm;
 	unsigned short				reserved;
+#define fir_endcopy
 	// Collection of Finger View records
 	TAILQ_HEAD(, finger_image_view_record)	finger_views;
 };
@@ -123,6 +132,7 @@ typedef struct finger_image_record FIR;
 /* view list will be initialized to empty.                                    */
 /*                                                                            */
 /* Parameters:                                                                */
+/*   format_std The standard for record (ANSI, ISO, etc.)                     */
 /*   fir    Address of the pointer to the FIR that will be allocated.         */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -131,7 +141,7 @@ typedef struct finger_image_record FIR;
 /*                                                                            */
 /******************************************************************************/
 int
-new_fir(struct finger_image_record **fir);
+new_fir(unsigned int format_std, struct finger_image_record **fir);
 
 /******************************************************************************/
 /* Free the storage for a Finger Image Record.                                */
@@ -364,5 +374,15 @@ get_fivrs(struct finger_image_record *fir,
 void
 copy_fivr(struct finger_image_view_record *src,
     struct finger_image_view_record *dst);
+
+/******************************************************************************/
+/* Map a standard name represented as a string to a numeric value.            */
+/* Parameters:                                                                */
+/*     stdstr String with name of standard ("ANSI", "ISO", etc.)              */
+/* Return:                                                                    */
+/*   One of the standard types defined in fir.h, or -1 on error.              */
+/******************************************************************************/
+int
+fir_stdstr_to_type(char *stdstr);
 
 #endif /* !_FIR_H */

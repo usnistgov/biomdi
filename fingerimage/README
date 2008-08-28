@@ -1,5 +1,6 @@
-This distribution contains the source for the ANSI-INCITS 381-2004 M1 
-Finger Image library and utility programs. 
+This distribution contains the source for the Finger Image library and utility
+programs. Currently, records conforming to the ANSI-INCITS 381-2004 and
+ISO/IEC 19794-4:2004 standards are processed.
 
 Gnu make is required to build and install this distribution.
 

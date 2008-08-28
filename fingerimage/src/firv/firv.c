@@ -28,9 +28,11 @@
 #include <fir.h>
 #include <biomdimacro.h>
 
-void
-usage(char *name) {
-	printf("usage: %s <datafile>\n", name);
+static void
+usage(char *name)
+{
+	fprintf(stderr, "usage: %s [-ti <type>] <datafile>\n"
+			"\t -ti <type> is one of ISO | ANSI\n", name);
 	exit (EXIT_FAILURE);
 }
 
@@ -41,11 +43,37 @@ int main(int argc, char *argv[])
 	struct finger_image_record *fir;
 	int ret;
 	unsigned long long total_length;
+	int in_type;
+	int ch;
+	char pm;
 
-	if (argc != 2)
+	if ((argc != 2) && (argc != 4))
 		usage(argv[0]);
 
-	fp = fopen(argv[1], "rb");
+	in_type = FIR_STD_ANSI;	/* Default input type */
+	while ((ch = getopt(argc, argv, "vt:")) != -1) {
+		switch (ch) {
+			case 't':
+				pm = *(char *)optarg;
+				switch (pm) {
+					case 'i':
+						in_type = fir_stdstr_to_type(
+						    argv[optind]);
+						if (in_type < 0)
+							usage(argv[0]);
+						optind++;
+						break;
+					default:
+						usage(argv[0]);
+						break;  /* not reached */
+                                }
+                                break;
+			default:
+				usage(argv[0]);
+				break;  /* not reached */
+		}
+	}
+	fp = fopen(argv[optind], "rb");
 	if (fp == NULL)
 		OPEN_ERR_EXIT(argv[optind]);
 
@@ -54,7 +82,7 @@ int main(int argc, char *argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	if (new_fir(&fir) < 0)
+	if (new_fir(in_type, &fir) < 0)
 		ALLOC_ERR_EXIT("Could not allocate FIR\n");
 
 	total_length = 0;
@@ -70,7 +98,7 @@ int main(int argc, char *argv[])
 
 		free_fir(fir);
 
-		if (new_fir(&fir) < 0)
+		if (new_fir(in_type, &fir) < 0)
 			ALLOC_ERR_EXIT("Could not allocate FIR\n");
 	}
 	if (ret != READ_OK)

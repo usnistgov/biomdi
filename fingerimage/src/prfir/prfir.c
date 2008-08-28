@@ -27,39 +27,61 @@
 #include <biomdi.h>
 #include <biomdimacro.h>
 
+static void
+usage()
+{
+	fprintf(stderr, "usage: prfir [-v] [-ti <type>] <datafile>\n"
+			"\t -v Validate the record\n"
+			"\t -ti <type> is one of ISO ANSI\n");
+	exit (EXIT_FAILURE);
+}
+
 int main(int argc, char *argv[])
 {
-	char *usage = "usage: prfir [-v] <datafile>\n"
-			"\t -v Validate the record";
 	FILE *fp;
 	struct stat sb;
 	struct finger_image_record *fir;
-	int vflag = 0;
 	int ch;
 	int ret;
+	int in_type;
 	unsigned long long total_length;
+	int v_opt = 0;
+	int ti_opt = 0;
+	char pm;
 
-	if ((argc < 2) || (argc > 3)) {
-		printf("%s\n", usage);
-		exit (EXIT_FAILURE);
-	}
+	if ((argc < 2) || (argc > 5))
+		usage();
 
-	while ((ch = getopt(argc, argv, "v")) != -1) {
+	in_type = FIR_STD_ANSI;	/* Default input type */
+	while ((ch = getopt(argc, argv, "vt:")) != -1) {
 		switch (ch) {
+			case 't':
+				pm = *(char *)optarg;
+				switch (pm) {
+					case 'i':
+						in_type = fir_stdstr_to_type(
+						    argv[optind]);
+						if (in_type < 0)
+							usage();
+						optind++;
+						ti_opt++;
+						break;
+					default:
+						usage();
+						break;	/* not reached */
+				}
+				break;
 			case 'v' :
-				vflag = 1;
+				v_opt = 1;
 				break;
 			default :
-				printf("%s\n", usage);
-				exit (EXIT_FAILURE);
+				usage();
 				break;
 		}
 	}
 				
-	if (argv[optind] == NULL) {
-		printf("%s\n", usage);
-		exit (EXIT_FAILURE);
-	}
+	if (argv[optind] == NULL)
+		usage();
 
 	fp = fopen(argv[optind], "rb");
 	if (fp == NULL) {
@@ -68,7 +90,7 @@ int main(int argc, char *argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	if (new_fir(&fir) < 0) {
+	if (new_fir(in_type, &fir) < 0) {
 		fprintf(stderr, "could not allocate FIR\n");
 		exit (EXIT_FAILURE);
 	}
@@ -86,7 +108,7 @@ int main(int argc, char *argv[])
 		total_length += fir->record_length;
 
 		// Validate the FIR
-		if (vflag) {
+		if (v_opt) {
 			if (validate_fir(fir) != VALIDATE_OK) {
 				fprintf(stdout, 
 				    "Finger Image Record is invalid.\n");
@@ -103,7 +125,7 @@ int main(int argc, char *argv[])
 		// Free the entire FIR
 		free_fir(fir);
 
-		if (new_fir(&fir) < 0) {
+		if (new_fir(in_type, &fir) < 0) {
 			fprintf(stderr, "could not allocate FIR\n");
 			exit (EXIT_FAILURE);
 		}
@@ -115,7 +137,7 @@ int main(int argc, char *argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	if (vflag) {
+	if (v_opt) {
 		// Check the header info against file reality
 		if (sb.st_size != total_length) {
 			fprintf(stdout, "WARNING: "
