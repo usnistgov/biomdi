@@ -29,6 +29,8 @@ The FMR plotting program requires the GD graphics library, available at
 http://www.libgd.org/ and distributed in many ported packages. 
 Building of fmrplot is disabled by default.  If you want the FMR plotting
 program to be built, add 'fmrplot' to the 'SUBDIRS' line in the src/Makefile.
+If you build the AN2K programs, or the plotting program, be sure to modify
+the COMMONINCOPT and COMMONLIBOPT definitions in src/common.mk.
 
 On some systems (Linux, for example), it may be required to reload the 
 dynamic linker cache after installation by running the 'ldconfig' command.

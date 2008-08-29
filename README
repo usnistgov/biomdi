@@ -30,9 +30,21 @@ If you want to only build a sub-package (such as fingerminutia), follow the
 same steps above for the common package, then steps 2 and 3 for each
 sub-package you wish to install.
 
---------------------------------------------------------------------------------
-Current standards that are supported for each project:
+Two variables are used within the common.mk file from the common package:
+    COMMONINCOPT can be appended to add include directories.
+    COMMONLIBOPT can be appended to add library directories.
 
+Each sub-package has a common.mk file in the src directory. By adding the
+definition of COMMONINCOPT and/or COMMONLIBOPT, extra include and library
+directories can be added in order to build the sub-package that is dependent
+on other packages. For example, the fingerminutia sub-package optionally
+requires the NBIS package.
+
+--------------------------------------------------------------------------------
+Standards that are supported for each project:
+
+BIOMDI Release 1.0:
+-------------------
 fingerminutia: ANSI/INCITS 378-2004 and ISO 19794-2 2005-09-15.
 fingerimage: ANSI/INCITS 381-2004 and ISO/IEC 19794-4:2004.
 facerecognition: ANSI/INCITS 385-2004.
