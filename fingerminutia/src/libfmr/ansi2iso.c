@@ -33,6 +33,7 @@ ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 	double xunits, yunits;
 	int theta;
 
+	/* XXX Convert the finger quality from ANSI07 to ISO */
 	COPY_FVMR(ifvmr, ofvmr);
 	*length = FVMR_HEADER_LENGTH;
 	mcount = get_minutiae_count(ifvmr);
@@ -79,6 +80,7 @@ ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 		}
 		theta = FMD_ANSI_ANGLE_UNIT * (int)ifmds[m]->angle;
 		isotheta = round(conversion_factor * (double)theta);
+		/* XXX Convert the minutia quality from ANSI07 to ISO */
 		ofmd->angle = (unsigned char)isotheta;
 		add_fmd_to_fvmr(ofmd, ofvmr);
 		if (ofvmr->format_std == FMR_STD_ISO)

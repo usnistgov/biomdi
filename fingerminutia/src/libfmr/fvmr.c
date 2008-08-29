@@ -77,6 +77,7 @@ internal_read_fvmr(FILE *fp, BDB *fmdb,
 {
 	unsigned char cval;
 	unsigned short sval;
+	unsigned int lval;
 	int i;
 	struct finger_minutiae_data *fmd;
 	struct finger_extended_data_block *fedb;
@@ -107,22 +108,35 @@ internal_read_fvmr(FILE *fp, BDB *fmdb,
 				ERR_OUT("Could not read FMD %d", i);
 		}
 	}
-
-	// Finger number
 	CGET(&cval, fp, fmdb);
 	fvmr->finger_number = cval;
 
-	// View number/impression type
-	CGET(&cval, fp, fmdb);
-	fvmr->view_number = (cval & FVMR_VIEW_NUMBER_MASK) >> 
-				FVMR_VIEW_NUMBER_SHIFT;
-	fvmr->impression_type = (unsigned short)(cval & FVMR_IMPRESSION_MASK);
-
-	// Finger quality
-	CGET(&cval, fp, fmdb);
-	fvmr->finger_quality = (unsigned short)cval;
-
-	// Number of minutiae
+	if (fvmr->format_std == FMR_STD_ANSI07) {
+		CGET(&cval, fp, fmdb);
+		fvmr->view_number = cval;
+		CGET(&cval, fp, fmdb);
+		fvmr->impression_type = cval;
+		CGET(&cval, fp, fmdb);
+		fvmr->finger_quality = (unsigned short)cval;
+		LGET(&lval, fp, fmdb);
+		fvmr->algorithm_id = lval;
+		SGET(&sval, fp, fmdb);
+		fvmr->x_image_size = sval;
+		SGET(&sval, fp, fmdb);
+		fvmr->y_image_size = sval;
+		SGET(&sval, fp, fmdb);
+		fvmr->x_resolution = sval;
+		SGET(&sval, fp, fmdb);
+		fvmr->y_resolution = sval;
+	} else {
+		CGET(&cval, fp, fmdb);
+		fvmr->view_number = (cval & FVMR_VIEW_NUMBER_MASK) >> 
+					FVMR_VIEW_NUMBER_SHIFT;
+		fvmr->impression_type = (unsigned short)(cval &
+		    FVMR_IMPRESSION_MASK);
+		CGET(&cval, fp, fmdb);
+		fvmr->finger_quality = (unsigned short)cval;
+	}
 	CGET(&cval, fp, fmdb);
 	fvmr->number_of_minutiae = cval;
 
@@ -207,19 +221,23 @@ internal_write_fvmr(FILE *fp, BDB *fmdb,
 		}
 		return WRITE_OK;
 	}
-
-	// Finger number
 	CPUT(fvmr->finger_number, fp, fmdb);
 
-	// View number/impression type
-	cval = (fvmr->view_number << FVMR_VIEW_NUMBER_SHIFT) | 
-		fvmr->impression_type;
-	CPUT(cval, fp, fmdb);
-
-	// Finger quality
-	CPUT(fvmr->finger_quality, fp, fmdb);
-
-	// Number of minutiae
+	if (fvmr->format_std == FMR_STD_ANSI07) {
+		CPUT(fvmr->view_number, fp, fmdb);
+		CPUT(fvmr->impression_type, fp, fmdb);
+		CPUT(fvmr->finger_quality, fp, fmdb);
+		LPUT(fvmr->algorithm_id, fp, fmdb);
+		SPUT(fvmr->x_image_size, fp, fmdb);
+		SPUT(fvmr->y_image_size, fp, fmdb);
+		SPUT(fvmr->x_resolution, fp, fmdb);
+		SPUT(fvmr->y_resolution, fp, fmdb);
+	} else {
+		cval = (fvmr->view_number << FVMR_VIEW_NUMBER_SHIFT) | 
+			fvmr->impression_type;
+		CPUT(cval, fp, fmdb);
+		CPUT(fvmr->finger_quality, fp, fmdb);
+	}
 	CPUT(fvmr->number_of_minutiae, fp, fmdb);
 
 	// Write each Finger Minutiae Data record
@@ -265,6 +283,7 @@ print_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 	int i;
 
 	if ((fvmr->format_std == FMR_STD_ANSI) ||
+	    (fvmr->format_std == FMR_STD_ANSI07) ||
 	    (fvmr->format_std == FMR_STD_ISO)) {
 
 		fprintf(fp, "----------------------------------------------------\n");
@@ -274,6 +293,14 @@ print_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 		fprintf(fp, "\tImpression Type\t\t: %u\n",
 		    fvmr->impression_type);
 		fprintf(fp, "\tFinger Quality\t\t: %u\n", fvmr->finger_quality);
+		if (fvmr->format_std == FMR_STD_ANSI07) {
+			fprintf(fp, "\tAlgorithm ID\t\t: 0x%08X\n",
+				fvmr->algorithm_id);
+			fprintf(fp, "\tImage Size\t\t: %ux%u\n",
+				fvmr->x_image_size, fvmr->y_image_size);
+			fprintf(fp, "\tImage Resolution\t: %ux%u\n",
+				fvmr->x_resolution, fvmr->y_resolution);
+		}
 		fprintf(fp, "\tNumber of Minutiae\t: %u\n",
 		    fvmr->number_of_minutiae);
 		fprintf(fp, "\n");

@@ -36,7 +36,18 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 	double xcm, ycm;
 	double xunits, yunits;
 
+	/* Convert the ISO quality to ANSI07 quality. */
 	COPY_FVMR(ifvmr, ofvmr);
+	/* For ANSI07, the coord and resolution info
+	 * is stored in the FVMR; copy it from the
+	 * FMR header into each FVMR; it doesn't hurt
+	 * to do this for every output type.
+	 */
+	ofvmr->x_image_size = ifvmr->fmr->x_image_size;
+	ofvmr->y_image_size = ifvmr->fmr->y_image_size;
+	ofvmr->x_resolution = ifvmr->fmr->x_resolution;
+	ofvmr->y_resolution = ifvmr->fmr->y_resolution;
+
 	*length = FVMR_HEADER_LENGTH;
 	mcount = get_minutiae_count(ifvmr);
 	if (mcount == 0)
@@ -53,7 +64,7 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 	 */
 	conversion_factor = FMD_ISO_ANGLE_UNIT;
 	for (m = 0; m < mcount; m++) {
-		if (new_fmd(FMR_STD_ANSI, &ofmd, m) != 0)
+		if (new_fmd(ofvmr->format_std, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
 
 		COPY_FMD(ifmds[m], ofmd);
@@ -77,6 +88,7 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 		 * max angle value */
 		if (ofmd->angle > FMD_MAX_MINUTIA_ANGLE)
 			ofmd->angle = FMD_MAX_MINUTIA_ANGLE;
+		/* XXX Need to convert minutia quality to ANSI07 spec */
 		ofmd->quality = FMD_UNKNOWN_MINUTIA_QUALITY;
 		add_fmd_to_fvmr(ofmd, ofvmr);
 		*length += FMD_DATA_LENGTH;
@@ -121,7 +133,7 @@ isocc2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 
 	conversion_factor = FMD_ISOCC_ANGLE_UNIT;
 	for (m = 0; m < mcount; m++) {
-		if (new_fmd(FMR_STD_ANSI, &ofmd, m) != 0)
+		if (new_fmd(ofvmr->format_std, &ofmd, m) != 0)
 			ALLOC_ERR_RETURN("Output FMD");
 		COPY_FMD(ifmds[m], ofmd);
 		theta = conversion_factor * (double)(ifmds[m]->angle);

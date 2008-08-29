@@ -283,7 +283,8 @@ print_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 	fprintf(fp, "\tAngle\t\t: %u (%u degrees)\n",
 	    fmd->angle, fmd_convert_angle(fmd));
 	if ((fmd->format_std == FMR_STD_ANSI) ||
-	    (fmd->format_std == FMR_STD_ISO))
+	    (fmd->format_std == FMR_STD_ISO) ||
+	    (fmd->format_std == FMR_STD_ANSI07))
 		fprintf(fp, "\tQuality\t\t: %u\n", fmd->quality);
 
 	return 0;

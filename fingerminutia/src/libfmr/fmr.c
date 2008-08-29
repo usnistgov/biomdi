@@ -99,9 +99,13 @@ internal_read_fmr(FILE *fp, BDB *fmdb, struct finger_minutiae_record *fmr)
 			LGET(&lval, fp, fmdb);
 			fmr->record_length = lval;
 			fmr->record_length_type = FMR_ISO_HEADER_TYPE;
+		} else if (fmr->format_std == FMR_STD_ANSI07) {
+			LGET(&lval, fp, fmdb);
+			fmr->record_length = lval;
+			fmr->record_length_type = FMR_ANSI07_HEADER_TYPE;
 		} else {
-			/* ANSI Record Length; read two bytes, and if that is
-			 * not 0, that is the length; otherwise, the length
+			/* ANSI 04 Record Length; read two bytes, and if that
+			 * is not 0, that is the length; otherwise, the length
 			 * is in the next 4 bytes
 			 */
 			SGET(&sval, fp, fmdb);
@@ -115,7 +119,9 @@ internal_read_fmr(FILE *fp, BDB *fmdb, struct finger_minutiae_record *fmr)
 				fmr->record_length_type =
 				    FMR_ANSI_SMALL_HEADER_TYPE;
 			}
-
+		}
+		if ((fmr->format_std == FMR_STD_ANSI) ||
+		    (fmr->format_std == FMR_STD_ANSI07)) {
 			// CBEFF Product ID
 			SGET(&fmr->product_identifier_owner, fp, fmdb);
 			SGET(&fmr->product_identifier_type, fp, fmdb);
@@ -123,28 +129,21 @@ internal_read_fmr(FILE *fp, BDB *fmdb, struct finger_minutiae_record *fmr)
 
 		// Capture Eqpt Compliance/Scanner ID
 		SGET(&sval, fp, fmdb);
-		sval = sval;
 		fmr->scanner_id = sval & HDR_SCANNER_ID_MASK; 
 		fmr->compliance = (sval & HDR_COMPLIANCE_MASK) >>
 		    HDR_COMPLIANCE_SHIFT; 
-
-		// x image size
-		SGET(&sval, fp, fmdb);
-		fmr->x_image_size = sval;
-
-		// y image size
-		SGET(&sval, fp, fmdb);
-		fmr->y_image_size = sval;
-
-		// x resolution
-		SGET(&sval, fp, fmdb);
-		fmr->x_resolution = sval;
-
-		// y resolution
-		SGET(&sval, fp, fmdb);
-		fmr->y_resolution = sval;
-
-		// number of finger views
+ 
+		if ((fmr->format_std == FMR_STD_ANSI) ||
+		    (fmr->format_std == FMR_STD_ISO)) {
+			SGET(&sval, fp, fmdb);
+			fmr->x_image_size = sval;
+			SGET(&sval, fp, fmdb);
+			fmr->y_image_size = sval;
+			SGET(&sval, fp, fmdb);
+			fmr->x_resolution = sval;
+			SGET(&sval, fp, fmdb);
+			fmr->y_resolution = sval;
+		}
 		CGET(&cval, fp, fmdb);
 		fmr->num_views = cval;
 
@@ -212,7 +211,8 @@ internal_write_fmr(FILE *fp, BDB *fmdb, struct finger_minutiae_record *fmr)
 	struct finger_view_minutiae_record *fvmr;
 
 	if ((fmr->format_std == FMR_STD_ANSI) ||
-	    (fmr->format_std == FMR_STD_ISO)) {
+	    (fmr->format_std == FMR_STD_ISO) ||
+	    (fmr->format_std == FMR_STD_ANSI07)) {
 
 		// Write the header
 		// Format ID
@@ -221,10 +221,11 @@ internal_write_fmr(FILE *fp, BDB *fmdb, struct finger_minutiae_record *fmr)
 		// Spec Version
 		OPUT(fmr->spec_version, 1, FMR_SPEC_VERSION_LEN, fp, fmdb);
 
-		if (fmr->format_std == FMR_STD_ISO) {
+		if ((fmr->format_std == FMR_STD_ISO) ||
+		    (fmr->format_std == FMR_STD_ANSI07)) {
 			LPUT(fmr->record_length, fp, fmdb);
 		} else {
-			/* ANSI Record Length; if the length is greater than
+			/* ANSI 04 Record Length; if the length is greater than
 			 * what will fit in two bytes, store it in the next
 			 * four bytes.
 			 */
@@ -235,7 +236,9 @@ internal_write_fmr(FILE *fp, BDB *fmdb, struct finger_minutiae_record *fmr)
 			} else {
 				SPUT(fmr->record_length, fp, fmdb);
 			}
-
+		}
+		if ((fmr->format_std == FMR_STD_ANSI) ||
+		    (fmr->format_std == FMR_STD_ANSI07)) {
 			// CBEFF Product ID
 			SPUT(fmr->product_identifier_owner, fp, fmdb);
 			SPUT(fmr->product_identifier_type, fp, fmdb);
@@ -246,19 +249,13 @@ internal_write_fmr(FILE *fp, BDB *fmdb, struct finger_minutiae_record *fmr)
 		    fmr->scanner_id;
 		SPUT(sval, fp, fmdb);
 
-		// x image size
-		SPUT(fmr->x_image_size, fp, fmdb);
-
-		// y image size
-		SPUT(fmr->y_image_size, fp, fmdb);
-
-		// x resolution
-		SPUT(fmr->x_resolution, fp, fmdb);
-
-		// y resolution
-		SPUT(fmr->y_resolution, fp, fmdb);
-
-		// number of finger views
+		if ((fmr->format_std == FMR_STD_ANSI) ||
+		    (fmr->format_std == FMR_STD_ISO)) {
+			SPUT(fmr->x_image_size, fp, fmdb);
+			SPUT(fmr->y_image_size, fp, fmdb);
+			SPUT(fmr->x_resolution, fp, fmdb);
+			SPUT(fmr->y_resolution, fp, fmdb);
+		}
 		CPUT(fmr->num_views, fp, fmdb);
 
 		// reserved field
@@ -302,7 +299,8 @@ print_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 	struct finger_view_minutiae_record *fvmr;
 
 	if ((fmr->format_std == FMR_STD_ANSI) ||
-	    (fmr->format_std == FMR_STD_ISO)) {
+	    (fmr->format_std == FMR_STD_ISO) ||
+	    (fmr->format_std == FMR_STD_ANSI07)) {
 
 		// Print the header information 
 		fprintf(fp, "Format ID\t\t: %s\nSpec Version\t\t: %s\n",
@@ -326,12 +324,13 @@ print_fmr(FILE *fp, struct finger_minutiae_record *fmr)
 		}
 		fprintf(fp, "; ID, 0x%03x\n", fmr->scanner_id);
 
-		fprintf(fp, "Image Size\t\t: %ux%u\n",
-			fmr->x_image_size, fmr->y_image_size);
-
-		fprintf(fp, "Image Resolution\t: %ux%u\n",
-			fmr->x_resolution, fmr->y_resolution);
-
+		if ((fmr->format_std == FMR_STD_ANSI) ||
+		    (fmr->format_std == FMR_STD_ISO)) {
+			fprintf(fp, "Image Size\t\t: %ux%u\n",
+				fmr->x_image_size, fmr->y_image_size);
+			fprintf(fp, "Image Resolution\t: %ux%u\n",
+				fmr->x_resolution, fmr->y_resolution);
+		}
 		fprintf(fp, "Number of Views\t\t: %u\n", fmr->num_views);
 
 		fprintf(fp, "\n");
@@ -356,10 +355,27 @@ validate_fmr(struct finger_minutiae_record *fmr)
 	struct finger_view_minutiae_record *fvmr;
 	int ret = VALIDATE_OK;
 	int error;
-	int val;
+	int min_hdr_len;
+	char *ver;
 
 	if ((fmr->format_std == FMR_STD_ANSI) ||
-	    (fmr->format_std == FMR_STD_ISO)) {
+	    (fmr->format_std == FMR_STD_ISO) ||
+	    (fmr->format_std == FMR_STD_ANSI07)) {
+
+		switch (fmr->format_std) {
+		case FMR_STD_ANSI:
+			min_hdr_len = FMR_ANSI_MIN_RECORD_LENGTH;
+			ver = FMR_ANSI_SPEC_VERSION;
+			break;
+		case FMR_STD_ANSI07:
+			min_hdr_len = FMR_ANSI07_MIN_RECORD_LENGTH;
+			ver = FMR_ANSI07_SPEC_VERSION;
+			break;
+		case FMR_STD_ISO:
+			min_hdr_len = FMR_ISO_MIN_RECORD_LENGTH;
+			ver = FMR_ISO_SPEC_VERSION;
+			break;
+		}
 
 		// Validate the header
 		if (strncmp(fmr->format_id, FMR_FORMAT_ID, FMR_FORMAT_ID_LEN)
@@ -369,24 +385,17 @@ validate_fmr(struct finger_minutiae_record *fmr)
 			ret = VALIDATE_ERROR;
 		}
 
-
-		if (strncmp(fmr->spec_version, FMR_SPEC_VERSION,
+		if (strncmp(fmr->spec_version, ver,
 		    FMR_SPEC_VERSION_LEN) != 0) {
 			ERRP("Header spec version is [%s], should be [%s]",
-			fmr->spec_version, FMR_SPEC_VERSION);
+			fmr->spec_version, ver);
 			ret = VALIDATE_ERROR;
 		}
 
-		if ((fmr->format_std == FMR_STD_ISO) ||
-		    (fmr->format_std == FMR_STD_ISO_NORMAL_CARD) ||
-		    (fmr->format_std == FMR_STD_ISO_COMPACT_CARD))
-			val = FMR_ISO_MIN_RECORD_LENGTH;
-		else
-			val = FMR_ANSI_MIN_RECORD_LENGTH;
-
 		// Record length must be at least as long as the header
-		if (fmr->record_length < val) {
-			ERRP("Record length is too short, minimum is %d", val);
+		if (fmr->record_length < min_hdr_len) {
+			ERRP("Record length is too short, minimum is %d",
+			    min_hdr_len);
 			ret = VALIDATE_ERROR;
 		}
 
@@ -401,16 +410,20 @@ validate_fmr(struct finger_minutiae_record *fmr)
 		}
 #endif
 
-		// X resolution shall not be 0
-		if (fmr->x_resolution == 0) {
-			ERRP("X resolution is set to zero");
-			ret = VALIDATE_ERROR;
-		}
+		if ((fmr->format_std == FMR_STD_ANSI) ||
+		    (fmr->format_std == FMR_STD_ISO)) {
 
-		// Y resolution shall not be 0
-		if (fmr->y_resolution == 0) {
-			ERRP("Y resolution is set to zero");
-			ret = VALIDATE_ERROR;
+			// X resolution shall not be 0
+			if (fmr->x_resolution == 0) {
+				ERRP("X resolution is set to zero");
+				ret = VALIDATE_ERROR;
+			}
+
+			// Y resolution shall not be 0
+			if (fmr->y_resolution == 0) {
+				ERRP("Y resolution is set to zero");
+				ret = VALIDATE_ERROR;
+			}
 		}
 
 		// The reserved field shall not be 0
@@ -428,7 +441,7 @@ validate_fmr(struct finger_minutiae_record *fmr)
 		}
 	}
 
-	return ret;
+	return (ret);
 }
 
 void

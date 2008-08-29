@@ -24,6 +24,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <iid_ext.h>
 #include <iid.h>
 #include <biomdi.h>
 #include <biomdimacro.h>
@@ -107,7 +108,7 @@ int main(int argc, char *argv[])
 		// Check the header info against file reality
 		if (sb.st_size != total_length) {
 			fprintf(stdout, "WARNING: "
-			    "File size does not match FIR record length(s).\n");
+			    "File size does not match record length(s).\n");
 		} 
 	}
 

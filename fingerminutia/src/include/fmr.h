@@ -64,13 +64,16 @@
 #define FMR_STD_ISO			2
 #define FMR_STD_ISO_NORMAL_CARD		3
 #define FMR_STD_ISO_COMPACT_CARD	4
+#define FMR_STD_ANSI07			5
 
 // The identifier that must appear at the beginning of the record header
 #define FMR_FORMAT_ID 		"FMR"
 #define FMR_FORMAT_ID_LEN 	4
 
 // The version number
-#define FMR_SPEC_VERSION	" 20"
+#define FMR_ANSI_SPEC_VERSION	" 20"
+#define FMR_ISO_SPEC_VERSION	" 20"
+#define FMR_ANSI07_SPEC_VERSION	"030"
 #define FMR_SPEC_VERSION_LEN	4
 
 #define FMR_MAX_FINGER_CODE	10	// Plain codes are not used in FMR
@@ -344,6 +347,12 @@ struct finger_view_minutiae_record {
 	unsigned char				impression_type;
 	unsigned char				finger_quality;
 	unsigned char				number_of_minutiae;
+	/* The next five fields are ANSI '07 only */
+	unsigned short				x_image_size;
+	unsigned short				y_image_size;
+	unsigned short				x_resolution;
+	unsigned short				y_resolution;
+	unsigned int				algorithm_id;
 #define fvmr_endcopy				partial
 	// Flag to indicate a partial FVMR was read
 	unsigned int 				partial;
@@ -364,6 +373,7 @@ typedef struct finger_view_minutiae_record FVMR;
 #define	FMR_ANSI_SMALL_HEADER_TYPE		1
 #define	FMR_ANSI_LARGE_HEADER_TYPE		2
 #define	FMR_ISO_HEADER_TYPE			3
+#define	FMR_ANSI07_HEADER_TYPE			4
 
 #define FMR_ANSI_SMALL_HEADER_LENGTH		26
 #define FMR_ANSI_LARGE_HEADER_LENGTH		30
@@ -373,6 +383,9 @@ typedef struct finger_view_minutiae_record FVMR;
 
 #define FMR_ISO_HEADER_LENGTH			24
 #define FMR_ISO_MIN_RECORD_LENGTH		FMR_ISO_HEADER_LENGTH
+
+#define FMR_ANSI07_HEADER_LENGTH		20
+#define FMR_ANSI07_MIN_RECORD_LENGTH		20
 
 // XXX The field names of this struct should be prefixed with fmr_
 struct finger_minutiae_record {

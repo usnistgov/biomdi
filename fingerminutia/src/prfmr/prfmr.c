@@ -8,11 +8,8 @@
  * about its quality, reliability, or any other characteristic.
  */
 /******************************************************************************/
-/* This program uses the ANSI/INCITS Finger Minutiae Record library to print  */
+/* This program uses the Finger Minutiae Record library to print              */
 /* the contents of a file containing minutiae records.                        */
-/*                                                                            */
-/*                                                                            */
-/*                                                                            */
 /******************************************************************************/
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -47,6 +44,8 @@ stdstr_to_type(char *stdstr)
 		return (FMR_STD_ISO_NORMAL_CARD);
 	if (strcmp(stdstr, "ISOCC") == 0)
 		return (FMR_STD_ISO_COMPACT_CARD);
+	if (strcmp(stdstr, "ANSI07") == 0)
+		return (FMR_STD_ANSI07);
 	return (-1);
 }
 
@@ -55,7 +54,7 @@ usage()
 {
 	fprintf(stderr, "usage: prfmr [-v] [-ti <type] <datafile>\n"
 		"\t -v Validate the record\n"
-		"\t -ti <type> is one of ISO | ISONC | ISOCC | ANSI\n");
+		"\t -ti <type> is one of ISO | ISONC | ISOCC | ANSI | ANSI07\n");
 	exit (EXIT_FAILURE);
 }
 

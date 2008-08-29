@@ -8,41 +8,32 @@
 * about its quality, reliability, or any other characteristic.
 */
 /******************************************************************************/
-/* Header file for the Iris Image Data Record format, as specified in         */
-/* ISO/IEC 19794-6:2005.                                                      */
+/* Header file for the Iris Image Data Record format, as specified in the     */
+/* Iris Exchange (IREX) Evaluation 2008 specification.                        */
 /*                                                                            */
 /* Layout of the entire iris image biometric data block in memory:            */
 /*                                                                            */
 /*       Iris Image Biometric Data Block                                      */
 /*   +-------------------------------------+                                  */
-/*   |  iris record header (45 bytes)      |                                  */
+/*   |  iris record header (46 bytes)      |                                  */
 /*   +-------------------------------------+                                  */
 /*   Array[2] {                                                               */
 /*       +--------------------------------------------+                       */
 /*       |  iris biometric subtype header (3 bytes)   |                       */
 /*       +--------------------------------------------+                       */
 /*       List {                                                               */
-/*           +--------------------------------|     +--------+---+            */
-/*           |  iris image header (11 bytes)  |-->  | image data |            */
-/*           +--------------------------------|     +--------+---+            */
-/*                                               :                            */
-/*                                               :                            */
-/*           +--------------------------------|     +--------+---+            */
-/*           |  iris image header (11 bytes)  |-->  | image data |            */
-/*           +--------------------------------|     +--------+---+            */
-/*       }                                                                    */
-/*       +--------------------------------------------+                       */
-/*       |  iris biometric subtype header (3 bytes)   |                       */
-/*       +--------------------------------------------+                       */
-/*       List {                                                               */
-/*           +--------------------------------|     +--------+---+            */
-/*           |  iris image header (11 bytes)  |-->  | image data |            */
-/*           +--------------------------------|     +--------+---+            */
-/*                                               :                            */
-/*                                               :                            */
-/*           +--------------------------------|     +--------+---+            */
-/*           |  iris image header (11 bytes)  |-->  | image data |            */
-/*           +--------------------------------|     +--------+---+            */
+/*           +--------------------------------|     +------------+            */
+/*           |  iris image header (>= 58)     |-->  | image data |            */
+/*           +--------------------------------|     +------------+            */
+/*             +----------------------------+                                 */
+/*             | ROI masked data (3)        |                                 */
+/*             +----------------------------+                                 */
+/*             +----------------------------+                                 */
+/*             | UNSEG polar data (12)      |                                 */
+/*             +----------------------------+                                 */
+/*             +----------------------------+     +-------------------+       */
+/*             | commmon image data (>= 28) |-->  | freeman code data |       */
+/*             +----------------------------+     +-------------------+       */
 /*       }                                                                    */
 /*   }                                                                        */
 /*                                                                            */
@@ -53,13 +44,19 @@
 #define IID_FORMAT_ID				"IIR"
 #define IID_FORMAT_ID_LEN			4
 
+#define IID_IMAGE_KIND_RECTLINEAR_NO_ROI_NO_CROPPING	0x01
+#define IID_IMAGE_KIND_RECTLINEAR_NO_ROI_CROPPING	0x03
+#define IID_IMAGE_KIND_RECTLINEAR_MASKING_CROPPING	0x07
+#define IID_IMAGE_KIND_UNSEGMENTED_POLAR		0x10
+#define IID_IMAGE_KIND_RECTILINEAR_UNSEGMENTED_POLAR	0x30
+
 #define IID_FORMAT_VERSION_LEN			4
 
 #define IID_DEVICE_UNIQUE_ID_LEN		16
 #define IID_CAPTURE_DEVICE_UNDEF		0
 
-#define IID_MIN_BIOMETRIC_SUBTYPES		1
-#define IID_MAX_BIOMETRIC_SUBTYPES		2
+#define IID_MIN_EYES				1
+#define IID_MAX_EYES				2
 
 #define IID_RECORD_HEADER_LENGTH		45
 
@@ -74,8 +71,6 @@
 #define IID_IRIS_OCCLUSIONS_SHIFT		6
 #define IID_OCCLUSION_FILLING_MASK		0x0080
 #define IID_OCCLUSION_FILLING_SHIFT		7
-#define IID_BOUNDARY_EXTRACTION_MASK		0x0100
-#define IID_BOUNDARY_EXTRACTION_SHIFT		8
 
 #define IID_ORIENTATION_UNDEF			0
 #define IID_ORIENTATION_BASE			1
@@ -117,31 +112,31 @@
 #define IID_CODE_CLASS_SCAN_TYPE		1
 #define IID_CODE_CLASS_OCCLUSION		2
 #define IID_CODE_CLASS_OCCLUSION_FILLING	3
-#define IID_CODE_CLASS_BOUNDARY_EXTRACTION	4
-#define IID_CODE_CLASS_IMAGE_FORMAT		5
-#define IID_CODE_CLASS_IMAGE_TRANSFORMATION	6
-#define IID_CODE_CLASS_BIOMETRIC_SUBTYPE	7
+#define IID_CODE_CLASS_IMAGE_FORMAT		4
+#define IID_CODE_CLASS_IMAGE_TRANSFORMATION	5
+#define IID_CODE_CLASS_EYE_POSITION		6
+#define IID_CODE_CLASS_KIND_OF_IMAGERY		7
 
 struct iris_record_header {
 	char			format_id[IID_FORMAT_ID_LEN];
 	char			format_version[IID_FORMAT_VERSION_LEN];
+	uint8_t			kind_of_imagery;
 	uint32_t		record_length;
 	uint16_t		capture_device_id;
-	uint8_t			biometric_subtype_count;
+	uint8_t			num_eyes;
 	uint16_t		record_header_length;
 	uint8_t			horizontal_orientation;
 	uint8_t			vertical_orientation;
 	uint8_t			scan_type;
 	uint8_t			iris_occlusions;
 	uint8_t			occlusion_filling;
-	uint8_t			boundary_extraction;
 	uint16_t		diameter;
 	uint16_t		image_format;
 	uint16_t		image_width;
 	uint16_t		image_height;
-	uint8_t			intesity_depth;
+	uint8_t			intensity_depth;
 	uint8_t			image_transformation;
-	uint8_t			device_unique_id[IID_DEVICE_UNIQUE_ID_LEN];
+	char			device_unique_id[IID_DEVICE_UNIQUE_ID_LEN];
 };
 typedef struct iris_record_header IRH;
 
@@ -151,11 +146,16 @@ typedef struct iris_record_header IRH;
 #define IID_ROT_UNCERTAIN_UNDEF			0xFFFF
 
 struct iris_image_header {
+	uint32_t				image_length;
 	uint16_t				image_number;
 	uint8_t					image_quality;
+	uint16_t				quality_algo_vendor_id;
+	uint16_t				quality_algo_id;
 	uint16_t				rotation_angle;
 	uint16_t				rotation_uncertainty;
-	uint32_t				image_length;
+	struct roi_mask				roi_mask;
+	struct unsegmented_polar		unsegmented_polar;
+	struct image_ancillary			image_ancillary;
 	uint8_t					*image_data;
 	TAILQ_ENTRY(iris_image_header)		list;
 	struct iris_biometric_subtype_header	*ibsh; /* ptr to parent rec */
@@ -167,8 +167,9 @@ typedef struct iris_image_header IIH;
 #define IID_EYE_LEFT				0x02
 
 struct iris_biometric_subtype_header {
-	uint8_t			biometric_subtype;
-	uint16_t		num_images;
+	uint8_t					eye_position;
+	uint16_t				num_images;
+	struct iris_image_biometric_data_block *iibdb; /* ptr to parent block */
 	TAILQ_HEAD(, iris_image_header)	image_headers;
 };
 typedef struct iris_biometric_subtype_header IBSH;

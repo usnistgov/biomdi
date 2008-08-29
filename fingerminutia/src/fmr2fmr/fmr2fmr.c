@@ -46,7 +46,7 @@ usage()
 	    "\t   -to: Specifies the output file type\n"
 	    "\t   -rx: Specifies the X resolution for ISO card formats\n"
 	    "\t   -ry: Specifies the Y resolution for ISO card formats\n"
-	    "\t   <type> is one of ISO | ISONC | ISOCC | ANSI\n");
+	    "\t   <type> is one of ISO | ISONC | ISOCC | ANSI | ANSI07\n");
 }
 
 /* Global file pointers */
@@ -81,6 +81,8 @@ stdstr_to_type(char *stdstr)
 {
 	if (strcmp(stdstr, "ANSI") == 0)
 		return (FMR_STD_ANSI);
+	if (strcmp(stdstr, "ANSI07") == 0)
+		return (FMR_STD_ANSI07);
 	if (strcmp(stdstr, "ISO") == 0)
 		return (FMR_STD_ISO);
 	if (strcmp(stdstr, "ISONC") == 0)
@@ -283,6 +285,7 @@ copy_with_conversion(FMR *ifmr, FMR *ofmr, int in_type, int out_type)
 	int r, rcount;
 	unsigned int fmr_len, fvmr_len;
 	int rc, retval;
+	char *ver;
 
 	retval = -1;			/* Assume failure, for now */
 
@@ -290,20 +293,32 @@ copy_with_conversion(FMR *ifmr, FMR *ofmr, int in_type, int out_type)
 		return (-1);
 
 	COPY_FMR(ifmr, ofmr);
-	if (out_type == FMR_STD_ANSI)
+	switch (out_type) {
+	case FMR_STD_ANSI:
 		fmr_len = FMR_ANSI_SMALL_HEADER_LENGTH;
-	else
+		ver = FMR_ANSI_SPEC_VERSION;
+		break;
+	case FMR_STD_ANSI07:
+		fmr_len = FMR_ANSI07_HEADER_LENGTH;
+		ver = FMR_ANSI07_SPEC_VERSION;
+		break;
+	case FMR_STD_ISO:
 		fmr_len = FMR_ISO_HEADER_LENGTH;
+		ver = FMR_ISO_SPEC_VERSION;
+		break;
+	}
 
 	/* Fix up the output FMR header for those input types that don't
 	 * have all the needed information.
 	 */
-	if ((out_type == FMR_STD_ANSI) || (out_type == FMR_STD_ISO))
+	
+	if ((out_type == FMR_STD_ANSI) || (out_type == FMR_STD_ISO) ||
+	    (out_type == FMR_STD_ANSI07))
 		if ((in_type == FMR_STD_ISO_NORMAL_CARD) ||
 		    (in_type == FMR_STD_ISO_COMPACT_CARD)) {
 			strncpy(ofmr->format_id, FMR_FORMAT_ID,
 			    FMR_FORMAT_ID_LEN);
-			strncpy(ofmr->spec_version, FMR_SPEC_VERSION,
+			strncpy(ofmr->spec_version, ver,
 			    FMR_SPEC_VERSION_LEN);
 		}
 
@@ -320,24 +335,40 @@ copy_with_conversion(FMR *ifmr, FMR *ofmr, int in_type, int out_type)
 			if (new_fvmr(out_type, &ofvmr) < 0)
 	                        ALLOC_ERR_RETURN("Output FVMR");
 
+			rc = -1;
 			switch (in_type) {
+			    case FMR_STD_ANSI07:
+				/* The coord and resolution info is stored
+				 * in the FVMR; copy it to the FMR header,
+				 * using the first FVMR as the canonical set.
+				 */
+				ofmr->x_image_size = ifvmrs[0]->x_image_size;
+				ofmr->y_image_size = ifvmrs[0]->y_image_size;
+				ofmr->x_resolution = ifvmrs[0]->x_resolution;
+				ofmr->y_resolution = ifvmrs[0]->y_resolution;
 			    case FMR_STD_ANSI:
-				if ((out_type == FMR_STD_ISO) ||
-				    (out_type == FMR_STD_ISO_NORMAL_CARD))
+				switch (out_type) {
+				case FMR_STD_ISO:
+				case FMR_STD_ISO_NORMAL_CARD:
 					rc = ansi2iso_fvmr(ifvmrs[r], ofvmr,
 					    &fvmr_len, ifmr->x_resolution,
 					    ifmr->y_resolution);
-				if (out_type == FMR_STD_ISO_COMPACT_CARD)
+					break;
+				case FMR_STD_ISO_COMPACT_CARD:
 					rc = ansi2isocc_fvmr(ifvmrs[r], ofvmr,
 					    &fvmr_len, ifmr->x_resolution,
 					    ifmr->y_resolution);
+					break;
+				default:
+					ERR_OUT("Invalid output type");
+				}
 				break;
 
-			/* XXX Handle ISO->ISO conversions, but assume that
-			 * this funciton is not called with that type of
-			 * conversion request.
-			 */
+			    /* XXX Eventually handle ISO->ISO conversions */
 			    case FMR_STD_ISO:
+				/* For ANSI07, the coord and resolution info
+				 * is copied by iso2ansi_fvmr().
+				 */
 			    case FMR_STD_ISO_NORMAL_CARD:
 				rc = iso2ansi_fvmr(ifvmrs[r], ofvmr, &fvmr_len,
 				    ifmr->x_resolution, ifmr->y_resolution);

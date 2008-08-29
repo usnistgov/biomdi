@@ -12,7 +12,7 @@
 #
 include ../common.mk
 OS := $(shell uname -s)
-SOURCES = iid.c
+SOURCES = iid.c iid_ext.c
 
 all: $(SOURCES)
 ifeq ($(OS), Darwin)

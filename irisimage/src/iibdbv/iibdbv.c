@@ -24,6 +24,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <iid_ext.h>
 #include <iid.h>
 #include <biomdi.h>
 #include <biomdimacro.h>
@@ -61,7 +62,7 @@ err_out:
 static void validate_ibsh_in_iibd(IIBDB *iibdb)
 {
 	unsigned int num, n;
-	IBSH *ibsh[IID_MAX_BIOMETRIC_SUBTYPES];
+	IBSH *ibsh[IID_MAX_EYES];
 
 	/*
 	 * Validate the biometric subtype headers.
