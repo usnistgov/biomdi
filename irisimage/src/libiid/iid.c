@@ -408,9 +408,10 @@ print_iih(FILE *fp, IIH *iih)
 	FPRINTF(fp, "\tImage Length\t\t\t: %u\n", iih->image_length);
 	FPRINTF(fp, "\tImage Number\t\t\t: %hu\n", iih->image_number);
 	FPRINTF(fp, "\tImage Quality\t\t\t: %hhu\n", iih->image_quality);
-	FPRINTF(fp, "\tQuality Algorithm Vendor ID\t: %hd\n",
+	FPRINTF(fp, "\tQuality Algorithm Vendor ID\t: 0x%04x\n",
 	    iih->quality_algo_vendor_id);
-	FPRINTF(fp, "\tQuality Algorithm ID\t\t: %hd\n", iih->quality_algo_id);
+	FPRINTF(fp, "\tQuality Algorithm ID\t\t: 0x%04x\n",
+	    iih->quality_algo_id);
 	FPRINTF(fp, "\tRotation Angle\t\t\t: ");
 	if (iih->rotation_angle == IID_ROT_ANGLE_UNDEF)
 		FPRINTF(fp, "Undefined\n");
