@@ -13,6 +13,7 @@
 # This set of directories is where the header files, libraries, programs,
 # and man pages are to be installed.
 
+BIOMDIINC := ../../../common/src/include
 PREFIX := /usr/local
 INCPATH := $(PREFIX)/include
 LIBPATH := $(PREFIX)/lib
@@ -83,4 +84,4 @@ $(MANPATH):
 # be searched prior to the 'standard' libraries, add the to the CFLAGS
 # variable.
 
-CFLAGS := -g $(COMMONINCOPT) -I$(LOCALINC) -I$(INCPATH) $(COMMONLIBOPT) -L$(LOCALLIB) -L$(LIBPATH) $(EXTRACFLAGS)
+CFLAGS := -g -I$(BIOMDIINC) $(COMMONINCOPT) -I$(LOCALINC) -I$(INCPATH) $(COMMONLIBOPT) -L$(LOCALLIB) -L$(LIBPATH) $(EXTRACFLAGS)
