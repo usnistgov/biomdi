@@ -165,6 +165,8 @@ typedef struct iris_image_header IIH;
 #define IID_EYE_UNDEF				0x00
 #define IID_EYE_RIGHT				0x01
 #define IID_EYE_LEFT				0x02
+#define IID_EYE_MIN_IMAGES			0
+#define IID_EYE_MAX_IMAGES			65535
 
 struct iris_biometric_subtype_header {
 	uint8_t					eye_position;

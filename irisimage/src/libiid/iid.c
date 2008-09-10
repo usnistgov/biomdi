@@ -582,6 +582,8 @@ validate_ibsh(IBSH *ibsh)
 		ERRP("Eye Position 0x%02X invalid", ibsh->eye_position);
 		ret = VALIDATE_ERROR;
 	}
+	CRSR(ibsh->num_images, IID_EYE_MIN_IMAGES, IID_EYE_MAX_IMAGES,
+	    "Number of Images");
 	TAILQ_FOREACH(iih, &ibsh->image_headers, list) {
 		error = validate_iih(iih);
 		if (error != VALIDATE_OK)

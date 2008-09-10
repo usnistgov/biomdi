@@ -38,16 +38,16 @@ static void validate_iih_in_ibsh(IBSH *ibsh)
 	 */
 	num = get_iih_count(ibsh);
 	if (num == 0) {
-		printf("There are no image headers.\n");
+		printf("\tThere are no image headers.\n");
 	} else {
 		iih = (IIH **)malloc(num * sizeof(IIH *));
 		if (iih == NULL)
-			ALLOC_ERR_OUT("Iris image header");
+			ALLOC_ERR_OUT("\tIris image header");
 		if (get_iihs(ibsh, iih) != num) {
-			ERRP("Could not get image headers");
+			ERRP("\tCould not get image headers");
 		} else {
 			for (n = 0; n < num; n++) {
-				printf("Image header %d ", n + 1);
+				printf("\tImage header %d ", n + 1);
 				if (validate_iih(iih[n]) != VALIDATE_OK)
 					printf("is NOT valid.\n");
 				else
@@ -72,10 +72,10 @@ static void validate_ibsh_in_iibd(IIBDB *iibdb)
 		printf("There are no subtype headers.\n");
 	} else {
 		if (get_ibshs(iibdb, ibsh) != num)
-			printf("Could not get subtype headers.\n");
+			printf("\tCould not get subtype headers.\n");
 		else
 			for (n = 0; n < num; n++) {
-				printf("Subtype header %d ", n + 1);
+				printf("\tSubtype header %d ", n + 1);
 				if (validate_ibsh(ibsh[n]) != VALIDATE_OK) {
 					printf("is NOT valid.\n");
 					validate_iih_in_ibsh(ibsh[n]);
@@ -133,6 +133,7 @@ int main(int argc, char *argv[])
 
 		if (validate_iibdb(iibdb) != VALIDATE_OK) {
 			printf("is NOT valid.\n");
+			printf("\nValidating components:\n");
 			validate_ibsh_in_iibd(iibdb);
 			status = EXIT_FAILURE;
 		} else {
