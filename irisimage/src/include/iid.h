@@ -55,7 +55,7 @@
 #define IID_DEVICE_UNIQUE_ID_LEN		16
 #define IID_CAPTURE_DEVICE_UNDEF		0
 
-#define IID_MIN_EYES				1
+#define IID_MIN_EYES				0
 #define IID_MAX_EYES				2
 
 #define IID_RECORD_HEADER_LENGTH		46
@@ -165,7 +165,7 @@ typedef struct iris_image_header IIH;
 #define IID_EYE_UNDEF				0x00
 #define IID_EYE_RIGHT				0x01
 #define IID_EYE_LEFT				0x02
-#define IID_EYE_MIN_IMAGES			0
+#define IID_EYE_MIN_IMAGES			1
 #define IID_EYE_MAX_IMAGES			65535
 
 struct iris_biometric_subtype_header {
