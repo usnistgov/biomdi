@@ -21,8 +21,8 @@ ifeq ($(OS), Darwin)
 	$(CP) libiid.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
-	$(CC) $(CFLAGS) -c iid.c
-	ar rs libiid.a iid.o
+	$(CC) $(CFLAGS) -c $(SOURCES)
+	ar rs libiid.a *.o
 	ranlib libiid.a
 	$(CC) -shared -o libiid.dll -Wl,--out-implib=libiid.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libiid.a -Wl,--no-whole-archive
 	$(CP) libiid.a $(LOCALLIB)
