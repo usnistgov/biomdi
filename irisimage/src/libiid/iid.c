@@ -232,8 +232,8 @@ read_ibsh(FILE *fp, IBSH *ibsh)
 	SREAD(&ibsh->num_images, fp);
 	for (i = 0; i < ibsh->num_images; i++) {
 		ret = new_iih(&iih);
-		if (iih == NULL)
-			ALLOC_ERR_OUT("Iris image header");
+		if (ret < 0)
+			goto err_out;
 		ret = read_iih(fp, iih);
 		if (ret != READ_OK)
 			READ_ERR_OUT("Iris image header");
@@ -287,7 +287,7 @@ read_iibdb(FILE *fp, IIBDB *iibdb)
 	/* Read the image headers and image data */
 	for (i = 0; i < iibdb->record_header.num_eyes; i++) {
 		if (new_ibsh(&ibsh) < 0) 
-			ALLOC_ERR_OUT("Iris Biometric Subtype Header %d");
+			goto err_out;
 		ibsh->iibdb = iibdb;
 		ret = read_ibsh(fp, ibsh);
 		if (ret == READ_OK)
