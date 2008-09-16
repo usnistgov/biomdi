@@ -112,6 +112,7 @@ new_iih(IIH **iih)
 		ALLOC_ERR_RETURN("Iris image header");
 	memset((void *)liih, 0, sizeof(IIH));
 	*iih = liih;
+	return (0);
 }
 
 void
@@ -133,6 +134,7 @@ new_ibsh(IBSH **ibsh)
 	memset((void *)libsh, 0, sizeof(IBSH));
 	TAILQ_INIT(&libsh->image_headers);
 	*ibsh = libsh;
+	return (0);
 }
 
 void
