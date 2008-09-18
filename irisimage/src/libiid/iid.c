@@ -109,7 +109,7 @@ new_iih(IIH **iih)
 
 	liih = (IIH *)malloc(sizeof(IIH));
 	if (liih == NULL)
-		ALLOC_ERR_RETURN("Iris image header");
+		return (-1);
 	memset((void *)liih, 0, sizeof(IIH));
 	*iih = liih;
 	return (0);
@@ -130,7 +130,7 @@ new_ibsh(IBSH **ibsh)
 
 	libsh = (IBSH *)malloc(sizeof(IBSH));
 	if (libsh == NULL)
-		ALLOC_ERR_RETURN("Iris biometric subtype header");
+		return (-1);
 	memset((void *)libsh, 0, sizeof(IBSH));
 	TAILQ_INIT(&libsh->image_headers);
 	*ibsh = libsh;
@@ -156,7 +156,7 @@ new_iibdb(IIBDB **iibdb)
 
 	liibdb = (IIBDB *)malloc(sizeof(IIBDB));
 	if (liibdb == NULL)
-		ALLOC_ERR_RETURN("Iris image biometric data block");
+		return (-1);
 	memset((void *)liibdb, 0, sizeof(IIBDB));
 	*iibdb = liibdb;
 	return (0);
@@ -235,7 +235,7 @@ read_ibsh(FILE *fp, IBSH *ibsh)
 	for (i = 0; i < ibsh->num_images; i++) {
 		ret = new_iih(&iih);
 		if (ret < 0)
-			goto err_out;
+			ALLOC_ERR_OUT("image header");
 		ret = read_iih(fp, iih);
 		if (ret != READ_OK)
 			READ_ERR_OUT("Iris image header");
@@ -289,7 +289,7 @@ read_iibdb(FILE *fp, IIBDB *iibdb)
 	/* Read the image headers and image data */
 	for (i = 0; i < iibdb->record_header.num_eyes; i++) {
 		if (new_ibsh(&ibsh) < 0) 
-			goto err_out;
+			ALLOC_ERR_OUT("image biometric subtype header");
 		ibsh->iibdb = iibdb;
 		ret = read_ibsh(fp, ibsh);
 		if (ret == READ_OK)

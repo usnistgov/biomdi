@@ -40,6 +40,7 @@ new_roimask(ROIMASK **roimask)
 		return (-1);
 	memset((void *)lroimask, 0, sizeof(ROIMASK));
 	*roimask = lroimask;
+	return (0);
 }
 
 void
@@ -58,6 +59,7 @@ new_unsegpolar(UNSEGPOLAR **unsegpolar)
 		return (-1);
 	memset((void *)lunsegpolar, 0, sizeof(UNSEGPOLAR));
 	*unsegpolar = lunsegpolar;
+	return (0);
 }
 
 void
