@@ -40,6 +40,12 @@ directories can be added in order to build the sub-package that is dependent
 on other packages. For example, the fingerminutia sub-package optionally
 requires the NBIS package.
 
+When installing on a Windows system, the location of the dynamic link libraries
+(DLL) must be in the user's PATH environment variable in order for the programs
+to execute. By default, DLLs are installed in /usr/local/lib, while the programs
+are installed in /usr/local/bin. Both directories should be added to the PATH
+environment variable. The installation paths can be changed in the 
+common/common.mk make include file.
 --------------------------------------------------------------------------------
 Standards that are supported for each project:
 
