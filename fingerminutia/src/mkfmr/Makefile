@@ -14,6 +14,5 @@ all: mkfmr.c
 	$(CP) mkfmr.1 $(LOCALMAN)
 
 clean:
-	$(RM) mkfmr *.o
-	$(RM) .gdb_history
-	$(RM) -r *.dSYM
+	$(RM) mkfmr $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

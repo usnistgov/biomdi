@@ -14,5 +14,5 @@ all: mkfrf.c
 	$(CP) mkfrf.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o mkfrf
-	$(RM) -r *.dSYM
+	$(RM) mkfrf $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

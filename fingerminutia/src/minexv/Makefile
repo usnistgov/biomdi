@@ -28,5 +28,5 @@ minex2v: minexv.c $(LIBFMR)
 	$(CP) minex2v $(LOCALBIN)
 
 clean:
-	$(RM) minexv minexov minex2v *.o
-	$(RM) -r *.dSYM
+	$(RM) minexv minexov minex2v $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

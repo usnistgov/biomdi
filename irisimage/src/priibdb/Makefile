@@ -15,6 +15,5 @@ priibdb: priibdb.c
 	$(CP) $@.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o priibdb 
-	$(RM) -r *.dSYM
-	$(RM) .gdb_history
+	$(RM) priibdb $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

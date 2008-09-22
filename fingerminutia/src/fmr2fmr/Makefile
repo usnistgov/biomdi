@@ -15,5 +15,5 @@ fmr2fmr: fmr2fmr.c
 	$(CP) fmr2fmr.1 $(LOCALMAN)
 
 clean:
-	$(RM) fmr2fmr *.o
-	$(RM) -r *.dSYM
+	$(RM) fmr2fmr $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

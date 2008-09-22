@@ -14,6 +14,5 @@ all: prfir.c
 	$(CP) prfir.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o prfir
-	$(RM) .gdb_history
-	$(RM) -r *.dSYM
+	$(RM) prfir $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

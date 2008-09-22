@@ -21,6 +21,12 @@ BINPATH := $(PREFIX)/bin
 MANPATH := $(PREFIX)/man/man1
 
 #
+# Files and directories that are created during the build process, that
+# are to be removed during 'make clean'.
+DISPOSABLEFILES = *.o *.exe .gdb_history *.dll *.dylib *.so *.a
+DISPOSABLEDIRS  = *.dSYM
+
+#
 # Each package that includes this common file can define these variables:
 # COMMONINCOPT : Location of include files from other packages, specified
 #                as a compiler option (e.g. -I/usr/local/an2k/include

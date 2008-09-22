@@ -14,5 +14,5 @@ all: fmrisocompact.c
 	$(CP) fmrisocompact.1 $(LOCALMAN)
 
 clean:
-	$(RM) fmrisocompact *.o
-	$(RM) -r *.dSYM
+	$(RM) fmrisocompact $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

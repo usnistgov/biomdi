@@ -14,6 +14,5 @@ all: frfv.c
 	$(CP) frfv.1 $(LOCALMAN)
 
 clean:
-	$(RM) frfv *.o
-	$(RM) .gdb_history
-	$(RM) -r *.dSYM
+	$(RM) frfv $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

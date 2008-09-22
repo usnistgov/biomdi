@@ -14,6 +14,5 @@ all: fmr2an2k.c
 	$(CP) fmr2an2k.1 $(LOCALMAN)
 
 clean:
-	$(RM) fmr2an2k *.o
-	$(RM) -r *.dSYM
-	$(RM) .gdb_history
+	$(RM) fmr2an2k $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

@@ -46,5 +46,5 @@ endif
 endif
 
 clean:
-	$(RM) *.dylib *.o *.so *.dll *.a
-	$(RM) .gdb_history
+	$(RM) $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

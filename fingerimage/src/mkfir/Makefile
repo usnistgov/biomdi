@@ -14,5 +14,5 @@ all: mkfir.c
 	$(CP) mkfir.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o mkfir
-	$(RM) -r *.dSYM
+	$(RM) mkfir $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

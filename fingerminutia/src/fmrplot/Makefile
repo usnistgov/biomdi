@@ -14,5 +14,5 @@ all: fmrplot.c
 	$(CP) fmrplot.1 $(LOCALMAN)
 
 clean:
-	$(RM) fmrplot *.o
-	$(RM) -r *.dSYM
+	$(RM) fmrplot $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

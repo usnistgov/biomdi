@@ -43,4 +43,5 @@ endif
 endif
 
 clean:
-	$(RM) *.dylib *.o *.so *.a *.dll
+	$(RM) $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

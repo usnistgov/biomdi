@@ -24,5 +24,5 @@ fmrprune: $(SOURCES)
 	$(CP) fmrprune.1 $(LOCALMAN)
 
 clean:
-	$(RM) fmrprune *.o
-	$(RM) -r *.dSYM
+	$(RM) fmrprune $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

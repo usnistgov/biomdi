@@ -14,6 +14,5 @@ all: pgm2fir.cpp
 	${CP} pgm2fir.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o pgm2fir
-	$(RM) .gdb_history
-	$(RM) -r *.dSYM
+	$(RM) pgm2fir $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

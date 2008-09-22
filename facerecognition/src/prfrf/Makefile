@@ -14,5 +14,5 @@ all: prfrf.c
 #	$(CP) prfrf.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o prfrf
-	$(RM) -r *.dSYM
+	$(RM) prfrf $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

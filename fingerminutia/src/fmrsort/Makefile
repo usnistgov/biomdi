@@ -15,5 +15,5 @@ all: $(SOURCES)
 	$(CP) fmrsort.1 $(LOCALMAN)
 
 clean:
-	$(RM) fmrsort *.o
-	$(RM) -r *.dSYM
+	$(RM) fmrsort $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

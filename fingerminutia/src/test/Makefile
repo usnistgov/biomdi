@@ -12,5 +12,5 @@ all: testfmr.c
 	cc $(CFLAGS) testfmr.c -lfmr -o testfmr
 
 clean:
-	rm -f *.o testfmr
-	rm -f .gdb_history
+	$(RM) testfmr $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

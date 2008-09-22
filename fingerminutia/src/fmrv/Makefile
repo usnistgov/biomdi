@@ -14,6 +14,5 @@ all: fmrv.c
 	$(CP) fmrv.1 $(LOCALMAN)
 
 clean:
-	$(RM) fmrv *.o
-	$(RM) .gdb_history
-	$(RM) -r *.dSYM
+	$(RM) fmrv $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

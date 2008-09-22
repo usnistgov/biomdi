@@ -15,6 +15,5 @@ iibdbv: iibdbv.c
 	$(CP) $@.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o iibdbv
-	$(RM) -r *.dSYM
-	$(RM) .gdb_history
+	$(RM) iibdbv $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

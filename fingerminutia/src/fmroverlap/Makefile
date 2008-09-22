@@ -14,5 +14,5 @@ all: fmroverlap.c
 	$(CP) fmroverlap.1 $(LOCALMAN)
 
 clean:
-	$(RM) fmroverlap *.o
-	$(RM) -r *.dSYM
+	$(RM) fmroverlap $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)

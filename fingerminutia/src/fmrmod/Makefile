@@ -17,6 +17,5 @@ fmrmod: fmrmod.c
 	$(CP) $@.1 $(LOCALMAN)
 
 clean:
-	$(RM) *.o fmrmod
-	$(RM) -r *.dSYM
-	$(RM) .gdb_history
+	$(RM) fmrmod $(DISPOSABLEFILES)
+	$(RM) -r $(DISPOSABLEDIRS)
