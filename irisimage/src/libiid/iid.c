@@ -186,27 +186,36 @@ add_iih_to_ibsh(IIH *iih, IBSH *ibsh)
 /* Implement the interface for reading/writing/verifying iris image data      */
 /* blocks.                                                                    */
 /******************************************************************************/
-int
-read_iih(FILE *fp, IIH *iih)
+static int
+internal_read_iih(FILE *fp, BDB *bdb, IIH *iih)
 {
 	int ret;
 
-	LREAD(&iih->image_length, fp);
-	SREAD(&iih->image_number, fp);
-	CREAD(&iih->image_quality, fp);
-	SREAD(&iih->quality_algo_vendor_id, fp);
-	SREAD(&iih->quality_algo_id, fp);
-	SREAD(&iih->rotation_angle, fp);
-	SREAD(&iih->rotation_uncertainty, fp);
+	LGET(&iih->image_length, fp, bdb);
+	SGET(&iih->image_number, fp, bdb);
+	CGET(&iih->image_quality, fp, bdb);
+	SGET(&iih->quality_algo_vendor_id, fp, bdb);
+	SGET(&iih->quality_algo_id, fp, bdb);
+	SGET(&iih->rotation_angle, fp, bdb);
+	SGET(&iih->rotation_uncertainty, fp, bdb);
 
 	/* Read the extended data */
-	ret = read_roimask(fp, &iih->roi_mask);
+	if (fp != NULL)
+		ret = read_roimask(fp, &iih->roi_mask);
+	else
+		ret = scan_roimask(bdb, &iih->roi_mask);
 	if (ret != READ_OK)
 		READ_ERR_OUT("ROI Mask");
-	ret = read_unsegpolar(fp, &iih->unsegmented_polar);
+	if (fp != NULL)
+		ret = read_unsegpolar(fp, &iih->unsegmented_polar);
+	else
+		ret = scan_unsegpolar(bdb, &iih->unsegmented_polar);
 	if (ret != READ_OK)
 		READ_ERR_OUT("Unsegmented Polar");
-	ret = read_image_ancillary(fp, &iih->image_ancillary);
+	if (fp != NULL)
+		ret = read_image_ancillary(fp, &iih->image_ancillary);
+	else
+		ret = scan_image_ancillary(bdb, &iih->image_ancillary);
 	if (ret != READ_OK)
 		READ_ERR_OUT("Image Ancillary Data");
 
@@ -214,7 +223,7 @@ read_iih(FILE *fp, IIH *iih)
 		iih->image_data = (uint8_t *)malloc(iih->image_length);
 		if (iih->image_data == NULL)
 			ALLOC_ERR_OUT("Image data buffer");
-		OREAD(iih->image_data, 1, iih->image_length, fp);
+		OGET(iih->image_data, 1, iih->image_length, fp, bdb);
 	}
 	return (READ_OK);
 eof_out:
@@ -224,19 +233,34 @@ err_out:
 }
 
 int
-read_ibsh(FILE *fp, IBSH *ibsh)
+read_iih(FILE *fp, IIH *iih)
+{
+	return (internal_read_iih(fp, NULL, iih));
+}
+
+int
+scan_iih(BDB *bdb, IIH *iih)
+{
+	return (internal_read_iih(NULL, bdb, iih));
+}
+
+static int
+internal_read_ibsh(FILE *fp, BDB *bdb, IBSH *ibsh)
 {
 	int i;
 	int ret;
 	IIH *iih;
 
-	CREAD(&ibsh->eye_position, fp);
-	SREAD(&ibsh->num_images, fp);
+	CGET(&ibsh->eye_position, fp, bdb);
+	SGET(&ibsh->num_images, fp, bdb);
 	for (i = 0; i < ibsh->num_images; i++) {
 		ret = new_iih(&iih);
 		if (ret < 0)
 			ALLOC_ERR_OUT("image header");
-		ret = read_iih(fp, iih);
+		if (fp != NULL)
+			ret = read_iih(fp, iih);
+		else
+			ret = scan_iih(bdb, iih);
 		if (ret != READ_OK)
 			READ_ERR_OUT("Iris image header");
 		add_iih_to_ibsh(iih, ibsh);
@@ -249,7 +273,19 @@ err_out:
 }
 
 int
-read_iibdb(FILE *fp, IIBDB *iibdb)
+read_ibsh(FILE *fp, IBSH *ibsh)
+{
+	return (internal_read_ibsh(fp, NULL, ibsh));
+}
+
+int
+scan_ibsh(BDB *bdb, IBSH *ibsh)
+{
+	return (internal_read_ibsh(NULL, bdb, ibsh));
+}
+
+static int
+internal_read_iibdb(FILE *fp, BDB *bdb, IIBDB *iibdb)
 {
 	IBSH *ibsh;
 	uint16_t sval;
@@ -259,14 +295,14 @@ read_iibdb(FILE *fp, IIBDB *iibdb)
 
 	/* Read the Iris record header */
 	hdr = &iibdb->record_header;
-	OREAD(hdr->format_id, 1, IID_FORMAT_ID_LEN, fp);
-	OREAD(hdr->format_version, 1, IID_FORMAT_VERSION_LEN, fp);
-	CREAD(&hdr->kind_of_imagery, fp);
-	LREAD(&hdr->record_length, fp);
-	SREAD(&hdr->capture_device_id, fp);
-	CREAD(&hdr->num_eyes, fp);
-	SREAD(&hdr->record_header_length, fp);
-	SREAD(&sval, fp);
+	OGET(hdr->format_id, 1, IID_FORMAT_ID_LEN, fp, bdb);
+	OGET(hdr->format_version, 1, IID_FORMAT_VERSION_LEN, fp, bdb);
+	CGET(&hdr->kind_of_imagery, fp, bdb);
+	LGET(&hdr->record_length, fp, bdb);
+	SGET(&hdr->capture_device_id, fp, bdb);
+	CGET(&hdr->num_eyes, fp, bdb);
+	SGET(&hdr->record_header_length, fp, bdb);
+	SGET(&sval, fp, bdb);
 
 	hdr->horizontal_orientation = (sval & IID_HORIZONTAL_ORIENTATION_MASK)
 	    >> IID_HORIZONTAL_ORIENTATION_SHIFT;
@@ -278,20 +314,23 @@ read_iibdb(FILE *fp, IIBDB *iibdb)
 	hdr->occlusion_filling = (sval & IID_OCCLUSION_FILLING_MASK)
 	    >> IID_OCCLUSION_FILLING_SHIFT;
 
-	SREAD(&hdr->diameter, fp);
-	SREAD(&hdr->image_format, fp);
-	SREAD(&hdr->image_width, fp);
-	SREAD(&hdr->image_height, fp);
-	CREAD(&hdr->intensity_depth, fp);
-	CREAD(&hdr->image_transformation, fp);
-	OREAD(hdr->device_unique_id, 1, IID_DEVICE_UNIQUE_ID_LEN, fp);
+	SGET(&hdr->diameter, fp, bdb);
+	SGET(&hdr->image_format, fp, bdb);
+	SGET(&hdr->image_width, fp, bdb);
+	SGET(&hdr->image_height, fp, bdb);
+	CGET(&hdr->intensity_depth, fp, bdb);
+	CGET(&hdr->image_transformation, fp, bdb);
+	OGET(hdr->device_unique_id, 1, IID_DEVICE_UNIQUE_ID_LEN, fp, bdb);
 
 	/* Read the image headers and image data */
 	for (i = 0; i < iibdb->record_header.num_eyes; i++) {
 		if (new_ibsh(&ibsh) < 0) 
 			ALLOC_ERR_OUT("image biometric subtype header");
 		ibsh->iibdb = iibdb;
-		ret = read_ibsh(fp, ibsh);
+		if (fp != NULL)
+			ret = read_ibsh(fp, ibsh);
+		else
+			ret = scan_ibsh(bdb, ibsh);
 		if (ret == READ_OK)
 			iibdb->biometric_subtype_headers[i] = ibsh;
 		else if (ret == READ_EOF)
@@ -309,46 +348,82 @@ err_out:
 }
 
 int
-write_iih(FILE *fp, IIH *iih)
+read_iibdb(FILE *fp, IIBDB *iibdb)
+{
+	return (internal_read_iibdb(fp, NULL, iibdb));
+}
+
+int
+scan_iibdb(BDB *bdb, IIBDB *iibdb)
+{
+	return (internal_read_iibdb(NULL, bdb, iibdb));
+}
+
+static int
+internal_write_iih(FILE *fp, BDB *bdb, IIH *iih)
 {
 	int ret;
 
-	LWRITE(iih->image_length, fp);
-	SWRITE(iih->image_number, fp);
-	CWRITE(iih->image_quality, fp);
-	SWRITE(iih->rotation_angle, fp);
-	SWRITE(iih->rotation_uncertainty, fp);
-	SWRITE(iih->quality_algo_vendor_id, fp);
-	SWRITE(iih->quality_algo_id, fp);
+	LPUT(iih->image_length, fp, bdb);
+	SPUT(iih->image_number, fp, bdb);
+	CPUT(iih->image_quality, fp, bdb);
+	SPUT(iih->rotation_angle, fp, bdb);
+	SPUT(iih->rotation_uncertainty, fp, bdb);
+	SPUT(iih->quality_algo_vendor_id, fp, bdb);
+	SPUT(iih->quality_algo_id, fp, bdb);
 
 	/* Read the extended data */
-	ret = write_roimask(fp, &iih->roi_mask);
+	if (fp != NULL)
+		ret = write_roimask(fp, &iih->roi_mask);
+	else
+		ret = push_roimask(bdb, &iih->roi_mask);
 	if (ret != WRITE_OK)
 		WRITE_ERR_OUT("ROI Mask");
-	ret = write_unsegpolar(fp, &iih->unsegmented_polar);
+	if (fp != NULL)
+		ret = write_unsegpolar(fp, &iih->unsegmented_polar);
+	else
+		ret = push_unsegpolar(bdb, &iih->unsegmented_polar);
 	if (ret != WRITE_OK)
 		WRITE_ERR_OUT("Unsegmented Polar");
-	ret = write_image_ancillary(fp, &iih->image_ancillary);
+	if (fp != NULL)
+		ret = write_image_ancillary(fp, &iih->image_ancillary);
+	else
+		ret = push_image_ancillary(bdb, &iih->image_ancillary);
 	if (ret != WRITE_OK)
 		WRITE_ERR_OUT("Image Ancillary Data");
 
 	if (iih->image_data != NULL)
-		OWRITE(iih->image_data, 1, iih->image_length, fp);
+		OPUT(iih->image_data, 1, iih->image_length, fp, bdb);
 	return (WRITE_OK);
 err_out:
 	return (WRITE_ERROR);
 }
 
 int
-write_ibsh(FILE *fp, IBSH *ibsh)
+write_iih(FILE *fp, IIH *iih)
+{
+	return (internal_write_iih(fp, NULL, iih));
+}
+
+int
+push_iih(BDB *bdb, IIH *iih)
+{
+	return (internal_write_iih(NULL, bdb, iih));
+}
+
+static int
+internal_write_ibsh(FILE *fp, BDB *bdb, IBSH *ibsh)
 {
 	IIH *iih;
 	int ret;
 
-	CWRITE(ibsh->eye_position, fp);
-	SWRITE(ibsh->num_images, fp);
+	CPUT(ibsh->eye_position, fp, bdb);
+	SPUT(ibsh->num_images, fp, bdb);
 	TAILQ_FOREACH(iih, &ibsh->image_headers, list) {
-		ret = write_iih(fp, iih);
+		if (fp != NULL)
+			ret = write_iih(fp, iih);
+		else
+			ret = push_iih(bdb, iih);
 		if (ret != WRITE_OK)
 			WRITE_ERR_OUT("Iris Image Header");
 	}
@@ -358,7 +433,19 @@ err_out:
 }
 
 int
-write_iibdb(FILE *fp, IIBDB *iibdb)
+write_ibsh(FILE *fp, IBSH *ibsh)
+{
+	return (internal_write_ibsh(fp, NULL, ibsh));
+}
+
+int
+push_ibsh(BDB *bdb, IBSH *ibsh)
+{
+	return (internal_write_ibsh(NULL, bdb, ibsh));
+}
+
+static int
+internal_write_iibdb(FILE *fp, BDB *bdb, IIBDB *iibdb)
 {
 	int i;
 	int ret;
@@ -368,31 +455,36 @@ write_iibdb(FILE *fp, IIBDB *iibdb)
 	/* Write the Iris record header */
 	hdr = &iibdb->record_header;
 
-	OWRITE(hdr->format_id, 1, IID_FORMAT_ID_LEN, fp);
-	OWRITE(hdr->format_version, 1, IID_FORMAT_VERSION_LEN, fp);
-	CWRITE(hdr->kind_of_imagery, fp);
-	LWRITE(hdr->record_length, fp);
-	SWRITE(hdr->capture_device_id, fp);
-	CWRITE(hdr->num_eyes, fp);
-	SWRITE(hdr->record_header_length, fp);
+	OPUT(hdr->format_id, 1, IID_FORMAT_ID_LEN, fp, bdb);
+	OPUT(hdr->format_version, 1, IID_FORMAT_VERSION_LEN, fp, bdb);
+	CPUT(hdr->kind_of_imagery, fp, bdb);
+	LPUT(hdr->record_length, fp, bdb);
+	SPUT(hdr->capture_device_id, fp, bdb);
+	CPUT(hdr->num_eyes, fp, bdb);
+	SPUT(hdr->record_header_length, fp, bdb);
 	sval =
 	      (hdr->horizontal_orientation << IID_HORIZONTAL_ORIENTATION_SHIFT)
 	    | (hdr->vertical_orientation << IID_VERTICAL_ORIENTATION_SHIFT)
 	    | (hdr->scan_type << IID_SCAN_TYPE_SHIFT)
 	    | (hdr->iris_occlusions << IID_IRIS_OCCLUSIONS_SHIFT)
 	    | (hdr->occlusion_filling << IID_OCCLUSION_FILLING_SHIFT);
-	SWRITE(sval, fp);
-	SWRITE(hdr->diameter, fp);
-	SWRITE(hdr->image_format, fp);
-	SWRITE(hdr->image_width, fp);
-	SWRITE(hdr->image_height, fp);
-	CWRITE(hdr->intensity_depth, fp);
-	CWRITE(hdr->image_transformation, fp);
-	OWRITE(hdr->device_unique_id, 1, IID_DEVICE_UNIQUE_ID_LEN, fp);
+	SPUT(sval, fp, bdb);
+	SPUT(hdr->diameter, fp, bdb);
+	SPUT(hdr->image_format, fp, bdb);
+	SPUT(hdr->image_width, fp, bdb);
+	SPUT(hdr->image_height, fp, bdb);
+	CPUT(hdr->intensity_depth, fp, bdb);
+	CPUT(hdr->image_transformation, fp, bdb);
+	OPUT(hdr->device_unique_id, 1, IID_DEVICE_UNIQUE_ID_LEN, fp, bdb);
 
 	/* Write the image headers and data */
 	for (i = 0; i < iibdb->record_header.num_eyes; i++) {
-		ret = write_ibsh(fp, iibdb->biometric_subtype_headers[i]);
+		if (fp != NULL)
+			ret = write_ibsh(fp,
+			    iibdb->biometric_subtype_headers[i]);
+		else
+			ret = push_ibsh(bdb,
+			    iibdb->biometric_subtype_headers[i]);
 		if (ret != WRITE_OK)
 			WRITE_ERR_OUT("Iris Biometric Subtype Header %d", i+1);
 	}
@@ -400,6 +492,18 @@ write_iibdb(FILE *fp, IIBDB *iibdb)
 	return (WRITE_OK);
 err_out:
 	return (WRITE_ERROR);
+}
+
+int
+write_iibdb(FILE *fp, IIBDB *iibdb)
+{
+	return (internal_write_iibdb(fp, NULL, iibdb));
+}
+
+int
+push_iibdb(BDB *bdb, IIBDB *iibdb)
+{
+	return (internal_write_iibdb(NULL, bdb, iibdb));
 }
 
 int
@@ -722,4 +826,56 @@ get_iihs(IBSH *ibsh, IIH *iihs[])
 		count++;
 	}
 	return (count);
+}
+
+int
+clone_iibdb(IIBDB *src, IIBDB **dst, int cloneimg)
+{
+	IIBDB *liibdb;
+	IBSH *dstibsh;
+	IIH *srciih, *dstiih;
+	int ret;
+	int i, j;
+
+	liibdb = NULL;
+	dstibsh = NULL;
+	dstiih = NULL;
+	
+	ret = new_iibdb(&liibdb);
+	if (ret != 0)
+		ALLOC_ERR_RETURN("Cloned IIBDB");
+
+	liibdb->record_header = src->record_header;
+	for (i = 0; i < src->record_header.num_eyes; i++) {
+		ret = new_ibsh(&dstibsh);
+		if (ret != 0)
+			ALLOC_ERR_OUT("Cloned IBSH");
+		COPY_IBSH(src->biometric_subtype_headers[i], dstibsh);
+		liibdb->biometric_subtype_headers[i] = dstibsh;
+		dstibsh->iibdb = liibdb;
+		TAILQ_FOREACH(srciih,
+		    &src->biometric_subtype_headers[i]->image_headers, list) {
+			ret = new_iih(&dstiih);
+			if (ret != 0)
+				ALLOC_ERR_OUT("Cloned IIH");
+			COPY_IIH(srciih, dstiih);
+			add_iih_to_ibsh(dstiih, dstibsh);
+			if (cloneimg) {
+				dstiih->image_data =
+				    (uint8_t *)malloc(srciih->image_length);
+				if (dstiih->image_data == NULL)
+					ALLOC_ERR_OUT("Cloned image data");
+				bcopy(srciih->image_data, dstiih->image_data,
+				    srciih->image_length);
+			} else {
+				dstiih->image_data = NULL;
+			}
+		}
+	}
+	*dst = liibdb;
+	return (0);
+err_out:
+	if (liibdb != NULL)
+		free_iibdb(liibdb);
+	return (-1);
 }

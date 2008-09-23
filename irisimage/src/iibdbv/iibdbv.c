@@ -24,10 +24,10 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <iid_ext.h>
-#include <iid.h>
 #include <biomdi.h>
 #include <biomdimacro.h>
+#include <iid_ext.h>
+#include <iid.h>
 
 static void validate_iih_in_ibsh(IBSH *ibsh)
 {

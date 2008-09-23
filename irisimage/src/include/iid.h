@@ -118,6 +118,7 @@
 #define IID_CODE_CLASS_KIND_OF_IMAGERY		7
 
 struct iris_record_header {
+#define irh_startcopy		format_id
 	char			format_id[IID_FORMAT_ID_LEN];
 	char			format_version[IID_FORMAT_VERSION_LEN];
 	uint8_t			kind_of_imagery;
@@ -137,6 +138,8 @@ struct iris_record_header {
 	uint8_t			intensity_depth;
 	uint8_t			image_transformation;
 	char			device_unique_id[IID_DEVICE_UNIQUE_ID_LEN];
+#define irh_endcopy		dummy
+	uint32_t		dummy;
 };
 typedef struct iris_record_header IRH;
 
@@ -150,6 +153,7 @@ typedef struct iris_record_header IRH;
 #define IID_IMAGE_QUALITY_NOT_AVAILABLE		255
 
 struct iris_image_header {
+#define iih_startcopy				image_length
 	uint32_t				image_length;
 	uint16_t				image_number;
 	uint8_t					image_quality;
@@ -160,6 +164,7 @@ struct iris_image_header {
 	struct roi_mask				roi_mask;
 	struct unsegmented_polar		unsegmented_polar;
 	struct image_ancillary			image_ancillary;
+#define iih_endcopy				image_data
 	uint8_t					*image_data;
 	TAILQ_ENTRY(iris_image_header)		list;
 	struct iris_biometric_subtype_header	*ibsh; /* ptr to parent rec */
@@ -173,8 +178,10 @@ typedef struct iris_image_header IIH;
 #define IID_EYE_MAX_IMAGES			65535
 
 struct iris_biometric_subtype_header {
+#define ibsh_startcopy				eye_position
 	uint8_t					eye_position;
 	uint16_t				num_images;
+#define ibsh_endcopy				iibdb
 	struct iris_image_biometric_data_block *iibdb; /* ptr to parent block */
 	TAILQ_HEAD(, iris_image_header)	image_headers;
 };
@@ -201,20 +208,88 @@ void free_iibdb(IIBDB *iibdb);
 /******************************************************************************/
 /* Define the interface for reading/writing/verifying iris image data blocks. */
 /******************************************************************************/
-int read_iih(FILE *fp, IIH *iih);
-int write_iih(FILE *fp, IIH *iih);
-int print_iih(FILE *fp, IIH *iih);
-int validate_iih(IIH *iih);
-
-int read_ibsh(FILE *fp, IBSH *ibsh);
-int write_ibsh(FILE *fp, IBSH *ibsh);
-int print_ibsh(FILE *fp, IBSH *ibsh);
-int validate_ibsh(IBSH *ibsh);
-
+/******************************************************************************/
+/* Functions to read Iris Image records from a file, or buffer. Each function */
+/* reads/scans the complete record, including all sub-records. For example,   */
+/* read_iibdb() reads the record header, the Iris Image headers, and all the  */
+/* Biometric Subtype Headers. The FILE and BDB structs are modified by these  */
+/* functions.                                                                 */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   bdb    Pointer to the biometric data block containing iris data.         */
+/*   iih    Pointer to the output iris image header structure.                */
+/*   ibsh   Pointer to the output biometric subtype header structure.         */
+/*   ibsh   Pointer to the output iris image biometric datablock structure.   */
+/*                                                                            */
+/* Return:                                                                    */
+/*        READ_OK     Success                                                 */
+/*        READ_EOF    End of file encountered                                 */
+/*        READ_ERROR  Failure                                                 */
+/******************************************************************************/
 int read_iibdb(FILE *fp, IIBDB *iibdb);
+int scan_iibdb(BDB *bdb, IIBDB *iibdb);
+int read_ibsh(FILE *fp, IBSH *ibsh);
+int scan_ibsh(BDB *bdb, IBSH *ibsh);
+int read_iih(FILE *fp, IIH *iih);
+int scan_iih(BDB *bdb, IIH *iih);
+
+/******************************************************************************/
+/* Functions to write Iris Image records from a file, or buffer. Each         */
+/*  function writes/pushes the complete record, including all sub-records.    */
+/* The FILE and BDB structs are modified by these functions.                  */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   bdb    Pointer to the biometric data block containing iris data.         */
+/*   iih    Pointer to the output iris image header structure.                */
+/*   ibsh   Pointer to the output biometric subtype header structure.         */
+/*   ibsh   Pointer to the output iris image biometric datablock structure.   */
+/*                                                                            */
+/* Return:                                                                    */
+/*        WRITE_OK    Success                                                 */
+/*        WRITE_ERROR Failure                                                 */
+/******************************************************************************/
 int write_iibdb(FILE *fp, IIBDB *iibdb);
+int push_iibdb(BDB *bdb, IIBDB *iibdb);
+int write_ibsh(FILE *fp, IBSH *ibsh);
+int push_ibsh(BDB *bdb, IBSH *ibsh);
+int write_iih(FILE *fp, IIH *iih);
+int push_iih(BDB *bdb, IIH *iih);
+
+/******************************************************************************/
+/* Functions to print Iris Image records to a file in human-readable form.    */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   iih    Pointer to the output iris image header structure.                */
+/*   ibsh   Pointer to the output biometric subtype header structure.         */
+/*   ibsh   Pointer to the output iris image biometric datablock structure.   */
+/*                                                                            */
+/* Return:                                                                    */
+/*        WRITE_OK    Success                                                 */
+/*        WRITE_ERROR Failure                                                 */
+/******************************************************************************/
+int print_iih(FILE *fp, IIH *iih);
+int print_ibsh(FILE *fp, IBSH *ibsh);
 int print_iibdb(FILE *fp, IIBDB *iibdb);
+
+/******************************************************************************/
+/* Functions to validate Iris Image records according to the requirements of  */
+/* the ISO/IEC 19794-6:2005 Iris Image Data standard.                         */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   iih    Pointer to the output iris image header structure.                */
+/*   ibsh   Pointer to the output biometric subtype header structure.         */
+/*   ibsh   Pointer to the output iris image biometric datablock structure.   */
+/*                                                                            */
+/* Return:                                                                    */
+/*        VALIDATE_OK       Record does conform                               */
+/*        VALIDATE_ERROR    Record does NOT conform                           */
+/******************************************************************************/
+int validate_ibsh(IBSH *ibsh);
 int validate_iibdb(IIBDB *fir);
+int validate_iih(IIH *iih);
 
 void add_iih_to_ibsh(IIH *iih, IBSH *ibsh);
 
@@ -232,4 +307,32 @@ int get_iihs(IBSH *ibsh, IIH *iihs[]);
  * for an invalid code for the class.
  */
 char * iid_code_to_str(int class, int code);
+
+/*
+ * Clone a complete Iris Image Data Block. The caller is responsible for
+ * freeing the clone. Will return -1 on allocation failures, 0 otherwise.
+ * Parameters:
+ *    src      Pointer to the source data block
+ *    dst      Pointer to the destination data block
+ *    cloneimg Flag indicating whether to clone the image data
+ * The macros that follow copy the data items in each structure, but do
+ * not copy the linkages between data blocks.
+ */
+int clone_iibdb(IIBDB *src, IIBDB **dst, int cloneimg);
+
+#define COPY_IIH(_src, _dst)						\
+	bcopy(&_src->iih_startcopy, &_dst->iih_startcopy,		\
+	    (unsigned)((uint8_t *)&_dst->iih_endcopy -			\
+		(uint8_t *)&_dst->iih_startcopy))
+
+#define COPY_IRH(_src, _dst)						\
+	bcopy(&_src->irh_startcopy, &_dst->irh_startcopy,		\
+	    (unsigned)((uint8_t *)&_dst->irh_endcopy -			\
+		(uint8_t *)&_dst->irh_startcopy))
+
+#define COPY_IBSH(_src, _dst)						\
+	bcopy(&_src->ibsh_startcopy, &_dst->ibsh_startcopy,		\
+	    (unsigned)((uint8_t *)&_dst->ibsh_endcopy -			\
+		(uint8_t *)&_dst->ibsh_startcopy))
+
 #endif 	/* _IID_H */

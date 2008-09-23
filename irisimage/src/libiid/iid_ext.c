@@ -72,12 +72,12 @@ free_unsegpolar(UNSEGPOLAR *unsegpolar)
 /* Implement the interface for reading/writing/validating iris image          */
 /* extension data blocks.                                                     */
 /******************************************************************************/
-int
-read_roimask(FILE *fp, ROIMASK *roimask)
+static int
+internal_read_roimask(FILE *fp, BDB *bdb, ROIMASK *roimask)
 {
-	CREAD(&roimask->upper_eyelid_mask, fp);
-	CREAD(&roimask->lower_eyelid_mask, fp);
-	CREAD(&roimask->sclera_mask, fp);
+	CGET(&roimask->upper_eyelid_mask, fp, bdb);
+	CGET(&roimask->lower_eyelid_mask, fp, bdb);
+	CGET(&roimask->sclera_mask, fp, bdb);
 	return (READ_OK);
 eof_out:
 	return (READ_EOF);
@@ -86,25 +86,82 @@ err_out:
 }
 
 int
-write_roimask(FILE *fp, ROIMASK *roimask)
+read_roimask(FILE *fp, ROIMASK *roimask)
 {
-	CWRITE(roimask->upper_eyelid_mask, fp);
-	CWRITE(roimask->lower_eyelid_mask, fp);
-	CWRITE(roimask->sclera_mask, fp);
-	return (WRITE_OK);
+	return (internal_read_roimask(fp, NULL, roimask));
+}
+
+int
+scan_roimask(BDB *bdb, ROIMASK *roimask)
+{
+	return (internal_read_roimask(NULL, bdb, roimask));
+}
+
+static int
+internal_read_unsegpolar(FILE *fp, BDB *bdb, UNSEGPOLAR *unsegpolar)
+{
+	SGET(&unsegpolar->num_samples_radially, fp, bdb);
+	SGET(&unsegpolar->num_samples_circumferentially, fp, bdb);
+	SGET(&unsegpolar->inner_outer_circle_x, fp, bdb);
+	SGET(&unsegpolar->inner_outer_circle_y, fp, bdb);
+	SGET(&unsegpolar->inner_circle_radius, fp, bdb);
+	SGET(&unsegpolar->outer_circle_radius, fp, bdb);
+	return (READ_OK);
+eof_out:
+	return (READ_EOF);
 err_out:
-	return (WRITE_ERROR);
+	return (READ_ERROR);
 }
 
 int
 read_unsegpolar(FILE *fp, UNSEGPOLAR *unsegpolar)
 {
-	SREAD(&unsegpolar->num_samples_radially, fp);
-	SREAD(&unsegpolar->num_samples_circumferentially, fp);
-	SREAD(&unsegpolar->inner_outer_circle_x, fp);
-	SREAD(&unsegpolar->inner_outer_circle_y, fp);
-	SREAD(&unsegpolar->inner_circle_radius, fp);
-	SREAD(&unsegpolar->outer_circle_radius, fp);
+	return (internal_read_unsegpolar(fp, NULL, unsegpolar));
+}
+
+int
+scan_unsegpolar(BDB *bdb, UNSEGPOLAR *unsegpolar)
+{
+	return (internal_read_unsegpolar(NULL, bdb, unsegpolar));
+}
+
+static int
+internal_read_image_ancillary(FILE *fp, BDB *bdb, IMAGEANCILLARY *ancillary)
+{
+	SGET(&ancillary->pupil_center_of_ellipse_x, fp, bdb);
+	SGET(&ancillary->pupil_center_of_ellipse_y, fp, bdb);
+	SGET(&ancillary->pupil_semimajor_intersection_x, fp, bdb);
+	SGET(&ancillary->pupil_semimajor_intersection_y, fp, bdb);
+	SGET(&ancillary->pupil_semiminor_intersection_x, fp, bdb);
+	SGET(&ancillary->pupil_semiminor_intersection_y, fp, bdb);
+	SGET(&ancillary->iris_center_of_ellipse_x, fp, bdb);
+	SGET(&ancillary->iris_center_of_ellipse_y, fp, bdb);
+	SGET(&ancillary->iris_semimajor_intersection_x, fp, bdb);
+	SGET(&ancillary->iris_semimajor_intersection_y, fp, bdb);
+	SGET(&ancillary->iris_semiminor_intersection_x, fp, bdb);
+	SGET(&ancillary->iris_semiminor_intersection_y, fp, bdb);
+
+	SGET(&ancillary->pupil_iris_boundary_freeman_code_length, fp, bdb);
+	if (ancillary->pupil_iris_boundary_freeman_code_length != 0) {
+		ancillary->pupil_iris_boundary_freeman_code_data =
+		    (uint8_t *) malloc(
+			ancillary->pupil_iris_boundary_freeman_code_length);
+		if (ancillary->pupil_iris_boundary_freeman_code_data == NULL)
+			goto err_out;
+		OGET(ancillary->pupil_iris_boundary_freeman_code_data, 1,
+		    ancillary->pupil_iris_boundary_freeman_code_length, fp, bdb);
+	}
+	SGET(&ancillary->sclera_iris_boundary_freeman_code_length, fp, bdb);
+	if (ancillary->sclera_iris_boundary_freeman_code_length != 0) {
+		ancillary->sclera_iris_boundary_freeman_code_data =
+		    (uint8_t *) malloc(
+			ancillary->sclera_iris_boundary_freeman_code_length);
+		if (ancillary->sclera_iris_boundary_freeman_code_data == NULL)
+			goto err_out;
+		OGET(ancillary->sclera_iris_boundary_freeman_code_data, 1,
+		    ancillary->sclera_iris_boundary_freeman_code_length, fp, bdb);
+	}
+
 	return (READ_OK);
 eof_out:
 	return (READ_EOF);
@@ -115,56 +172,96 @@ err_out:
 int
 read_image_ancillary(FILE *fp, IMAGEANCILLARY *ancillary)
 {
-	SREAD(&ancillary->pupil_center_of_ellipse_x, fp);
-	SREAD(&ancillary->pupil_center_of_ellipse_y, fp);
-	SREAD(&ancillary->pupil_semimajor_intersection_x, fp);
-	SREAD(&ancillary->pupil_semimajor_intersection_y, fp);
-	SREAD(&ancillary->pupil_semiminor_intersection_x, fp);
-	SREAD(&ancillary->pupil_semiminor_intersection_y, fp);
-	SREAD(&ancillary->iris_center_of_ellipse_x, fp);
-	SREAD(&ancillary->iris_center_of_ellipse_y, fp);
-	SREAD(&ancillary->iris_semimajor_intersection_x, fp);
-	SREAD(&ancillary->iris_semimajor_intersection_y, fp);
-	SREAD(&ancillary->iris_semiminor_intersection_x, fp);
-	SREAD(&ancillary->iris_semiminor_intersection_y, fp);
+	return (internal_read_image_ancillary(fp, NULL, ancillary));
+}
 
-	SREAD(&ancillary->pupil_iris_boundary_freeman_code_length, fp);
-	if (ancillary->pupil_iris_boundary_freeman_code_length != 0) {
-		ancillary->pupil_iris_boundary_freeman_code_data =
-		    (uint8_t *) malloc(
-			ancillary->pupil_iris_boundary_freeman_code_length);
-		if (ancillary->pupil_iris_boundary_freeman_code_data == NULL)
-			goto err_out;
-		OREAD(ancillary->pupil_iris_boundary_freeman_code_data, 1,
-		    ancillary->pupil_iris_boundary_freeman_code_length, fp);
-	}
-	SREAD(&ancillary->sclera_iris_boundary_freeman_code_length, fp);
-	if (ancillary->sclera_iris_boundary_freeman_code_length != 0) {
-		ancillary->sclera_iris_boundary_freeman_code_data =
-		    (uint8_t *) malloc(
-			ancillary->sclera_iris_boundary_freeman_code_length);
-		if (ancillary->sclera_iris_boundary_freeman_code_data == NULL)
-			goto err_out;
-		OREAD(ancillary->sclera_iris_boundary_freeman_code_data, 1,
-		    ancillary->sclera_iris_boundary_freeman_code_length, fp);
-	}
+int
+scan_image_ancillary(BDB *bdb, IMAGEANCILLARY *ancillary)
+{
+	return (internal_read_image_ancillary(NULL, bdb, ancillary));
+}
 
-	return (READ_OK);
-eof_out:
-	return (READ_EOF);
+static int
+internal_write_roimask(FILE *fp, BDB *bdb, ROIMASK *roimask)
+{
+	CPUT(roimask->upper_eyelid_mask, fp, bdb);
+	CPUT(roimask->lower_eyelid_mask, fp, bdb);
+	CPUT(roimask->sclera_mask, fp, bdb);
+	return (WRITE_OK);
 err_out:
-	return (READ_ERROR);
+	return (WRITE_ERROR);
+}
+
+int
+write_roimask(FILE *fp, ROIMASK *roimask)
+{
+	return (internal_write_roimask(fp, NULL, roimask));
+}
+
+int
+push_roimask(BDB *bdb, ROIMASK *roimask)
+{
+	return (internal_write_roimask(NULL, bdb, roimask));
+}
+
+static int
+internal_write_unsegpolar(FILE *fp, BDB *bdb, UNSEGPOLAR *unsegpolar)
+{
+	SPUT(unsegpolar->num_samples_radially, fp, bdb);
+	SPUT(unsegpolar->num_samples_circumferentially, fp, bdb);
+	SPUT(unsegpolar->inner_outer_circle_x, fp, bdb);
+	SPUT(unsegpolar->inner_outer_circle_y, fp, bdb);
+	SPUT(unsegpolar->inner_circle_radius, fp, bdb);
+	SPUT(unsegpolar->outer_circle_radius, fp, bdb);
+	return (WRITE_OK);
+err_out:
+	return (WRITE_ERROR);
 }
 
 int
 write_unsegpolar(FILE *fp, UNSEGPOLAR *unsegpolar)
 {
-	SWRITE(unsegpolar->num_samples_radially, fp);
-	SWRITE(unsegpolar->num_samples_circumferentially, fp);
-	SWRITE(unsegpolar->inner_outer_circle_x, fp);
-	SWRITE(unsegpolar->inner_outer_circle_y, fp);
-	SWRITE(unsegpolar->inner_circle_radius, fp);
-	SWRITE(unsegpolar->outer_circle_radius, fp);
+	return (internal_write_unsegpolar(fp, NULL, unsegpolar));
+}
+
+int
+push_unsegpolar(BDB *bdb, UNSEGPOLAR *unsegpolar)
+{
+	return (internal_write_unsegpolar(NULL, bdb, unsegpolar));
+}
+
+static int
+internal_write_image_ancillary(FILE *fp, BDB *bdb, IMAGEANCILLARY *ancillary)
+{
+	SPUT(ancillary->pupil_center_of_ellipse_x, fp, bdb);
+	SPUT(ancillary->pupil_center_of_ellipse_y, fp, bdb);
+	SPUT(ancillary->pupil_semimajor_intersection_x, fp, bdb);
+	SPUT(ancillary->pupil_semimajor_intersection_y, fp, bdb);
+	SPUT(ancillary->pupil_semiminor_intersection_x, fp, bdb);
+	SPUT(ancillary->pupil_semiminor_intersection_y, fp, bdb);
+	SPUT(ancillary->iris_center_of_ellipse_x, fp, bdb);
+	SPUT(ancillary->iris_center_of_ellipse_y, fp, bdb);
+	SPUT(ancillary->iris_semimajor_intersection_x, fp, bdb);
+	SPUT(ancillary->iris_semimajor_intersection_y, fp, bdb);
+	SPUT(ancillary->iris_semiminor_intersection_x, fp, bdb);
+	SPUT(ancillary->iris_semiminor_intersection_y, fp, bdb);
+
+	SPUT(ancillary->pupil_iris_boundary_freeman_code_length, fp, bdb);
+	if (ancillary->pupil_iris_boundary_freeman_code_length != 0) {
+		if (ancillary->pupil_iris_boundary_freeman_code_data != NULL)
+			OPUT(ancillary->pupil_iris_boundary_freeman_code_data,
+			    1,
+			    ancillary->pupil_iris_boundary_freeman_code_length,
+			    fp, bdb);
+	}
+	SPUT(ancillary->sclera_iris_boundary_freeman_code_length, fp, bdb);
+	if (ancillary->sclera_iris_boundary_freeman_code_length != 0) {
+		if (ancillary->sclera_iris_boundary_freeman_code_data != NULL)
+			OPUT(ancillary->sclera_iris_boundary_freeman_code_data,
+			    1,
+			    ancillary->sclera_iris_boundary_freeman_code_length,
+			    fp, bdb);
+	}
 	return (WRITE_OK);
 err_out:
 	return (WRITE_ERROR);
@@ -173,38 +270,13 @@ err_out:
 int
 write_image_ancillary(FILE *fp, IMAGEANCILLARY *ancillary)
 {
-	SWRITE(ancillary->pupil_center_of_ellipse_x, fp);
-	SWRITE(ancillary->pupil_center_of_ellipse_y, fp);
-	SWRITE(ancillary->pupil_semimajor_intersection_x, fp);
-	SWRITE(ancillary->pupil_semimajor_intersection_y, fp);
-	SWRITE(ancillary->pupil_semiminor_intersection_x, fp);
-	SWRITE(ancillary->pupil_semiminor_intersection_y, fp);
-	SWRITE(ancillary->iris_center_of_ellipse_x, fp);
-	SWRITE(ancillary->iris_center_of_ellipse_y, fp);
-	SWRITE(ancillary->iris_semimajor_intersection_x, fp);
-	SWRITE(ancillary->iris_semimajor_intersection_y, fp);
-	SWRITE(ancillary->iris_semiminor_intersection_x, fp);
-	SWRITE(ancillary->iris_semiminor_intersection_y, fp);
+	return (internal_write_image_ancillary(fp, NULL, ancillary));
+}
 
-	SWRITE(ancillary->pupil_iris_boundary_freeman_code_length, fp);
-	if (ancillary->pupil_iris_boundary_freeman_code_length != 0) {
-		if (ancillary->pupil_iris_boundary_freeman_code_data != NULL)
-			OWRITE(ancillary->pupil_iris_boundary_freeman_code_data,
-			    1,
-			    ancillary->pupil_iris_boundary_freeman_code_length,
-			    fp);
-	}
-	SWRITE(ancillary->sclera_iris_boundary_freeman_code_length, fp);
-	if (ancillary->sclera_iris_boundary_freeman_code_length != 0) {
-		if (ancillary->sclera_iris_boundary_freeman_code_data != NULL)
-			OWRITE(ancillary->sclera_iris_boundary_freeman_code_data,
-			    1,
-			    ancillary->sclera_iris_boundary_freeman_code_length,
-			    fp);
-	}
-	return (WRITE_OK);
-err_out:
-	return (WRITE_ERROR);
+int
+push_image_ancillary(BDB *bdb, IMAGEANCILLARY *ancillary)
+{
+	return (internal_write_image_ancillary(NULL, bdb, ancillary));
 }
 
 int

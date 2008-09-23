@@ -71,19 +71,58 @@ void free_image_ancillary(IMAGEANCILLARY *ancillary);
 /******************************************************************************/
 /* Define the interface for reading/writing/verifying iris image data blocks. */
 /******************************************************************************/
+/******************************************************************************/
+/* Functions to read Iris Image "extra" data from a file, or buffer.          */
+/* The FILE and BDB structs are modified by these functions.                  */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp          The open file pointer.                                       */
+/*   bdb         Pointer to the biometric data block containing extra data.   */
+/*   roimask     Pointer to the output ROI mask structure.                    */
+/*   unsegpolar  Pointer to the output UNSEG POLAR data structure.            */
+/*   ancillary   Pointer to the output ancilary data structure.               */
+/*                                                                            */
+/* Return:                                                                    */
+/*        READ_OK     Success                                                 */
+/*        READ_EOF    End of file encountered                                 */
+/*        READ_ERROR  Failure                                                 */
+/******************************************************************************/
 int read_roimask(FILE *fp, ROIMASK *roimask);
-int write_roimask(FILE *fp, ROIMASK *roimask);
-int print_roimask(FILE *fp, ROIMASK *roimask);
-int validate_roimask(ROIMASK *roimask);
-
+int scan_roimask(BDB *bdb, ROIMASK *roimask);
 int read_unsegpolar(FILE *fp, UNSEGPOLAR *unsegpolar);
-int write_unsegpolar(FILE *fp, UNSEGPOLAR *unsegpolar);
-int print_unsegpolar(FILE *fp, UNSEGPOLAR *unsegpolar);
-int validate_unsegpolar(UNSEGPOLAR *unsegpolar);
-
+int scan_unsegpolar(BDB *bdb, UNSEGPOLAR *unsegpolar);
 int read_image_ancillary(FILE *fp, IMAGEANCILLARY *ancillary);
+int scan_image_ancillary(BDB *bdb, IMAGEANCILLARY *ancillary);
+
+/******************************************************************************/
+/* Functions to write Iris Image "extra" data from a file, or buffer.         */
+/* The FILE and BDB structs are modified by these functions.                  */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp          The open file pointer.                                       */
+/*   bdb         Pointer to the biometric data block containing extra data.   */
+/*   roimask     Pointer to the output ROI mask structure.                    */
+/*   unsegpolar  Pointer to the output UNSEG POLAR data structure.            */
+/*   ancillary   Pointer to the output ancilary data structure.               */
+/*                                                                            */
+/* Return:                                                                    */
+/*        READ_OK     Success                                                 */
+/*        READ_EOF    End of file encountered                                 */
+/*        READ_ERROR  Failure                                                 */
+/******************************************************************************/
+int write_roimask(FILE *fp, ROIMASK *roimask);
+int push_roimask(BDB *bdb, ROIMASK *roimask);
+int write_unsegpolar(FILE *fp, UNSEGPOLAR *unsegpolar);
+int push_unsegpolar(BDB *bdb, UNSEGPOLAR *unsegpolar);
 int write_image_ancillary(FILE *fp, IMAGEANCILLARY *ancillary);
+int push_image_ancillary(BDB *bdb, IMAGEANCILLARY *ancillary);
+
+int print_roimask(FILE *fp, ROIMASK *roimask);
+int print_unsegpolar(FILE *fp, UNSEGPOLAR *unsegpolar);
 int print_image_ancillary(FILE *fp, IMAGEANCILLARY *ancillary);
+
+int validate_roimask(ROIMASK *roimask);
+int validate_unsegpolar(UNSEGPOLAR *unsegpolar);
 int validate_image_ancillary(IMAGEANCILLARY *ancillary);
 
 #endif 	/* _IID_EXT_H */

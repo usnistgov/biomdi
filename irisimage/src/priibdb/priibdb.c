@@ -24,10 +24,10 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <iid_ext.h>
-#include <iid.h>
 #include <biomdi.h>
 #include <biomdimacro.h>
+#include <iid_ext.h>
+#include <iid.h>
 
 int main(int argc, char *argv[])
 {
