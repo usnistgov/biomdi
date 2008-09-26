@@ -49,9 +49,9 @@ struct image_ancillary {
 	uint16_t		iris_semimajor_intersection_y;
 	uint16_t		iris_semiminor_intersection_x;
 	uint16_t		iris_semiminor_intersection_y;
-	uint8_t			pupil_iris_boundary_freeman_code_length;
+	uint16_t		pupil_iris_boundary_freeman_code_length;
 	uint8_t		       *pupil_iris_boundary_freeman_code_data;
-	uint8_t			sclera_iris_boundary_freeman_code_length;
+	uint16_t		sclera_iris_boundary_freeman_code_length;
 	uint8_t		       *sclera_iris_boundary_freeman_code_data;
 };
 typedef struct image_ancillary IMAGEANCILLARY;
