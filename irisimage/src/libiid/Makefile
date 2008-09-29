@@ -30,7 +30,8 @@ ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CP) libiid.dll $(LOCALLIB)
 else
 	$(CC) $(CFLAGS) -shared $(SOURCES) -o libiid.so
-	$(CP) libiid.so $(LOCALLIB)
+	$(CC) -m32 $(CFLAGS) -shared $(SOURCES) -o libiid32.so
+	$(CP) libiid*.so $(LOCALLIB)
 endif
 endif
 
