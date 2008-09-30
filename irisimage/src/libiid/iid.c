@@ -367,10 +367,10 @@ internal_write_iih(FILE *fp, BDB *bdb, IIH *iih)
 	LPUT(iih->image_length, fp, bdb);
 	SPUT(iih->image_number, fp, bdb);
 	CPUT(iih->image_quality, fp, bdb);
-	SPUT(iih->rotation_angle, fp, bdb);
-	SPUT(iih->rotation_uncertainty, fp, bdb);
 	SPUT(iih->quality_algo_vendor_id, fp, bdb);
 	SPUT(iih->quality_algo_id, fp, bdb);
+	SPUT(iih->rotation_angle, fp, bdb);
+	SPUT(iih->rotation_uncertainty, fp, bdb);
 
 	/* Read the extended data */
 	if (fp != NULL)
