@@ -44,9 +44,9 @@
  */
 struct biometric_data_buffer {
 	uint32_t		bdb_size;	// Max size of the buffer
-	void			*bdb_start;	// Beginning read/write location
-	void			*bdb_end;	// Last read/write location
-	void			*bdb_current;	// Current read/write location
+	uint8_t			*bdb_start;	// Beginning read/write location
+	uint8_t			*bdb_end;	// Last read/write location
+	uint8_t			*bdb_current;	// Current read/write location
 };
 typedef struct biometric_data_buffer BDB;
 

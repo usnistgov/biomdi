@@ -108,14 +108,14 @@
  * Class codes for converting codes to strings. See the iid_code_str()
  * function defined below.
  */
-#define IID_CODE_CLASS_ORIENTATION		0
-#define IID_CODE_CLASS_SCAN_TYPE		1
-#define IID_CODE_CLASS_OCCLUSION		2
-#define IID_CODE_CLASS_OCCLUSION_FILLING	3
-#define IID_CODE_CLASS_IMAGE_FORMAT		4
-#define IID_CODE_CLASS_IMAGE_TRANSFORMATION	5
-#define IID_CODE_CLASS_EYE_POSITION		6
-#define IID_CODE_CLASS_KIND_OF_IMAGERY		7
+#define IID_CODE_CATEGORY_ORIENTATION		0
+#define IID_CODE_CATEGORY_SCAN_TYPE		1
+#define IID_CODE_CATEGORY_OCCLUSION		2
+#define IID_CODE_CATEGORY_OCCLUSION_FILLING	3
+#define IID_CODE_CATEGORY_IMAGE_FORMAT		4
+#define IID_CODE_CATEGORY_IMAGE_TRANSFORMATION	5
+#define IID_CODE_CATEGORY_EYE_POSITION		6
+#define IID_CODE_CATEGORY_KIND_OF_IMAGERY		7
 
 struct iris_record_header {
 #define irh_startcopy		format_id
@@ -302,11 +302,11 @@ int get_iih_count(IBSH *ibsh);
 int get_iihs(IBSH *ibsh, IIH *iihs[]);
 
 /* Convert a code (image orientation, scan type, etc. to a string. The
- * 'class' argument must be on of those defined above. This function will
- * either return a string matching the code within the class, or 'INVALID'
- * for an invalid code for the class.
+ * 'category' argument must be one of those defined above. This function will
+ * either return a string matching the code within the category, or 'INVALID'
+ * for an invalid code for the category.
  */
-char * iid_code_to_str(int class, int code);
+char * iid_code_to_str(int category, int code);
 
 /*
  * Clone a complete Iris Image Data Block. The caller is responsible for

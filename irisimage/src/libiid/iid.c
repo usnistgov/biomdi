@@ -22,17 +22,17 @@
 #include <iid.h>
 
 char *
-iid_code_to_str(int class, int code)
+iid_code_to_str(int category, int code)
 {
-	switch(class) {
-	case IID_CODE_CLASS_ORIENTATION :
+	switch(category) {
+	case IID_CODE_CATEGORY_ORIENTATION :
 		switch(code) {
 			case IID_ORIENTATION_UNDEF : return("Undefined");
 			case IID_ORIENTATION_BASE : return("Base");
 			case IID_ORIENTATION_FLIPPED : return("Flipped");
 			default : return("Invalid code");
 		}
-	case IID_CODE_CLASS_SCAN_TYPE :
+	case IID_CODE_CATEGORY_SCAN_TYPE :
 		switch(code) {
 			case IID_SCAN_TYPE_CORRECTED : return("Corrected");
 			case IID_SCAN_TYPE_PROGRESSIVE : return("Progressive");
@@ -42,19 +42,19 @@ iid_code_to_str(int class, int code)
 				return("Interlace Field");
 			default : return("Invalid code");
 		}
-	case IID_CODE_CLASS_OCCLUSION :
+	case IID_CODE_CATEGORY_OCCLUSION :
 		switch(code) {
 			case IID_IROCC_UNDEF : return("Undefined");
 			case IID_IROCC_PROCESSED : return("Processed");
 			default : return("Invalid code");
 		}
-	case IID_CODE_CLASS_OCCLUSION_FILLING :
+	case IID_CODE_CATEGORY_OCCLUSION_FILLING :
 		switch(code) {
 			case IID_IROCC_ZEROFILL : return ("Zero Fill");
 			case IID_IROCC_UNITFILL : return ("Unit Fill");
 			default : return ("Invalid code");
 		}
-	case IID_CODE_CLASS_IMAGE_FORMAT :
+	case IID_CODE_CATEGORY_IMAGE_FORMAT :
 		switch(code) {
 			case IID_IMAGEFORMAT_MONO_RAW : return ("Mono Raw");
 			case IID_IMAGEFORMAT_RGB_RAW : return ("RGB Raw");
@@ -70,20 +70,20 @@ iid_code_to_str(int class, int code)
 			    return ("RGB JPEG 2000");
 			default : return ("Invalid code");
 		}
-	case IID_CODE_CLASS_IMAGE_TRANSFORMATION :
+	case IID_CODE_CATEGORY_IMAGE_TRANSFORMATION :
 		switch(code) {
 			case IID_TRANS_UNDEF : return ("Undefined");
 			case IID_TRANS_STD : return ("Standard");
 			default : return ("Invalid code");
 		}
-	case IID_CODE_CLASS_EYE_POSITION :
+	case IID_CODE_CATEGORY_EYE_POSITION :
 		switch(code) {
 			case IID_EYE_UNDEF : return ("Undefined");
 			case IID_EYE_RIGHT : return ("Right Eye");
 			case IID_EYE_LEFT : return ("Left Eye");
 			default : return ("Invalid code");
 		}
-	case IID_CODE_CLASS_KIND_OF_IMAGERY :
+	case IID_CODE_CATEGORY_KIND_OF_IMAGERY :
 		switch(code) {
 			case IID_IMAGE_KIND_RECTLINEAR_NO_ROI_NO_CROPPING :
 			    return ("Rectlinear w/o ROI masking, w/o cropping");
@@ -97,7 +97,7 @@ iid_code_to_str(int class, int code)
 			    return ("Rectlinear recon of unsegmented polar");
 			default : return ("Invalid code");
 		}
-	default : return("Invalid class");
+	default : return("Invalid category");
 	}
 }
 
@@ -557,7 +557,7 @@ print_ibsh(FILE *fp, IBSH *ibsh)
 	FPRINTF(fp, "-----------------------------\n");
 	FPRINTF(fp, "Eye Position\t\t\t\t: 0x%02X (%s)\n",
 	    ibsh->eye_position,
-	    iid_code_to_str(IID_CODE_CLASS_EYE_POSITION,
+	    iid_code_to_str(IID_CODE_CATEGORY_EYE_POSITION,
 		ibsh->eye_position));
 	FPRINTF(fp, "Number of Images\t\t\t: %d\n", ibsh->num_images);
 	i = 1;
@@ -585,7 +585,7 @@ print_iibdb(FILE *fp, IIBDB *iibdb)
 	    hdr->format_id, hdr->format_version);
 	FPRINTF(fp, "Kind of imagery\t\t\t: %hhu (%s)\n",
 	    hdr->kind_of_imagery,
-	    iid_code_to_str(IID_CODE_CLASS_KIND_OF_IMAGERY,
+	    iid_code_to_str(IID_CODE_CATEGORY_KIND_OF_IMAGERY,
 	    hdr->kind_of_imagery));
 	FPRINTF(fp, "Record Length\t\t\t: %u\n",
 	    hdr->record_length);
@@ -597,29 +597,29 @@ print_iibdb(FILE *fp, IIBDB *iibdb)
 	FPRINTF(fp, "Iris Image Properties:\n");
 	FPRINTF(fp, "\tHorizontal Orientation\t: %hhu (%s)\n",
 	    hdr->horizontal_orientation,
-	    iid_code_to_str(IID_CODE_CLASS_ORIENTATION,
+	    iid_code_to_str(IID_CODE_CATEGORY_ORIENTATION,
 		hdr->horizontal_orientation));
 	FPRINTF(fp, "\tVertical Orientation\t: %hhu (%s)\n",
 	    hdr->vertical_orientation,
-	    iid_code_to_str(IID_CODE_CLASS_ORIENTATION,
+	    iid_code_to_str(IID_CODE_CATEGORY_ORIENTATION,
 		hdr->vertical_orientation));
 	FPRINTF(fp, "\tScan Type\t\t: %hhu (%s)\n",
 	    hdr->scan_type,
-	    iid_code_to_str(IID_CODE_CLASS_SCAN_TYPE,
+	    iid_code_to_str(IID_CODE_CATEGORY_SCAN_TYPE,
 		hdr->scan_type));
 	FPRINTF(fp, "\tIris Occlusions\t\t: %hhu (%s)\n",
 	    hdr->iris_occlusions,
-	    iid_code_to_str(IID_CODE_CLASS_OCCLUSION,
+	    iid_code_to_str(IID_CODE_CATEGORY_OCCLUSION,
 		hdr->iris_occlusions));
 	FPRINTF(fp, "\tOcclusion Filling\t: %hhu (%s)\n",
 	    hdr->occlusion_filling,
-	    iid_code_to_str(IID_CODE_CLASS_OCCLUSION_FILLING,
+	    iid_code_to_str(IID_CODE_CATEGORY_OCCLUSION_FILLING,
 		hdr->occlusion_filling));
 	FPRINTF(fp, "Iris Diameter\t\t\t: %hu\n",
 	    hdr->diameter);
 	FPRINTF(fp, "Image Format\t\t\t: 0x%04X (%s)\n",
 	    hdr->image_format,
-	    iid_code_to_str(IID_CODE_CLASS_IMAGE_FORMAT,
+	    iid_code_to_str(IID_CODE_CATEGORY_IMAGE_FORMAT,
 		hdr->image_format));
 	FPRINTF(fp, "Image Size\t\t\t: %hux%hu\n",
 	    hdr->image_width, hdr->image_height);
@@ -627,7 +627,7 @@ print_iibdb(FILE *fp, IIBDB *iibdb)
 	    hdr->intensity_depth);
 	FPRINTF(fp, "Image Transformation\t\t: %hhu (%s)\n",
 	    hdr->image_transformation,
-	    iid_code_to_str(IID_CODE_CLASS_IMAGE_TRANSFORMATION,
+	    iid_code_to_str(IID_CODE_CATEGORY_IMAGE_TRANSFORMATION,
 		hdr->image_transformation));
 	FPRINTF(fp, "Device Unique ID\t\t: ");
 	if (hdr->device_unique_id[0] != 0)
