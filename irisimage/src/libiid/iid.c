@@ -9,6 +9,8 @@
 */
 
 #include <sys/queue.h>
+#include <arpa/inet.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -165,9 +167,6 @@ new_iibdb(IIBDB **iibdb)
 void
 free_iibdb(IIBDB *iibdb)
 {
-	IIH *iih;
-	int i;
-
 	if (iibdb->biometric_subtype_headers[0] != NULL)
 		free_ibsh(iibdb->biometric_subtype_headers[0]);
 	if (iibdb->biometric_subtype_headers[1] != NULL)
@@ -835,7 +834,7 @@ clone_iibdb(IIBDB *src, IIBDB **dst, int cloneimg)
 	IBSH *dstibsh;
 	IIH *srciih, *dstiih;
 	int ret;
-	int i, j;
+	int i;
 
 	liibdb = NULL;
 	dstibsh = NULL;

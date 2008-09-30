@@ -92,7 +92,7 @@ typedef struct biometric_data_buffer BDB;
 			goto eof_out;					\
 		  } else {						\
 		    fprintf(stderr, 					\
-			    "Error reading at position %d from %s:%d\n",\
+			    "Error reading at position %ld from %s:%d\n",\
 			    ftell(stream), __FILE__, __LINE__);		\
 			goto err_out;					\
 		  }							\
@@ -103,7 +103,7 @@ typedef struct biometric_data_buffer BDB;
 	do {								\
 		if (fprintf(stream, __VA_ARGS__) < 0) {			\
 		  fprintf(stderr, 					\
-			    "Error printing at position %d from %s:%d\n",\
+			    "Error printing at position %ld from %s:%d\n",\
 			    ftell(stream), __FILE__, __LINE__);		\
 			goto err_out;					\
 		}							\
@@ -210,7 +210,7 @@ typedef struct biometric_data_buffer BDB;
 	do {								\
 		if (fwrite(ptr, size, nmemb, stream) < nmemb) {		\
 		  fprintf(stderr, 					\
-			    "Error writing at position %d from %s:%d\n",\
+			    "Error writing at position %ld from %s:%d\n",\
 			    ftell(stream), __FILE__, __LINE__);		\
 			goto err_out;					\
 		}							\
