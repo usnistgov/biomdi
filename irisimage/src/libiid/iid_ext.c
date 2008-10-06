@@ -145,22 +145,32 @@ internal_read_image_ancillary(FILE *fp, BDB *bdb, IMAGEANCILLARY *ancillary)
 	SGET(&ancillary->pupil_iris_boundary_freeman_code_length, fp, bdb);
 	if (ancillary->pupil_iris_boundary_freeman_code_length != 0) {
 		ancillary->pupil_iris_boundary_freeman_code_data =
-		    (uint8_t *) malloc(
+		    (FCC *) malloc(
 			ancillary->pupil_iris_boundary_freeman_code_length);
 		if (ancillary->pupil_iris_boundary_freeman_code_data == NULL)
 			goto err_out;
-		OGET(ancillary->pupil_iris_boundary_freeman_code_data, 1,
-		    ancillary->pupil_iris_boundary_freeman_code_length, fp, bdb);
+		{
+			SGET(&ancillary->pupil_iris_boundary_freeman_code_data->start_x,   fp, bdb);
+			SGET(&ancillary->pupil_iris_boundary_freeman_code_data->start_y,   fp, bdb);
+			SGET(&ancillary->pupil_iris_boundary_freeman_code_data->num_codes, fp, bdb);
+		        OGET( ancillary->pupil_iris_boundary_freeman_code_data->fcc, 1,
+		              ancillary->pupil_iris_boundary_freeman_code_length - 3*sizeof(uint16_t), fp, bdb);
+		}
 	}
 	SGET(&ancillary->sclera_iris_boundary_freeman_code_length, fp, bdb);
 	if (ancillary->sclera_iris_boundary_freeman_code_length != 0) {
 		ancillary->sclera_iris_boundary_freeman_code_data =
-		    (uint8_t *) malloc(
+		    (FCC *) malloc(
 			ancillary->sclera_iris_boundary_freeman_code_length);
 		if (ancillary->sclera_iris_boundary_freeman_code_data == NULL)
 			goto err_out;
-		OGET(ancillary->sclera_iris_boundary_freeman_code_data, 1,
-		    ancillary->sclera_iris_boundary_freeman_code_length, fp, bdb);
+		{
+			SGET(&ancillary->sclera_iris_boundary_freeman_code_data->start_x,   fp, bdb);
+			SGET(&ancillary->sclera_iris_boundary_freeman_code_data->start_y,   fp, bdb);
+			SGET(&ancillary->sclera_iris_boundary_freeman_code_data->num_codes, fp, bdb);
+		        OGET( ancillary->sclera_iris_boundary_freeman_code_data->fcc, 1,
+		              ancillary->sclera_iris_boundary_freeman_code_length - 3*sizeof(uint16_t), fp, bdb);
+		}
 	}
 
 	return (READ_OK);
@@ -250,18 +260,24 @@ internal_write_image_ancillary(FILE *fp, BDB *bdb, IMAGEANCILLARY *ancillary)
 	SPUT(ancillary->pupil_iris_boundary_freeman_code_length, fp, bdb);
 	if (ancillary->pupil_iris_boundary_freeman_code_length != 0) {
 		if (ancillary->pupil_iris_boundary_freeman_code_data != NULL)
-			OPUT(ancillary->pupil_iris_boundary_freeman_code_data,
-			    1,
-			    ancillary->pupil_iris_boundary_freeman_code_length,
-			    fp, bdb);
+		{
+			SPUT(ancillary->pupil_iris_boundary_freeman_code_data->start_x,   fp, bdb);
+			SPUT(ancillary->pupil_iris_boundary_freeman_code_data->start_y,   fp, bdb);
+			SPUT(ancillary->pupil_iris_boundary_freeman_code_data->num_codes, fp, bdb);
+		        OPUT(ancillary->pupil_iris_boundary_freeman_code_data->fcc, 1,
+		             ancillary->pupil_iris_boundary_freeman_code_length - 3*sizeof(uint16_t), fp, bdb);
+		}
 	}
 	SPUT(ancillary->sclera_iris_boundary_freeman_code_length, fp, bdb);
 	if (ancillary->sclera_iris_boundary_freeman_code_length != 0) {
 		if (ancillary->sclera_iris_boundary_freeman_code_data != NULL)
-			OPUT(ancillary->sclera_iris_boundary_freeman_code_data,
-			    1,
-			    ancillary->sclera_iris_boundary_freeman_code_length,
-			    fp, bdb);
+		{
+			SPUT(ancillary->sclera_iris_boundary_freeman_code_data->start_x,   fp, bdb);
+			SPUT(ancillary->sclera_iris_boundary_freeman_code_data->start_y,   fp, bdb);
+			SPUT(ancillary->sclera_iris_boundary_freeman_code_data->num_codes, fp, bdb);
+		        OPUT(ancillary->sclera_iris_boundary_freeman_code_data->fcc, 1,
+		             ancillary->sclera_iris_boundary_freeman_code_length - 3*sizeof(uint16_t), fp, bdb);
+		}
 	}
 	return (WRITE_OK);
 err_out:
@@ -349,9 +365,15 @@ print_image_ancillary(FILE *fp, IMAGEANCILLARY *ancillary)
 	}
 	FPRINTF(fp, "\tPupil-Iris Boundary Freeman Code Length\t: %u\n",
 	    ancillary->pupil_iris_boundary_freeman_code_length);
+	FPRINTF(fp, "\tPupil-Iris Boundary Freeman Code Start Point\t: %u %u\n",
+	    ancillary->pupil_iris_boundary_freeman_code_data->start_x,
+	    ancillary->pupil_iris_boundary_freeman_code_data->start_y);
 	FPRINTF(fp, "\tSclera-Iris Boundary Freeman Code Length: %u\n",
 	    ancillary->sclera_iris_boundary_freeman_code_length);
-// XXX what to do with the freeman data? save to file?
+	FPRINTF(fp, "\tSclera-Iris Boundary Freeman Code Start Point\t: %u %u\n",
+	    ancillary->sclera_iris_boundary_freeman_code_data->start_x,
+	    ancillary->sclera_iris_boundary_freeman_code_data->start_y);
+// XXX what to do with the bit-packed freeman code data? save to file?
 	return (PRINT_OK);
 err_out:
 	return (PRINT_ERROR);

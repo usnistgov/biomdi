@@ -36,6 +36,14 @@ typedef struct unsegmented_polar UNSEGPOLAR;
 
 #define IID_EXT_COORD_NOT_COMPUTED	0xFFFF
 
+struct freeman_chain_block {
+	uint16_t		start_x;
+	uint16_t		start_y;
+	uint16_t		num_codes;
+	uint8_t		       *fcc;
+};
+typedef struct freeman_chain_block FCC;
+
 struct image_ancillary {
 	uint16_t		pupil_center_of_ellipse_x;
 	uint16_t		pupil_center_of_ellipse_y;
@@ -50,9 +58,9 @@ struct image_ancillary {
 	uint16_t		iris_semiminor_intersection_x;
 	uint16_t		iris_semiminor_intersection_y;
 	uint16_t		pupil_iris_boundary_freeman_code_length;
-	uint8_t		       *pupil_iris_boundary_freeman_code_data;
+	FCC		       *pupil_iris_boundary_freeman_code_data;
 	uint16_t		sclera_iris_boundary_freeman_code_length;
-	uint8_t		       *sclera_iris_boundary_freeman_code_data;
+	FCC		       *sclera_iris_boundary_freeman_code_data;
 };
 typedef struct image_ancillary IMAGEANCILLARY;
 
