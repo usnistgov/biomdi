@@ -122,6 +122,12 @@ free_iih(IIH *iih)
 {
 	if (iih->image_data != NULL)
 		free(iih->image_data);
+	if (iih->image_ancillary.pupil_iris_boundary_freeman_code_data.fcc
+	    != NULL)
+		free(iih->image_ancillary.pupil_iris_boundary_freeman_code_data.fcc);
+	if (iih->image_ancillary.sclera_iris_boundary_freeman_code_data.fcc
+	    != NULL)
+		free(iih->image_ancillary.sclera_iris_boundary_freeman_code_data.fcc);
 	free(iih);
 }
 
@@ -513,9 +519,9 @@ print_iih(FILE *fp, IIH *iih)
 	FPRINTF(fp, "\tImage Length\t\t\t: %u\n", iih->image_length);
 	FPRINTF(fp, "\tImage Number\t\t\t: %hu\n", iih->image_number);
 	FPRINTF(fp, "\tImage Quality\t\t\t: %hhu\n", iih->image_quality);
-	FPRINTF(fp, "\tQuality Algorithm Vendor ID\t: 0x%04x\n",
+	FPRINTF(fp, "\tQuality Algorithm Vendor ID\t: 0x%04hX\n",
 	    iih->quality_algo_vendor_id);
-	FPRINTF(fp, "\tQuality Algorithm ID\t\t: 0x%04x\n",
+	FPRINTF(fp, "\tQuality Algorithm ID\t\t: 0x%04hX\n",
 	    iih->quality_algo_id);
 	FPRINTF(fp, "\tRotation Angle\t\t\t: ");
 	if (iih->rotation_angle == IID_ROT_ANGLE_UNDEF)
@@ -555,7 +561,7 @@ print_ibsh(FILE *fp, IBSH *ibsh)
 	FPRINTF(fp, "-----------------------------\n");
 	FPRINTF(fp, "Iris Biometric Subtype Header\n");
 	FPRINTF(fp, "-----------------------------\n");
-	FPRINTF(fp, "Eye Position\t\t\t\t: 0x%02X (%s)\n",
+	FPRINTF(fp, "Eye Position\t\t\t\t: 0x%02hhX (%s)\n",
 	    ibsh->eye_position,
 	    iid_code_to_str(IID_CODE_CATEGORY_EYE_POSITION,
 		ibsh->eye_position));
@@ -589,7 +595,7 @@ print_iibdb(FILE *fp, IIBDB *iibdb)
 	    hdr->kind_of_imagery));
 	FPRINTF(fp, "Record Length\t\t\t: %u\n",
 	    hdr->record_length);
-	FPRINTF(fp, "Capture Device ID\t\t: 0x%04x\n",
+	FPRINTF(fp, "Capture Device ID\t\t: 0x%04hX\n",
 	    hdr->capture_device_id);
 	FPRINTF(fp, "Number of Eyes Imaged\t\t: %d\n", hdr->num_eyes);
 	FPRINTF(fp, "Record Header Length\t\t: %d\n",
@@ -617,7 +623,7 @@ print_iibdb(FILE *fp, IIBDB *iibdb)
 		hdr->occlusion_filling));
 	FPRINTF(fp, "Iris Diameter\t\t\t: %hu\n",
 	    hdr->diameter);
-	FPRINTF(fp, "Image Format\t\t\t: 0x%04X (%s)\n",
+	FPRINTF(fp, "Image Format\t\t\t: 0x%04hX (%s)\n",
 	    hdr->image_format,
 	    iid_code_to_str(IID_CODE_CATEGORY_IMAGE_FORMAT,
 		hdr->image_format));
@@ -684,7 +690,7 @@ validate_ibsh(IBSH *ibsh)
 	if ((ibsh->eye_position != IID_EYE_UNDEF) &&
 	    (ibsh->eye_position != IID_EYE_RIGHT) &&
 	    (ibsh->eye_position != IID_EYE_LEFT)) {
-		ERRP("Eye Position 0x%02X invalid", ibsh->eye_position);
+		ERRP("Eye Position 0x%02hhX invalid", ibsh->eye_position);
 		ret = VALIDATE_ERROR;
 	}
 	CRSR(ibsh->num_images, IID_EYE_MIN_IMAGES, IID_EYE_MAX_IMAGES,
@@ -756,7 +762,7 @@ validate_iibdb(IIBDB *iibdb)
 	    (rh.image_format != IID_IMAGEFORMAT_RGB_JPEG_LS) &&
 	    (rh.image_format != IID_IMAGEFORMAT_MONO_JPEG2000) &&
 	    (rh.image_format != IID_IMAGEFORMAT_RGB_JPEG2000)) {
-		ERRP("Image format 0x%04X invalid", rh.image_format);
+		ERRP("Image format 0x%04hX invalid", rh.image_format);
 		ret = VALIDATE_ERROR;
 	}
 	if ((rh.image_transformation != IID_TRANS_UNDEF) &&
