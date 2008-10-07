@@ -331,22 +331,35 @@ err_out:
 int
 print_image_ancillary(FILE *fp, IMAGEANCILLARY *ancillary)
 {
-	FPRINTF(fp, "\tPupil Center of Ellipse\t\t: (%hd, %hd)\n",
-	    ancillary->pupil_center_of_ellipse_x,
-	    ancillary->pupil_center_of_ellipse_y);
-	FPRINTF(fp, "\tPupil Semimajor Intersection\t: (%hd, %hd)\n",
-	    ancillary->pupil_semimajor_intersection_x,
-	    ancillary->pupil_semimajor_intersection_y);
-	FPRINTF(fp, "\tPupil Semiminor Intersection\t: (%hd, %hd)\n",
-	    ancillary->pupil_semiminor_intersection_x,
-	    ancillary->pupil_semiminor_intersection_y);
-
-	FPRINTF(fp, "\tIris Center of Ellipse\t\t: (%hd, %hd)\n",
-	    ancillary->iris_center_of_ellipse_x,
-	    ancillary->iris_center_of_ellipse_y);
-	FPRINTF(fp, "\tIris Semimajor Intersection\t: (%hd, %hd)\n",
-	    ancillary->iris_semimajor_intersection_x,
-	    ancillary->iris_semimajor_intersection_y);
+	if (ancillary->pupil_center_of_ellipse_x ==
+	    IID_EXT_COORD_NOT_COMPUTED) {
+		FPRINTF(fp, "\tPupil Center of Ellipse\t\t: Not computed\n");
+		FPRINTF(fp, "\tPupil Semimajor Intersection\t: Not computed\n");
+		FPRINTF(fp, "\tPupil Semiminor Intersection\t: Not computed\n");
+	} else {
+		FPRINTF(fp, "\tPupil Center of Ellipse\t\t: (%hd, %hd)\n",
+		    ancillary->pupil_center_of_ellipse_x,
+		    ancillary->pupil_center_of_ellipse_y);
+		FPRINTF(fp, "\tPupil Semimajor Intersection\t: (%hd, %hd)\n",
+		    ancillary->pupil_semimajor_intersection_x,
+		    ancillary->pupil_semimajor_intersection_y);
+		FPRINTF(fp, "\tPupil Semiminor Intersection\t: (%hd, %hd)\n",
+		    ancillary->pupil_semiminor_intersection_x,
+		    ancillary->pupil_semiminor_intersection_y);
+	}
+	if (ancillary->pupil_center_of_ellipse_x ==
+	    IID_EXT_COORD_NOT_COMPUTED) {
+		FPRINTF(fp, "\tIris Center of Ellipse\t\t: Not computed\n");
+		FPRINTF(fp, "\tIris Semimajor Intersection\t: Not computed\n");
+		FPRINTF(fp, "\tIris Semiminor Intersection\t: Not computed\n");
+	} else {
+		FPRINTF(fp, "\tIris Center of Ellipse\t\t: (%hd, %hd)\n",
+		    ancillary->iris_center_of_ellipse_x,
+		    ancillary->iris_center_of_ellipse_y);
+		FPRINTF(fp, "\tIris Semimajor Intersection\t: (%hd, %hd)\n",
+		    ancillary->iris_semimajor_intersection_x,
+		    ancillary->iris_semimajor_intersection_y);
+	}
 	FPRINTF(fp, "\tIris Semiminor Intersection\t: (%hd, %hd)\n",
 	    ancillary->iris_semiminor_intersection_x,
 	    ancillary->iris_semiminor_intersection_y);

@@ -34,7 +34,7 @@ struct unsegmented_polar {
 };
 typedef struct unsegmented_polar UNSEGPOLAR;
 
-#define IID_EXT_COORD_NOT_COMPUTED	0xFFFF
+#define IID_EXT_COORD_NOT_COMPUTED	0x7FFF
 
 #define IID_EXT_FCCB_HEADER_LEN		6
 struct freeman_chain_code_block {
