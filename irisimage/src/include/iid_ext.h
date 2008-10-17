@@ -17,6 +17,15 @@
 #ifndef _IID_EXT_H
 #define _IID_EXT_H
 
+#define IID_ROIMASK_LENGTH		3
+#define IID_UNSEG_POLAR_LENTH		12
+#define IID_IMAGE_ANCILLARY_MIN_LENGTH	28
+#define IID_IMAGE_ANCILLARY_LENGTH(_ancillary)				\
+	(IID_IMAGE_ANCILLARY_MIN_LENGTH +				\
+	    (_ancillary)->pupil_iris_boundary_freeman_code_length +	\
+	    (_ancillary)->sclera_iris_boundary_freeman_code_length)
+	    
+
 struct roi_mask {
 	uint8_t			upper_eyelid_mask;
 	uint8_t			lower_eyelid_mask;

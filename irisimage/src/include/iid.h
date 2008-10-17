@@ -59,6 +59,8 @@
 #define IID_MAX_EYES				2
 
 #define IID_RECORD_HEADER_LENGTH		46
+#define IID_IBSH_LENGTH				3
+#define IID_IIH_LENGTH				15
 
 /* Bit definitions for the Iris Record Header image properties field. */
 #define IID_HORIZONTAL_ORIENTATION_MASK		0x0003
