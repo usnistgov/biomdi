@@ -155,6 +155,7 @@ free_ibsh(IBSH *ibsh)
 		TAILQ_REMOVE(&ibsh->image_headers, iih, list);
 		free_iih(iih);
 	}
+	free(ibsh);
 }
 
 int
