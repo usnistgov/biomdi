@@ -675,7 +675,10 @@ validate_iih(IIH *iih)
 		    iih->image_number, iih->ibsh->num_images);
 		ret = VALIDATE_ERROR;
 	}
-	if (iih->rotation_uncertainty != IID_ROT_ANGLE_UNDEF)
+	if (iih->rotation_angle != IID_ROT_ANGLE_UNDEF)
+		CRSR(iih->rotation_angle, IID_ROT_ANGLE_MIN,
+		    IID_ROT_ANGLE_MAX, "Rotation angle");
+	if (iih->rotation_uncertainty != IID_ROT_UNCERTAIN_UNDEF)
 		CRSR(iih->rotation_uncertainty, IID_ROT_UNCERTAIN_MIN,
 		    IID_ROT_UNCERTAIN_MAX, "Rotation Uncertainty");
 	return (ret);

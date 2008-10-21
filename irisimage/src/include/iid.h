@@ -145,9 +145,11 @@ struct iris_record_header {
 };
 typedef struct iris_record_header IRH;
 
+#define IID_ROT_ANGLE_MIN			0
+#define IID_ROT_ANGLE_MAX			0xFFFE
 #define IID_ROT_ANGLE_UNDEF			0xFFFF
 #define IID_ROT_UNCERTAIN_MIN			0
-#define IID_ROT_UNCERTAIN_MAX			179
+#define IID_ROT_UNCERTAIN_MAX			0xFFFE
 #define IID_ROT_UNCERTAIN_UNDEF			0xFFFF
 #define IID_MIN_IMAGE_QUALITY			0
 #define IID_MAX_IMAGE_QUALITY			100
