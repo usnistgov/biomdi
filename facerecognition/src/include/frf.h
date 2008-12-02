@@ -278,6 +278,9 @@ validate_fpb(struct feature_point_block *fpb);
 // Information, list of Feature Points, Image Information, and Image Data.
 #define FRF_FIB_LENGTH				20
 #define FRF_IIB_LENGTH				12
+#define FRF_IMAGE_DATA_TYPE_JPEG		0
+#define FRF_IMAGE_DATA_TYPE_JPEG2000		1
+
 struct facial_data_block {
 	// Representation of the Facial Information Block
 	unsigned int				block_length;

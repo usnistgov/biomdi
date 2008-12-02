@@ -41,13 +41,23 @@ view_images(struct facial_block *fb)
 	FILE *fp;
 	int i;
 	char *viewer;
+	char *ext;
 	int first = true;
 
 	i = 1;
 	TAILQ_FOREACH(fdb, &fb->facial_data, list) {
 
 		// Create a temp file containing the image data
-		sprintf(tempfn, "%s-image%02d", fn_prefix, i);
+		switch (fdb->image_data_type) {
+			case FRF_IMAGE_DATA_TYPE_JPEG:
+			case FRF_IMAGE_DATA_TYPE_JPEG2000:
+				ext = "jpg";
+				break;
+			default:
+				ext = "unk";
+				break;
+		}
+		sprintf(tempfn, "%s-image%02d.%s", fn_prefix, i, ext);
 		i++;
 		if ((fp = fopen(tempfn, "wb")) < 0) {
 			perror("Could not create temp image file.");
@@ -66,7 +76,7 @@ view_images(struct facial_block *fb)
 		viewer = getenv("FRF_VIEWER");
 		if ((viewer == NULL) && first) {
 			fprintf(stdout,
-				"FRF_VIEWER not set; image view disabled.\n");
+				"FRF_VIEWER not set; image files saved, but view disabled.\n");
 			first = false;
 		} else
 			if (fork() == 0) 		// child process
@@ -84,7 +94,8 @@ int main(int argc, char *argv[])
 {
 	char *usage = "usage: prfrf [-v] [-i] <datafile>\n"
 			"\t -v Validate the record\n"
-			"\t -i Load the images using app given by FRF_VIEWER";
+			"\t -i Load the images using app given by FRF_VIEWER"
+			"\t    (will also save images to file)";
 	FILE *fp;
 	struct stat sb;
 	struct facial_block *fb;
