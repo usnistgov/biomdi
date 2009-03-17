@@ -16,6 +16,10 @@
 /*    1 - File contents are invalid                                           */
 /*   -1 - Other error occurred                                                */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <sys/queue.h>
 #include <sys/stat.h>
 #include <sys/types.h>

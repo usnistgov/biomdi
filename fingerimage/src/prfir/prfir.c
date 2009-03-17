@@ -12,6 +12,10 @@
 /* the contents of a file containing finger image records. The file may       */
 /* contain more than one record.                                              */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <sys/queue.h>
 #include <sys/stat.h>
 #include <sys/types.h>

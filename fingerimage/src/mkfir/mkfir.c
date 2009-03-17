@@ -20,6 +20,10 @@
 /*   -p               : Print the entire FIR to stdout                        */
 /*                                                                            */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <sys/param.h>
 #include <sys/queue.h>
 #include <sys/stat.h>

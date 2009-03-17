@@ -15,6 +15,10 @@
 /* as the name of the program to execute for viewing images.                  */
 /*                                                                            */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/queue.h>

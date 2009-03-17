@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 	if (new_iibdb(&iibdb) < 0)
 		ALLOC_ERR_EXIT("Iris Image Biometric Data Block");
 
-	if (fstat(fileno(fp), &sb) < 0)
+	if (stat(argv[1], &sb) < 0)
 		ERR_EXIT("Could not get stats on input file");
 
 	total_length = 0;

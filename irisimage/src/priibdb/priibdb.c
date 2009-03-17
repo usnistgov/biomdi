@@ -13,6 +13,10 @@
 /* ISO/IEC 19794-6:2005 standard. The record can be optionally validated.     */
 /* The file may contain more than one image biometric data block.             */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <sys/queue.h>
 #include <sys/stat.h>
 #include <sys/types.h>
