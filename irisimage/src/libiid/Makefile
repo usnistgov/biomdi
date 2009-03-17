@@ -12,17 +12,18 @@
 #
 include ../common.mk
 OS := $(shell uname -s)
-SOURCES = iid.c iid_ext.c
+SOURCES = iid.c iid_ext.c validate.c
+OBJECTS = iid.o iid_ext.o validate.o
 
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
 	$(CC) -c $(CFLAGS) $(SOURCES)
-	libtool -dynamic -o libiid.dylib -lc *.o -lSystemStubs
+	libtool -dynamic -o libiid.dylib -lc $(OBJECTS) -lSystemStubs
 	$(CP) libiid.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CC) $(CFLAGS) -c $(SOURCES)
-	ar rs libiid.a *.o
+	ar rs libiid.a $(OBJECTS)
 	ranlib libiid.a
 	$(CC) -shared -o libiid.dll -Wl,--out-implib=libiid.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libiid.a -Wl,--no-whole-archive
 	$(CP) libiid.a $(LOCALLIB)

@@ -8,8 +8,8 @@
 # about its quality, reliability, or any other characteristic.
 #
 include ../common.mk
-SOURCES = fmr.c fvmr.c fmd.c fedb.c polar.c random.c xy.c angle.c quality.c ansi2iso.c iso2ansi.c
-OBJECTS = fmr.o fvmr.o fmd.o fedb.o polar.o random.o xy.o angle.o quality.o ansi2iso.o iso2ansi.o
+SOURCES = fmr.c fvmr.c fmd.c fedb.c polar.c random.c xy.c angle.c quality.c ansi2iso.c iso2ansi.c validate.c
+OBJECTS = fmr.o fvmr.o fmd.o fedb.o polar.o random.o xy.o angle.o quality.o ansi2iso.o iso2ansi.o validate.o
 
 #
 # On OS-X, when using gcc 4.0 or later, the SystemStubs library must be

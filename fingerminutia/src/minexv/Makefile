@@ -9,7 +9,7 @@
 #
 #
 include ../common.mk
-LIBFMRSRC = ../libfmr/fedb.c ../libfmr/fmd.c ../libfmr/fmr.c ../libfmr/fvmr.c
+LIBFMRSRC = ../libfmr/fedb.c ../libfmr/fmd.c ../libfmr/fmr.c ../libfmr/fvmr.c ../libfmr/validate.c
 
 
 all:	minexv minexov minex2v

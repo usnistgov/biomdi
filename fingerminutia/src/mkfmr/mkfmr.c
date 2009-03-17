@@ -22,6 +22,10 @@
 /*   -p               : Print the entire FMR to stdout                        */
 /*                                                                            */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/queue.h>

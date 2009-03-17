@@ -11,6 +11,10 @@
 /* This program will modify the minutiae information from a 378 M1 record and */
 /* produce an output file containing the modified minutiae.                   */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <sys/queue.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -19,6 +23,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <strings.h>
 #include <unistd.h>
 

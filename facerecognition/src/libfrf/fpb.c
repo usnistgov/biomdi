@@ -9,7 +9,7 @@
 */
 /******************************************************************************/
 /*                                                                            */
-/* Routines that read, write, and validate Feature Point Blocks in compliance */
+/* Routines that read, write, and print Feature Point Blocks in compliance    */
 /* with the Face Recognition Format for Data Interchange (ANS/INCITS 385-2004)*/
 /* format standard.                                                           */
 /*                                                                            */
@@ -120,10 +120,4 @@ print_fpb(FILE *fp, struct feature_point_block *fpb)
 
 err_out:
         return PRINT_ERROR;
-}
-
-int
-validate_fpb(struct feature_point_block *fpb)
-{
-        return VALIDATE_OK;
 }

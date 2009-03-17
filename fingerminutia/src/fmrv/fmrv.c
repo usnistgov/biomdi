@@ -16,6 +16,10 @@
 /*    1 - File contents are invalid                                           */
 /*   -1 - Other error occurred                                                */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/queue.h>
@@ -55,7 +59,7 @@ int main(int argc, char *argv[])
 	if (fp == NULL)
 		OPEN_ERR_EXIT(argv[optind]);
 
-	if (fstat(fileno(fp), &sb) < 0) {
+	if (stat(argv[1], &sb) < 0) {
 		fprintf(stderr, "Could not get stats on input file.\n");
 		exit (EXIT_FAILURE);
 	}

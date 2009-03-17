@@ -11,7 +11,8 @@
 # form of linking libraries.
 #
 include ../common.mk
-SOURCES = fir.c fivr.c
+SOURCES = fir.c fivr.c validate.c
+OBJECTS = fir.o fivr.o validate.o
 
 #
 # On OS-X, when using gcc 4.0 or later, the SystemStubs library must be
@@ -27,13 +28,12 @@ endif
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
 	$(CC) -c $(CFLAGS) $(SOURCES)
-	libtool -dynamic -o libfir.dylib -lc *.o $(EXTRALIBS)
+	libtool -dynamic -o libfir.dylib -lc $(OBJECTS) $(EXTRALIBS)
 	$(CP) libfir.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
-	$(CC) $(CFLAGS) -c fir.c
-	$(CC) $(CFLAGS) -c fivr.c
-	ar rs libfir.a fir.o fivr.o
+	$(CC) -c $(CFLAGS) $(SOURCES)
+	ar rs libfir.a $(OBJECTS)
 	ranlib libfir.a
 	$(CC) -shared -o libfir.dll -Wl,--out-implib=libfir.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfir.a -Wl,--no-whole-archive
 	$(CP) libfir.a $(LOCALLIB)

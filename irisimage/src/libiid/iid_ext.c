@@ -387,30 +387,3 @@ print_image_ancillary(FILE *fp, IMAGEANCILLARY *ancillary)
 err_out:
 	return (PRINT_ERROR);
 }
-
-int
-validate_roimask(ROIMASK *roimask)
-{
-//XXX implement whatever constraints there are, if any
-	int ret = VALIDATE_OK;
-
-	return (ret);
-}
-
-int
-validate_unsegpolar(UNSEGPOLAR *unsegpolar)
-{
-//XXX implement whatever constraints there are, if any
-	int ret = VALIDATE_OK;
-
-	return (ret);
-}
-
-int
-validate_image_ancillary(IMAGEANCILLARY *ancillary)
-{
-//XXX implement whatever constraints there are, if any
-	int ret = VALIDATE_OK;
-
-	return (ret);
-}

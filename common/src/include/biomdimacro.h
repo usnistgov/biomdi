@@ -14,6 +14,8 @@
 #ifndef _BIOMDIMACRO_H
 #define _BIOMDIMACRO_H 
 
+#include <arpa/inet.h>
+
 /******************************************************************************/
 /* Common definitions used throughout                                         */
 /******************************************************************************/

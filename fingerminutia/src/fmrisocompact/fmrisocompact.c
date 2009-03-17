@@ -14,6 +14,10 @@
 /* format to ISO compact, as when an FMR is placed on a smart card, then      */
 /* converted back for matching, etc.                                          */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>

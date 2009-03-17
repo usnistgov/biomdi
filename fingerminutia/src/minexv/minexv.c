@@ -15,6 +15,10 @@
 /* This program assumes that a single FMR is contained in the file, and       */
 /* therefore, the record length in the header should match the file size.     */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/queue.h>

@@ -8,6 +8,8 @@
 # about its quality, reliability, or any other characteristic.
 #
 include ../common.mk
+SOURCES = fb.c fdb.c fpb.c validate.c
+OBJECTS = fb.o fdb.o fpb.o validate.o
 
 #
 # On OS-X, when using gcc 4.0 or later, the SystemStubs library must be
@@ -20,24 +22,22 @@ EXTRALIBS := -lSystemStubs
 endif
 endif
 
-all: fb.c fdb.c fpb.c
+all: $(SOURCES)
 ifeq ($(OS), Darwin)
-	$(CC) -c $(CFLAGS) $?
-	libtool -dynamic -o libfrf.dylib -lc $(EXTRALIBS) *.o
+	$(CC) -c $(CFLAGS) $(SOURCES)
+	libtool -dynamic -o libfrf.dylib -lc $(EXTRALIBS) $(OBJECTS)
 	$(CP) libfrf.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
-	$(CC) $(CFLAGS) -c fb.c
-	$(CC) $(CFLAGS) -c fdb.c
-	$(CC) $(CFLAGS) -c fpb.c
-	ar rs libfrf.a fb.o fdb.o fpb.o
+	$(CC) $(CFLAGS) -c $(SOURCES)
+	ar rs $(OBJECTS)
 	ranlib libfrf.a
 	$(CC) -shared -o libfrf.dll -Wl,--out-implib=libfrf.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfrf.a -Wl,--no-whole-archive
 	$(CP) libfrf.a $(LOCALLIB)
 	$(CP) libfrf.dll.a $(LOCALLIB)
 	$(CP) libfrf.dll $(LOCALLIB)
 else
-	$(CC) $(CFLAGS) -shared $? -o libfrf.so
+	$(CC) $(CFLAGS) -shared $(SOURCES) -o libfrf.so
 	$(CP) libfrf.so $(LOCALLIB)
 endif
 endif

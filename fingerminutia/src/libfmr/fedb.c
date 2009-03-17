@@ -294,35 +294,6 @@ print_fedb(FILE *fp, struct finger_extended_data_block *fedb)
 	return (PRINT_OK);
 }
 
-int
-validate_fedb(struct finger_extended_data_block *fedb)
-{
-	struct finger_extended_data *fed;
-	int sum = 0;
-	int ret = VALIDATE_OK;
-
-	// The block length must be the sum of the individual data 
-	// section lengths
-	TAILQ_FOREACH(fed, &fedb->extended_data, list) {
-		sum += fed->length;
-	}
-	if (sum != fedb->block_length) {
-		ERRP("Extended Data Block length (%u) is not "\
-			"sum of individual data lengths (%u)",
-			fedb->block_length, sum);
-		ret = VALIDATE_OK;
-	}
-
-	// Validate the extended data records
-	TAILQ_FOREACH(fed, &fedb->extended_data, list) {
-		if (validate_fed(fed) != VALIDATE_OK) {
-			ERRP("Extended Data Block is not valid");
-			ret = VALIDATE_ERROR;
-		}
-	}
-	return (ret);
-}
-
 void
 add_fed_to_fedb(struct finger_extended_data *fed,
                 struct finger_extended_data_block *fedb)
@@ -520,27 +491,6 @@ print_fed(FILE *fp, struct finger_extended_data *fed)
 		break;
 	}
 	return (PRINT_OK);
-}
-
-int
-validate_fed(struct finger_extended_data *fed)
-{
-	int ret = VALIDATE_OK;
-
-	switch (fed->type_id) {
-	case FED_RIDGE_COUNT :
-		ret = validate_rcdb(fed->rcdb);
-		break;
-
-	case FED_CORE_AND_DELTA :
-		ret = validate_cddb(fed->cddb);
-		break;
-
-	default :
-		break;
-	}
-
-	return (ret);
 }
 
 /******************************************************************************/
@@ -794,47 +744,6 @@ print_rcd(FILE *fp, struct ridge_count_data *rcd)
 
 err_out:
 	return (PRINT_ERROR);
-}
-
-// This routine will validate the entire record, even if a validation error is
-// encountered at any point.
-int
-validate_rcdb(struct ridge_count_data_block *rcdb)
-{
-	struct ridge_count_data *rcd;
-	int ret = VALIDATE_OK;
-
-	// Test the extraction method
-	if ((rcdb->method != RCE_NONSPECIFIC) &&
-	    (rcdb->method != RCE_FOUR_NEIGHBOR) &&
-	    (rcdb->method != RCE_EIGHT_NEIGHBOR)) {
-		ERRP("Extraction method of %u undefined", rcdb->method);
-		ret = VALIDATE_ERROR;
-	}
-
-	// The index numbers shall be list in increasing order
-	// XXX
-
-	// Validate the Ridge Count records
-	TAILQ_FOREACH(rcd, &rcdb->ridge_counts, list) {
-		if (validate_rcd(rcd) != VALIDATE_OK)
-			ret = VALIDATE_ERROR;
-	}
-	return (ret);
-}
-
-int
-validate_rcd(struct ridge_count_data *rcd)
-{
-	// The value of index cannot be greater than the number of 
-	// minutia records
-	if ((rcd->index_one > rcd->rcdb->fed->fedb->fvmr->number_of_minutiae) ||
-	    (rcd->index_two > rcd->rcdb->fed->fedb->fvmr->number_of_minutiae)) {
-		ERRP("Ridge count index(es) greater than number "
-				"number of minutiae");
-		return (VALIDATE_ERROR);
-	}
-	return (VALIDATE_OK);
 }
 
 /******************************************************************************/
@@ -1388,113 +1297,3 @@ err_out:
 	return (PRINT_ERROR);
 }
 
-int
-validate_cddb(struct core_delta_data_block *cddb)
-{
-	struct core_data *cd;
-	struct delta_data *dd;
-	int ret = VALIDATE_OK;
-
-	if (cddb->num_cores < CORE_MIN_NUM) {
-		ERRP("Number of cores %u is less than minimum %u",
-			cddb->num_cores, CORE_MIN_NUM);
-		ret = VALIDATE_ERROR;
-	}
-
-	if (cddb->num_deltas < DELTA_MIN_NUM) {
-		ERRP("Number of deltas %u is less than minimum %u",
-			cddb->num_deltas, DELTA_MIN_NUM);
-		ret = VALIDATE_ERROR;
-	}
-
-	TAILQ_FOREACH(cd, &cddb->cores, list) {
-		if (validate_cd(cd) != VALIDATE_OK)
-			ret = VALIDATE_ERROR;
-	}
-
-	TAILQ_FOREACH(dd, &cddb->deltas, list) {
-		if (validate_dd(dd) != VALIDATE_OK)
-			ret = VALIDATE_ERROR;
-	}
-	return (ret);
-}
-
-int
-validate_cd(struct core_data *cd)
-{
-	unsigned short coord;
-	int ret = VALIDATE_OK;
-
-	// The coordinates must lie within the scanned image
-	coord = cd->cddb->fed->fedb->fvmr->fmr->x_image_size - 1;
-	if (cd->x_coord > coord) {
-	  ERRP("X-coordinate (%u) of Core Data lies outside image", 
-		cd->x_coord);
-		ret = VALIDATE_ERROR;
-	}
-	coord = cd->cddb->fed->fedb->fvmr->fmr->y_image_size - 1;
-	if (cd->y_coord > coord) {
-	  ERRP("Y-coordinate (%u) of Core Data lies outside image",
-		cd->y_coord);
-		ret = VALIDATE_ERROR;
-	}
-
-	// Check the angle
-	if ((cd->angle < FMD_MIN_MINUTIA_ANGLE) |
-	    (cd->angle > FMD_MAX_MINUTIA_ANGLE)) {
-		ERRP("Core angle %u is out of range %u-%u",
-			cd->angle, FMD_MIN_MINUTIA_ANGLE,
-			    FMD_MAX_MINUTIA_ANGLE);
-		ret = VALIDATE_ERROR;
-	}
-
-	return (ret);
-}
-
-int
-validate_dd(struct delta_data *dd)
-{
-	unsigned short coord;
-	int ret = VALIDATE_OK;
-
-	// The coordinates must lie within the scanned image
-	coord = dd->cddb->fed->fedb->fvmr->fmr->x_image_size - 1;
-	if (dd->x_coord > coord) {
-		ERRP("X-coordinate (%u) of Delta data lies "
-			"outside image", dd->x_coord);
-		ret = VALIDATE_ERROR;
-	}
-	coord = dd->cddb->fed->fedb->fvmr->fmr->y_image_size - 1;
-	if (dd->y_coord > coord) {
-		ERRP("Y-coordinate (%u) of Delta data lies "
-			"outside image", dd->y_coord);
-		ret = VALIDATE_ERROR;
-	}
-
-	// Check the angles
-	if ((dd->angle1 < FMD_MIN_MINUTIA_ANGLE) |
-	    (dd->angle1 > FMD_MAX_MINUTIA_ANGLE)) {
-		ERRP("Delta angle one %u is out of range %u-%u",
-			dd->angle1, FMD_MIN_MINUTIA_ANGLE,
-			    FMD_MAX_MINUTIA_ANGLE);
-		ret = VALIDATE_ERROR;
-	}
-
-	if ((dd->angle2 < FMD_MIN_MINUTIA_ANGLE) |
-	    (dd->angle2 > FMD_MAX_MINUTIA_ANGLE)) {
-		ERRP("Delta angle two %u is out of range %u-%u",
-			dd->angle2, FMD_MIN_MINUTIA_ANGLE,
-			     FMD_MAX_MINUTIA_ANGLE);
-		ret = VALIDATE_ERROR;
-	}
-
-	if ((dd->angle3 < FMD_MIN_MINUTIA_ANGLE) |
-	    (dd->angle3 > FMD_MAX_MINUTIA_ANGLE)) {
-		ERRP("Delta angle three %u is out of range %u-%u",
-			dd->angle3, FMD_MIN_MINUTIA_ANGLE,
-			    FMD_MAX_MINUTIA_ANGLE);
-		ret = VALIDATE_ERROR;
-	}
-
-	return (ret);
-}

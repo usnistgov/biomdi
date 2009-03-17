@@ -12,6 +12,10 @@
 /* produce an output file containg the specified amount of minutiae.          */
 /*                                                                            */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <sys/queue.h>
 #include <sys/stat.h>
 #include <sys/types.h>

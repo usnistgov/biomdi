@@ -12,6 +12,10 @@
 /* another, ANSI to ISO compact for for example. The type of input and        */
 /* output files are given on the command line.                                */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>

@@ -13,8 +13,7 @@
 /* represents the Facial Header and 0 or more Facial Data blocks.             */
 /*                                                                            */
 /* This package implements the routines to read and write a Facial Image      */
-/* Record, validate the information from the record, and print that           */
-/* information in human-readable form.                                        */
+/* Record, and print that information in human-readable form.                 */
 /*                                                                            */
 /* Routines are provided to manage memory for Facial Block representations.   */
 /*                                                                            */
@@ -153,49 +152,6 @@ print_fb(FILE *fp, struct facial_block *fb)
 
 err_out:
 	return PRINT_ERROR;
-}
-
-int
-validate_fb(struct facial_block *fb)
-{
-	int ret = VALIDATE_OK;
-	int error;
-	struct facial_data_block *fdb;
-
-	// Validate the header
-	if (strncmp(fb->format_id, FRF_FORMAT_ID, FRF_FORMAT_ID_LENGTH) != 0) {
-		fprintf(stderr, "Header format ID is [%s], should be [%s]\n",
-		fb->format_id, FRF_FORMAT_ID);
-		ret = VALIDATE_ERROR;
-	}
-
-	if (strncmp(fb->version_num, FRF_VERSION_NUM, FRF_VERSION_NUM_LENGTH) != 0) {
-		fprintf(stderr, "Header spec version is [%s], should be [%s]\n",
-		fb->version_num, FRF_VERSION_NUM);
-		ret = VALIDATE_ERROR;
-	}
-
-	// Record length is minimum of header length + facial data block length
-	if (fb->record_length < FRF_MIN_RECORD_LENGTH) {
-		fprintf(stderr, "Record length of %u is short, minimum is %d\n",
-			fb->record_length, FRF_MIN_RECORD_LENGTH);
-		ret = VALIDATE_ERROR;
-	}
-
-	if (fb->num_faces < FRF_MIN_NUM_FACIAL_IMAGES) {
-		fprintf(stderr, "Number of facial images is %u, min is %u\n",
-			fb->num_faces, FRF_MIN_NUM_FACIAL_IMAGES);
-		ret = VALIDATE_ERROR;
-	}
-
-	// Validate all the facial data blocks
-	TAILQ_FOREACH(fdb, &fb->facial_data, list) {
-		error = validate_fdb(fdb);
-		if (error != VALIDATE_OK)
-			ret = VALIDATE_ERROR;
-	}
-
-	return (ret);
 }
 
 void

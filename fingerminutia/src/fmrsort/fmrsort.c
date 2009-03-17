@@ -12,6 +12,10 @@
 /* produce an output file containg the sorted set.                            */
 /*                                                                            */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>

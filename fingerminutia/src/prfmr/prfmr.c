@@ -11,6 +11,10 @@
 /* This program uses the Finger Minutiae Record library to print              */
 /* the contents of a file containing minutiae records.                        */
 /******************************************************************************/
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/queue.h>
@@ -111,7 +115,7 @@ int main(int argc, char *argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	if (fstat(fileno(fp), &sb) < 0) {
+	if (stat(argv[optind], &sb) < 0) {
 		fprintf(stdout, "Could not get stats on input file.\n");
 		exit (EXIT_FAILURE);
 	}

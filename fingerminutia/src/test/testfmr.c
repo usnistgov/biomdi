@@ -7,6 +7,10 @@
  * its use by other parties, and makes no guarantees, expressed or implied,
  * about its quality, reliability, or any other characteristic.
  */
+
+/* Needed by the GNU C libraries for Posix and other extensions */
+#define _XOPEN_SOURCE	1
+
 #include <sys/queue.h>
 #include <sys/stat.h>
 
@@ -56,10 +60,9 @@ int main(int argc, char *argv[])
 	FILE *infp;
 	FILE *outfp;
 	FMR *fmr;
-	char *buf;
+	uint8_t *buf;
 	BDB *fmdb;
 	struct stat sb;
-	char tempname[10];
 
 	if (argc != 2) {
 		printf("%s\n", usage);
@@ -89,7 +92,7 @@ int main(int argc, char *argv[])
 	 */
 	printf("\nTesting the push functions...\n");
 
-	buf = (void *)malloc(fmr->record_length);
+	buf = (uint8_t *)malloc(fmr->record_length);
 	if (buf == NULL) {
 		fprintf(stderr, "could not allocate buffer\n");
 		exit (EXIT_FAILURE);
@@ -105,8 +108,7 @@ int main(int argc, char *argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	strcpy(tempname, "FMR.XXX");
-        outfp = fopen(mktemp(tempname), "w+b");
+        outfp = tmpfile();
         if (outfp == NULL) {
                 fprintf(stderr, "open of temp file failed: %s\n",
                         strerror(errno));
@@ -128,7 +130,6 @@ int main(int argc, char *argv[])
 	print_fmr_stats(fmr);
 	free_fmr(fmr);
 	fclose(outfp);
-	unlink(tempname);
 
 	/* Test the scan functions by reading the file into a buffer, and
 	 * scanning the FMR, then verifying it.
