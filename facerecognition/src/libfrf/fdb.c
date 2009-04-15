@@ -22,22 +22,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <frf.h>
 #include <biomdi.h>
 #include <biomdimacro.h>
+#include <frf.h>
 
 int
-new_fdb(struct facial_data_block **fdb)
+new_fdb(FDB **fdb)
 {
-	struct facial_data_block *lfdb;
+	FDB *lfdb;
                 
-	lfdb = (struct facial_data_block *)malloc(
-			sizeof(struct facial_data_block));
+	lfdb = (FDB *)malloc(sizeof(FDB));
 	if (lfdb == NULL) {
 		perror("Failed to allocate Facial Block");
 		return -1;
 	}       
-	memset((void *)lfdb, 0, sizeof(struct facial_data_block));
+	memset((void *)lfdb, 0, sizeof(FDB));
 	TAILQ_INIT(&lfdb->feature_points);
 
 	*fdb = lfdb;
@@ -46,9 +45,9 @@ new_fdb(struct facial_data_block **fdb)
 }
 
 void
-free_fdb(struct facial_data_block *fdb)
+free_fdb(FDB *fdb)
 {
-	struct feature_point_block *fpb;
+	FPB *fpb;
 
 	while (!TAILQ_EMPTY(&fdb->feature_points)) {
 		fpb = TAILQ_FIRST(&fdb->feature_points);
@@ -58,50 +57,50 @@ free_fdb(struct facial_data_block *fdb)
 	free(fdb);
 }
 
-int
-read_fdb(FILE *fp, struct facial_data_block *fdb)
+static int
+internal_read_fdb(FILE *fp, BDB *fdbdb, FDB *fdb)
 {
 	unsigned int i;
 	int ret;
-	struct feature_point_block *fpb;
+	FPB *fpb;
 	unsigned int lval;
 	long long llval;
 
 	// Read the Facial Information Block first
 	// Block Length
-	LREAD(&fdb->block_length, fp);
+	LGET(&fdb->block_length, fp, fdbdb);
 
 	// Number of Feature Points
-	SREAD(&fdb->num_feature_points, fp);
+	SGET(&fdb->num_feature_points, fp, fdbdb);
 
 	// Gender
-	CREAD(&fdb->gender, fp);
+	CGET(&fdb->gender, fp, fdbdb);
 
 	// Eye Color
-	CREAD(&fdb->eye_color, fp);
+	CGET(&fdb->eye_color, fp, fdbdb);
 
 	// Hair Color
-	CREAD(&fdb->hair_color, fp);
+	CGET(&fdb->hair_color, fp, fdbdb);
 
 	// Feature Mask; need to shift the bits around because the length
 	// is less than what will fit in a long integer
 	lval = 0;
-	OREAD(&lval, 1, FEATURE_MASK_LEN, fp);
+	OGET(&lval, 1, FEATURE_MASK_LEN, fp, fdbdb);
 	lval = ntohl(lval);
 	fdb->feature_mask = lval >> 8;
 
 	// Expression
-	SREAD(&fdb->expression, fp);
+	SGET(&fdb->expression, fp, fdbdb);
 
 	// Pose Angles
-	CREAD(&fdb->pose_angle_yaw, fp);
-	CREAD(&fdb->pose_angle_pitch, fp);
-	CREAD(&fdb->pose_angle_roll, fp);
+	CGET(&fdb->pose_angle_yaw, fp, fdbdb);
+	CGET(&fdb->pose_angle_pitch, fp, fdbdb);
+	CGET(&fdb->pose_angle_roll, fp, fdbdb);
 
 	// Pose Angle Uncertainties
-	CREAD(&fdb->pose_angle_uncertainty_yaw, fp);
-	CREAD(&fdb->pose_angle_uncertainty_pitch, fp);
-	CREAD(&fdb->pose_angle_uncertainty_roll, fp);
+	CGET(&fdb->pose_angle_uncertainty_yaw, fp, fdbdb);
+	CGET(&fdb->pose_angle_uncertainty_pitch, fp, fdbdb);
+	CGET(&fdb->pose_angle_uncertainty_roll, fp, fdbdb);
 
 	// Read the Feature Points(s)
 	for (i = 1; i <= fdb->num_feature_points; i++) {
@@ -109,7 +108,10 @@ read_fdb(FILE *fp, struct facial_data_block *fdb)
 			fprintf(stderr, "error allocating FPB %u\n", i);
 			goto err_out;
 		}
-		ret = read_fpb(fp, fpb);
+		if (fp != NULL)
+			ret = read_fpb(fp, fpb);
+		else
+			ret = scan_fpb(fdbdb, fpb);
 		if (ret == READ_OK)
 			add_fpb_to_fdb(fpb, fdb);
 		else if (ret == READ_EOF)
@@ -121,28 +123,28 @@ read_fdb(FILE *fp, struct facial_data_block *fdb)
 
 	// Read the Image Information
 	// Face Image Type
-	CREAD(&fdb->face_image_type, fp);
+	CGET(&fdb->face_image_type, fp, fdbdb);
 
 	// Image Data Type
-	CREAD(&fdb->image_data_type, fp);
+	CGET(&fdb->image_data_type, fp, fdbdb);
 
 	// Width
-	SREAD(&fdb->width, fp);
+	SGET(&fdb->width, fp, fdbdb);
 
 	// Height
-	SREAD(&fdb->height, fp);
+	SGET(&fdb->height, fp, fdbdb);
 
 	// Image Color Space
-	CREAD(&fdb->image_color_space, fp);
+	CGET(&fdb->image_color_space, fp, fdbdb);
 
 	// Source Type
-	CREAD(&fdb->source_type, fp);
+	CGET(&fdb->source_type, fp, fdbdb);
 
 	// Device Type
-	SREAD(&fdb->device_type, fp);
+	SGET(&fdb->device_type, fp, fdbdb);
 
 	// Quality
-	SREAD(&fdb->quality, fp);
+	SGET(&fdb->quality, fp, fdbdb);
 
 	// Read the optional Image Data; the length of the image data is 
 	// equal to the Facial Image Block Length minus the sum of the
@@ -159,7 +161,7 @@ read_fdb(FILE *fp, struct facial_data_block *fdb)
 	if (fdb->image_data == NULL)
 		ERR_OUT("Allocating image data\n");
 
-	OREAD(fdb->image_data, 1, lval, fp);
+	OGET(fdb->image_data, 1, lval, fp, fdbdb);
 	fdb->image_len = lval;
 
         return READ_OK;
@@ -172,53 +174,68 @@ err_out:
 }
 
 int
-write_fdb(FILE *fp, struct facial_data_block *fdb)
+read_fdb(FILE *fp, FDB *fdb)
+{
+	return (internal_read_fdb(fp, NULL, fdb));
+}
+
+int
+scan_fdb(BDB *fdbdb, FDB *fdb)
+{
+	return (internal_read_fdb(NULL, fdbdb, fdb));
+}
+
+static int
+internal_write_fdb(FILE *fp, BDB *fdbdb, FDB *fdb)
 {
 	int ret;
-	struct feature_point_block *fpb;
+	FPB *fpb;
 	unsigned int lval;
 
-	LWRITE(fdb->block_length, fp);
-	SWRITE(fdb->num_feature_points, fp);
-	CWRITE(fdb->gender, fp);
-	CWRITE(fdb->eye_color, fp);
-	CWRITE(fdb->hair_color, fp);
+	LPUT(fdb->block_length, fp, fdbdb);
+	SPUT(fdb->num_feature_points, fp, fdbdb);
+	CPUT(fdb->gender, fp, fdbdb);
+	CPUT(fdb->eye_color, fp, fdbdb);
+	CPUT(fdb->hair_color, fp, fdbdb);
 
 	// Convert the feature mask, stored as a value longer than
 	// what is needed.
 	lval = fdb->feature_mask << 8;
 	lval = htonl(lval);
-	OWRITE(&lval, 1, FEATURE_MASK_LEN, fp);
+	OPUT(&lval, 1, FEATURE_MASK_LEN, fp, fdbdb);
 
-	SWRITE(fdb->expression, fp);
+	SPUT(fdb->expression, fp, fdbdb);
 
-	CWRITE(fdb->pose_angle_yaw, fp);
-	CWRITE(fdb->pose_angle_pitch, fp);
-	CWRITE(fdb->pose_angle_roll, fp);
-	CWRITE(fdb->pose_angle_uncertainty_yaw, fp);
-	CWRITE(fdb->pose_angle_uncertainty_pitch, fp);
-	CWRITE(fdb->pose_angle_uncertainty_roll, fp);
+	CPUT(fdb->pose_angle_yaw, fp, fdbdb);
+	CPUT(fdb->pose_angle_pitch, fp, fdbdb);
+	CPUT(fdb->pose_angle_roll, fp, fdbdb);
+	CPUT(fdb->pose_angle_uncertainty_yaw, fp, fdbdb);
+	CPUT(fdb->pose_angle_uncertainty_pitch, fp, fdbdb);
+	CPUT(fdb->pose_angle_uncertainty_roll, fp, fdbdb);
 
 	// Write the Feature Point Blocks
 	TAILQ_FOREACH(fpb, &fdb->feature_points, list) {
-		ret = write_fpb(fp, fpb);
+		if (fp != NULL)
+			ret = write_fpb(fp, fpb);
+		else
+			ret = push_fpb(fdbdb, fpb);
 		if (ret != WRITE_OK)
 			goto err_out;
 	}
 
 	// Write the Image Information block
-	CWRITE(fdb->face_image_type, fp);
-	CWRITE(fdb->image_data_type, fp);
-	SWRITE(fdb->width, fp);
-	SWRITE(fdb->height, fp);
-	CWRITE(fdb->image_color_space, fp);
-	CWRITE(fdb->source_type, fp);
-	SWRITE(fdb->device_type, fp);
-	SWRITE(fdb->quality, fp);
+	CPUT(fdb->face_image_type, fp, fdbdb);
+	CPUT(fdb->image_data_type, fp, fdbdb);
+	SPUT(fdb->width, fp, fdbdb);
+	SPUT(fdb->height, fp, fdbdb);
+	CPUT(fdb->image_color_space, fp, fdbdb);
+	CPUT(fdb->source_type, fp, fdbdb);
+	SPUT(fdb->device_type, fp, fdbdb);
+	SPUT(fdb->quality, fp, fdbdb);
 
 	// Write the image data
 	if (fdb->image_data != NULL)
-		OWRITE(fdb->image_data, 1, fdb->image_len, fp);
+		OPUT(fdb->image_data, 1, fdb->image_len, fp, fdbdb);
 
         return WRITE_OK;
 
@@ -227,9 +244,21 @@ err_out:
 }
 
 int
-print_fdb(FILE *fp, struct facial_data_block *fdb)
+write_fdb(FILE *fp, FDB *fdb)
 {
-	struct feature_point_block *fpb;
+	return (internal_write_fdb(fp, NULL, fdb));
+}
+
+int
+push_fdb(BDB *fdbdb, FDB *fdb)
+{
+	return (internal_write_fdb(NULL, fdbdb, fdb));
+}
+
+int
+print_fdb(FILE *fp, FDB *fdb)
+{
+	FPB *fpb;
 	int ret = PRINT_OK;
 	int error;
 
@@ -277,14 +306,14 @@ err_out:
 }
 
 void
-add_fpb_to_fdb(struct feature_point_block *fpb, struct facial_data_block *fdb)
+add_fpb_to_fdb(FPB *fpb, FDB *fdb)
 {
         fpb->fdb = fdb;
         TAILQ_INSERT_TAIL(&fdb->feature_points, fpb, list);
 }
 
 int
-add_image_to_fdb(char *filename, struct facial_data_block *fdb)
+add_image_to_fdb(char *filename, FDB *fdb)
 {
 	struct stat sb;
 	FILE *fp;

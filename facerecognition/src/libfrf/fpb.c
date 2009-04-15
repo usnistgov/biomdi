@@ -25,17 +25,16 @@
 #include <frf.h>
 
 int
-new_fpb(struct feature_point_block **fpb)
+new_fpb(FPB **fpb)
 {
-	struct feature_point_block *lfpb;
+	FPB *lfpb;
 
-	lfpb = (struct feature_point_block *)malloc(
-			sizeof(struct feature_point_block));
+	lfpb = (FPB *)malloc(sizeof(FPB));
 	if (lfpb == NULL) {
 		perror("Failed to allocate Feature Point Block");
 		return -1;
 	}
-	memset((void *)lfpb, 0, sizeof(struct feature_point_block));
+	memset((void *)lfpb, 0, sizeof(FPB));
 	
 	*fpb = lfpb;
 
@@ -43,33 +42,33 @@ new_fpb(struct feature_point_block **fpb)
 }
 
 void
-free_fpb(struct feature_point_block *fpb)
+free_fpb(FPB *fpb)
 {
 	free(fpb);
 }
 
-int
-read_fpb(FILE *fp, struct feature_point_block *fpb)
+static int
+internal_read_fpb(FILE *fp, BDB *fpbdb, FPB *fpb)
 {
 	unsigned char cval;
 
 	// Feature Type
-	CREAD(&fpb->type, fp);
+	CGET(&fpb->type, fp, fpbdb);
 
 	// Feature Point
-	CREAD(&cval, fp);
+	CGET(&cval, fp, fpbdb);
 	fpb->major_point = (cval & FRF_FEATURE_POINT_MAJOR_MASK) >> 
 				FRF_FEATURE_POINT_MAJOR_SHIFT;
 	fpb->minor_point = cval & FRF_FEATURE_POINT_MINOR_MASK;
 
 	// Horizontal Position
-	SREAD(&fpb->x_coord, fp);
+	SGET(&fpb->x_coord, fp, fpbdb);
 
 	// Vertical Position
-	SREAD(&fpb->y_coord, fp);
+	SGET(&fpb->y_coord, fp, fpbdb);
 
 	// Reserved
-	SREAD(&fpb->reserved, fp);
+	SGET(&fpb->reserved, fp, fpbdb);
 
         return READ_OK;
 
@@ -81,20 +80,32 @@ err_out:
 }
 
 int
-write_fpb(FILE *fp, struct feature_point_block *fpb)
+read_fpb(FILE *fp, FPB *fpb)
+{
+	return (internal_read_fpb(fp, NULL, fpb));
+}
+
+int
+scan_fpb(BDB *fpbdb, FPB *fpb)
+{
+	return (internal_read_fpb(NULL, fpbdb, fpb));
+}
+
+static int
+internal_write_fpb(FILE *fp, BDB *fpbdb, FPB *fpb)
 {
 	unsigned char cval;
 
-	CWRITE(fpb->type, fp);
+	CPUT(fpb->type, fp, fpbdb);
 
 	cval = (fpb->major_point << FRF_FEATURE_POINT_MAJOR_SHIFT) | 
 		fpb->minor_point;
-	CWRITE(cval, fp);
+	CPUT(cval, fp, fpbdb);
 
-	SWRITE(fpb->x_coord, fp);
-	SWRITE(fpb->y_coord, fp);
+	SPUT(fpb->x_coord, fp, fpbdb);
+	SPUT(fpb->y_coord, fp, fpbdb);
 
-	SWRITE(fpb->reserved, fp);
+	SPUT(fpb->reserved, fp, fpbdb);
 
         return WRITE_OK;
 
@@ -103,7 +114,19 @@ err_out:
 }
 
 int
-print_fpb(FILE *fp, struct feature_point_block *fpb)
+write_fpb(FILE *fp, FPB *fpb)
+{
+	return (internal_write_fpb(fp, NULL, fpb));
+}
+
+int
+push_fpb(BDB *fpbdb, FPB *fpb)
+{
+	return (internal_write_fpb(NULL, fpbdb, fpb));
+}
+
+int
+print_fpb(FILE *fp, FPB *fpb)
 {
 	FPRINTF(fp, "Feature Point Block\n");
 

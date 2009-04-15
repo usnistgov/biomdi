@@ -14,6 +14,7 @@
 /******************************************************************************/
 #ifndef _FRF_H
 #define _FRF_H
+#include <biomdimacro.h>
 
 /******************************************************************************/
 /* Components of the Facial Header Block                                      */
@@ -32,118 +33,15 @@
 // Min number of facial images
 #define FRF_MIN_NUM_FACIAL_IMAGES	1
 
-// Representation of the Facial Block. This contains the Facial Header 
-// and the list of Facial Data Blocks.
-struct facial_block {
-	char					format_id[4];
-	char					version_num[4];		
-	unsigned int				record_length;
-	unsigned short				num_faces;
-	TAILQ_HEAD(, facial_data_block)		facial_data;
-};
-typedef struct facial_block FB;
+/******************************************************************************/
+/* Components of the Image Information Block                                  */
+/******************************************************************************/
 
-/******************************************************************************/
-/* Allocate and initialize storage for a single Facial Block.                 */
-/* The record will be initialized to 'NULL' values.                           */
-/*                                                                            */
-/* Parameters:                                                                */
-/*   fb     Address of a pointer to the Facial Block that will be allocated.  */
-/*                                                                            */
-/* Returns:                                                                   */
-/*   0      Success                                                           */
-/*  -1      Failure                                                           */
-/*                                                                            */
-/******************************************************************************/
-int
-new_fb(struct facial_block **fb);
+// Device types
+#define FRF_DEVICE_TYPE_UNSPECIFIED		0
 
-/******************************************************************************/
-/* Free the storage for a single Facial Block.                                */
-/* This function does a "deep free", meaning that all memory allocated for    */
-/* any lists associated with the Facial Block will also be free'd.            */
-/*                                                                            */
-/* Parameters:                                                                */
-/*   fb     Pointer to the FB  structure that will be free'd.                 */
-/*                                                                            */
-/******************************************************************************/
-void
-free_fb(struct facial_block *fb);
-
-/******************************************************************************/
-/* Read a Facial Block from a file, including the Facial Header and all       */
-/* of the Facial Data blocks.                                                 */
-/* This function does not do any validation of the data being read.           */
-/*                                                                            */
-/* Parameters:                                                                */
-/*   fp     The open file pointer.                                            */
-/*   fb     Pointer to the Facial Block.                                      */
-/*                                                                            */
-/* Returns:                                                                   */
-/*      READ_OK      Success                                                  */
-/*      READ_ERROR   Failure                                                  */
-/*                                                                            */
-/******************************************************************************/
-int
-read_fb(FILE *fp, struct facial_block *fb);
-
-/******************************************************************************/
-/* Write a Facial Block to a file, including the Facial Header and all        */
-/* of the Facial Data blocks.                                                 */
-/*                                                                            */
-/* Parameters:                                                                */
-/*   fp     The open file pointer.                                            */
-/*   fb     Pointer to the Facial Block.                                      */
-/*                                                                            */
-/* Returns:                                                                   */
-/*      WRITE_OK      Success                                                 */
-/*      WRITE_ERROR   Failure                                                 */
-/*                                                                            */
-/******************************************************************************/
-int
-write_fb(FILE *fp, struct facial_block *fb);
-
-/******************************************************************************/
-/* Print a Facial Block to a file in human-readable form. The Facial Header   */
-/* and all of the Facial Data blocks are printed.                             */
-/*                                                                            */
-/* Parameters:                                                                */
-/*   fp     The open file pointer.                                            */
-/*   fb     Pointer to the Facial Block.                                      */
-/*                                                                            */
-/* Returns:                                                                   */
-/*      PRINT_OK      Success                                                 */
-/*      PRINT_ERROR   Failure                                                 */
-/*                                                                            */
-/******************************************************************************/
-int
-print_fb(FILE *fp, struct facial_block *fb);
-
-/******************************************************************************/
-/* Validate a Facial Block, including the Facial Header and all of the        */
-/* Facial Data blocks. Diagnostic messages are written to stderr.             */
-/*                                                                            */
-/* Parameters:                                                                */
-/*   fb     Pointer to the Facial Block.                                      */
-/*                                                                            */
-/* Returns:                                                                   */
-/*      VALIDATE_OK      Success                                              */
-/*      VALIDATE_ERROR   Failure                                              */
-/*                                                                            */
-/******************************************************************************/
-int
-validate_fb(struct facial_block *fb);
-
-/******************************************************************************/
-/* Add a Facial Data Block to a Facial Block.                                 */
-/*                                                                            */
-/* Parameters:                                                                */
-/*   fdb    Pointer to the Facial Data Block record that will be added.       */
-/*   fb     Pointer to the Facial Block.                                      */
-/*                                                                            */
-/******************************************************************************/
-void
-add_fdb_to_fb(struct facial_data_block *fdb, struct facial_block *fb);
+// Quality values
+#define FRF_IMAGE_QUALITY_UNSPECIFIED		0
 
 /******************************************************************************/
 /* Components of the Feature Point Block                                      */
@@ -176,106 +74,12 @@ struct feature_point_block {
 	// Back pointer to the parent Facial Data Block
 	struct facial_data_block		*fdb;
 };
-typedef struct feature_point FPB;
+typedef struct feature_point_block FPB;
 
 /******************************************************************************/
-/* Allocate and initialize storage for a single Feature Point Block.          */
-/* The record will be initialized to 'NULL' values.                           */
-/*                                                                            */
-/* Parameters:                                                                */
-/*   fpb    Address of a pointer to the Feature Point Block that will be      */
-/*          allocated.                                                        */
-/*                                                                            */
-/* Returns:                                                                   */
-/*   0      Success                                                           */
-/*  -1      Failure                                                           */
-/*                                                                            */
+/* Representation of the Facial Data Block. This includes the Facial          */
+/* Information, list of Feature Points, Image Information, and Image Data.    */
 /******************************************************************************/
-int
-new_fpb(struct feature_point_block **fpb);
-
-/******************************************************************************/
-/* Free the storage for a single Feature Point Block.                         */
-/*                                                                            */
-/* Parameters:                                                                */
-/*   fpb    Pointer to the FPB structure that will be free'd.                 */
-/*                                                                            */
-/******************************************************************************/
-void
-free_fpb(struct feature_point_block *fpb);
-
-/******************************************************************************/
-/* Read a Feature Point Block from a file.                                    */
-/* This function does not do any validation of the data being read.           */
-/*                                                                            */
-/* Parameters:                                                                */
-/*   fp     The open file pointer.                                            */
-/*   fpb     Pointer to the Feature Point Block.                              */
-/*                                                                            */
-/* Returns:                                                                   */
-/*      READ_OK      Success                                                  */
-/*      READ_ERROR   Failure                                                  */
-/*                                                                            */
-/******************************************************************************/
-int
-read_fpb(FILE *fp, struct feature_point_block *fpb);
-
-/******************************************************************************/
-/* Write a Feature Point Block to a file.                                     */
-/*                                                                            */
-/* Parameters:                                                                */
-/*   fp     The open file pointer.                                            */
-/*   fpb    Pointer to the Feature Point Block.                               */
-/*                                                                            */
-/* Returns:                                                                   */
-/*      WRITE_OK      Success                                                 */
-/*      WRITE_ERROR   Failure                                                 */
-/*                                                                            */
-/******************************************************************************/
-int
-write_fpb(FILE *fp, struct feature_point_block *fpb);
-
-/******************************************************************************/
-/* Print a Feature Point Block to a file in human-readabe form.               */
-/*                                                                            */
-/* Parameters:                                                                */
-/*   fp     The open file pointer.                                            */
-/*   fpb    Pointer to the Feature Point Block.                               */
-/*                                                                            */
-/* Returns:                                                                   */
-/*      PRINT_OK      Success                                                 */
-/*      PRINT_ERROR   Failure                                                 */
-/*                                                                            */
-/******************************************************************************/
-int
-print_fpb(FILE *fp, struct feature_point_block *fpb);
-
-/******************************************************************************/
-/* Validate a Feature Point Block. Diagnostic messages are written to stderr. */
-/*                                                                            */
-/* Parameters:                                                                */
-/*   fpb    Pointer to the Feature Point Block.                               */
-/*                                                                            */
-/* Returns:                                                                   */
-/*      VALIDATE_OK      Success                                              */
-/*      VALIDATE_ERROR   Failure                                              */
-/*                                                                            */
-/******************************************************************************/
-int
-validate_fpb(struct feature_point_block *fpb);
-
-/******************************************************************************/
-/* Components of the Image Information Block                                  */
-/******************************************************************************/
-
-// Device types
-#define FRF_DEVICE_TYPE_UNSPECIFIED		0
-
-// Quality values
-#define FRF_IMAGE_QUALITY_UNSPECIFIED		0
-
-// Representation of the Facial Data Block. This includes the Facial 
-// Information, list of Feature Points, Image Information, and Image Data.
 #define FRF_FIB_LENGTH				20
 #define FRF_IIB_LENGTH				12
 #define FRF_IMAGE_DATA_TYPE_JPEG		0
@@ -322,6 +126,219 @@ struct facial_data_block {
 typedef struct facial_data_block FDB;
 
 /******************************************************************************/
+/* Representation of the Facial Block. This contains the Facial Header        */
+/* and the list of Facial Data Blocks.                                        */
+/******************************************************************************/
+struct facial_block {
+	char					format_id[4];
+	char					version_num[4];		
+	unsigned int				record_length;
+	unsigned short				num_faces;
+	TAILQ_HEAD(, facial_data_block)		facial_data;
+};
+typedef struct facial_block FB;
+
+/******************************************************************************/
+/* Allocate and initialize storage for a single Facial Block.                 */
+/* The record will be initialized to 'NULL' values.                           */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fb     Address of a pointer to the Facial Block that will be allocated.  */
+/*                                                                            */
+/* Returns:                                                                   */
+/*   0      Success                                                           */
+/*  -1      Failure                                                           */
+/*                                                                            */
+/******************************************************************************/
+int
+new_fb(FB **fb);
+
+/******************************************************************************/
+/* Free the storage for a single Facial Block.                                */
+/* This function does a "deep free", meaning that all memory allocated for    */
+/* any lists associated with the Facial Block will also be free'd.            */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fb     Pointer to the FB  structure that will be free'd.                 */
+/*                                                                            */
+/******************************************************************************/
+void
+free_fb(FB *fb);
+
+/******************************************************************************/
+/* Read a Facial Block from a file or data block, including the Facial Header */
+/* and all of the Facial Data blocks.                                         */
+/* This function does not do any validation of the data being read.           */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   fbdb   Pointer to the biometric data block containing facial data.       */
+/*   fb     Pointer to the Facial Block.                                      */
+/*                                                                            */
+/* Returns:                                                                   */
+/*      READ_OK      Success                                                  */
+/*      READ_ERROR   Failure                                                  */
+/*                                                                            */
+/******************************************************************************/
+int
+read_fb(FILE *fp, FB *fb);
+int
+scan_fb(BDB *fbdb, FB *fb);
+
+/******************************************************************************/
+/* Write a Facial Block to a file or memory buffer, including the Facial      */
+/* Header and all of the Facial Data blocks.                                  */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   fbdb   Pointer to the biometric data block containing facial data.       */
+/*   fb     Pointer to the Facial Block.                                      */
+/*                                                                            */
+/* Returns:                                                                   */
+/*      WRITE_OK      Success                                                 */
+/*      WRITE_ERROR   Failure                                                 */
+/*                                                                            */
+/******************************************************************************/
+int
+write_fb(FILE *fp, FB *fb);
+int
+push_fb(BDB *fbdb, FB *fb);
+
+/******************************************************************************/
+/* Print a Facial Block to a file in human-readable form. The Facial Header   */
+/* and all of the Facial Data blocks are printed.                             */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   fb     Pointer to the Facial Block.                                      */
+/*                                                                            */
+/* Returns:                                                                   */
+/*      PRINT_OK      Success                                                 */
+/*      PRINT_ERROR   Failure                                                 */
+/*                                                                            */
+/******************************************************************************/
+int
+print_fb(FILE *fp, FB *fb);
+
+/******************************************************************************/
+/* Validate a Facial Block, including the Facial Header and all of the        */
+/* Facial Data blocks. Diagnostic messages are written to stderr.             */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fb     Pointer to the Facial Block.                                      */
+/*                                                                            */
+/* Returns:                                                                   */
+/*      VALIDATE_OK      Success                                              */
+/*      VALIDATE_ERROR   Failure                                              */
+/*                                                                            */
+/******************************************************************************/
+int
+validate_fb(FB *fb);
+
+/******************************************************************************/
+/* Add a Facial Data Block to a Facial Block.                                 */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fdb    Pointer to the Facial Data Block record that will be added.       */
+/*   fb     Pointer to the Facial Block.                                      */
+/*                                                                            */
+/******************************************************************************/
+void
+add_fdb_to_fb(FDB *fdb, FB *fb);
+
+/******************************************************************************/
+/* Allocate and initialize storage for a single Feature Point Block.          */
+/* The record will be initialized to 'NULL' values.                           */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fpb    Address of a pointer to the Feature Point Block that will be      */
+/*          allocated.                                                        */
+/*                                                                            */
+/* Returns:                                                                   */
+/*   0      Success                                                           */
+/*  -1      Failure                                                           */
+/*                                                                            */
+/******************************************************************************/
+int
+new_fpb(FPB **fpb);
+
+/******************************************************************************/
+/* Free the storage for a single Feature Point Block.                         */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fpb    Pointer to the FPB structure that will be free'd.                 */
+/*                                                                            */
+/******************************************************************************/
+void
+free_fpb(FPB *fpb);
+
+/******************************************************************************/
+/* Read a Feature Point Block from a file or memory buffer.                   */
+/* This function does not do any validation of the data being read.           */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   fpbdb  Pointer to the biometric data block containing feature point data.*/
+/*   fpb    Pointer to the Feature Point Block.                               */
+/*                                                                            */
+/* Returns:                                                                   */
+/*      READ_OK      Success                                                  */
+/*      READ_ERROR   Failure                                                  */
+/*                                                                            */
+/******************************************************************************/
+int
+read_fpb(FILE *fp, FPB *fpb);
+int
+scan_fpb(BDB *fpbdb, FPB *fpb);
+
+/******************************************************************************/
+/* Write a Feature Point Block to a file or memory buffer.                    */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   fpbdb  Pointer to the biometric data block containing feature point data.*/
+/*   fpb    Pointer to the Feature Point Block.                               */
+/*                                                                            */
+/* Returns:                                                                   */
+/*      WRITE_OK      Success                                                 */
+/*      WRITE_ERROR   Failure                                                 */
+/*                                                                            */
+/******************************************************************************/
+int
+write_fpb(FILE *fp, FPB *fpb);
+int
+push_fpb(BDB *fpbdb, FPB *fpb);
+
+/******************************************************************************/
+/* Print a Feature Point Block to a file in human-readabe form.               */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   fpb    Pointer to the Feature Point Block.                               */
+/*                                                                            */
+/* Returns:                                                                   */
+/*      PRINT_OK      Success                                                 */
+/*      PRINT_ERROR   Failure                                                 */
+/*                                                                            */
+/******************************************************************************/
+int
+print_fpb(FILE *fp, FPB *fpb);
+
+/******************************************************************************/
+/* Validate a Feature Point Block. Diagnostic messages are written to stderr. */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fpb    Pointer to the Feature Point Block.                               */
+/*                                                                            */
+/* Returns:                                                                   */
+/*      VALIDATE_OK      Success                                              */
+/*      VALIDATE_ERROR   Failure                                              */
+/*                                                                            */
+/******************************************************************************/
+int
+validate_fpb(FPB *fpb);
+
+/******************************************************************************/
 /* Allocate and initialize storage for a single Facial Data Block.            */
 /* The record will be initialized to 'NULL' values.                           */
 /*                                                                            */
@@ -335,7 +352,7 @@ typedef struct facial_data_block FDB;
 /*                                                                            */
 /******************************************************************************/
 int
-new_fdb(struct facial_data_block **fdb);
+new_fdb(FDB **fdb);
 
 /******************************************************************************/
 /* Free the storage for a single Facial Data Block.                           */
@@ -351,14 +368,15 @@ new_fdb(struct facial_data_block **fdb);
 /*                                                                            */
 /******************************************************************************/
 void
-free_fdb(struct facial_data_block *fdb);
+free_fdb(FDB *fdb);
 
 /******************************************************************************/
-/* Read a Facial Data Block from a file.                                      */
+/* Read a Facial Data Block from a file or memory buffer.                     */
 /* This function does not do any validation of the data being read.           */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   fdbdb  Pointer to the biometric data block containing facial data block. */
 /*   fdb     Pointer to the Facial Data Block.                                */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -367,13 +385,16 @@ free_fdb(struct facial_data_block *fdb);
 /*                                                                            */
 /******************************************************************************/
 int
-read_fdb(FILE *fp, struct facial_data_block *fdb);
+read_fdb(FILE *fp, FDB *fdb);
+int
+scan_fdb(BDB *fdbdb, FDB *fdb);
 
 /******************************************************************************/
-/* Write a Facial Data Block to a file.                                       */
+/* Write a Facial Data Block to a file or memory buffer.                      */
 /*                                                                            */
 /* Parameters:                                                                */
 /*   fp     The open file pointer.                                            */
+/*   fdbdb  Pointer to the biometric data block containing facial data block. */
 /*   fdb    Pointer to the Facial Data Block.                                 */
 /*                                                                            */
 /* Returns:                                                                   */
@@ -382,7 +403,10 @@ read_fdb(FILE *fp, struct facial_data_block *fdb);
 /*                                                                            */
 /******************************************************************************/
 int
-write_fdb(FILE *fp, struct facial_data_block *fdb);
+write_fdb(FILE *fp, FDB *fdb);
+int
+push_fdb(BDB *fdbdb, FDB *fdb);
+
 
 /******************************************************************************/
 /* Print a Facial Data Block to a file in human-readable form.                */
@@ -397,7 +421,7 @@ write_fdb(FILE *fp, struct facial_data_block *fdb);
 /*                                                                            */
 /******************************************************************************/
 int
-print_fdb(FILE *fp, struct facial_data_block *fdb);
+print_fdb(FILE *fp, FDB *fdb);
 
 /******************************************************************************/
 /* Validate a Facial Data Block, including all of the associated Feature      */
@@ -412,7 +436,7 @@ print_fdb(FILE *fp, struct facial_data_block *fdb);
 /*                                                                            */
 /******************************************************************************/
 int
-validate_fdb(struct facial_data_block *fdb);
+validate_fdb(FDB *fdb);
 
 /******************************************************************************/
 /* Add a Feature Point Block to a Facial Data Block.                          */
@@ -424,7 +448,7 @@ validate_fdb(struct facial_data_block *fdb);
 /*                                                                            */
 /******************************************************************************/
 void
-add_fpb_to_fdb(struct feature_point_block *fpb, struct facial_data_block *fdb);
+add_fpb_to_fdb(FPB *fpb, FDB *fdb);
 
 /******************************************************************************/
 /* Add an image from a file to the Facial Data Block.  The image_len and      */
@@ -437,7 +461,7 @@ add_fpb_to_fdb(struct feature_point_block *fpb, struct facial_data_block *fdb);
 /*                                                                            */
 /******************************************************************************/
 int
-add_image_to_fdb(char *filename, struct facial_data_block *fdb);
+add_image_to_fdb(char *filename, FDB *fdb);
 
 // Min record length in the header
 #define FRF_MIN_RECORD_LENGTH	(FRF_FHB_LENGTH + FRF_FIB_LENGTH +	\

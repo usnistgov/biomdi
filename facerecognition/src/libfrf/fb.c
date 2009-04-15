@@ -25,20 +25,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <frf.h>
 #include <biomdimacro.h>
+#include <frf.h>
 
 int
-new_fb(struct facial_block **fb)
+new_fb(FB **fb)
 {
-	struct facial_block *lfb;
+	FB *lfb;
 
-	lfb = (struct facial_block *)malloc(sizeof(struct facial_block));
+	lfb = (FB *)malloc(sizeof(FB));
 	if (lfb == NULL) {
 		perror("Failed to allocate Facial Block");
 		return -1;
 	}
-	memset((void *)lfb, 0, sizeof(struct facial_block));
+	memset((void *)lfb, 0, sizeof(FB));
 	TAILQ_INIT(&lfb->facial_data);
 
 	*fb = lfb;
@@ -46,9 +46,9 @@ new_fb(struct facial_block **fb)
 }
 
 void
-free_fb(struct facial_block *fb)
+free_fb(FB *fb)
 {
-	struct facial_data_block *fdb;
+	FDB *fdb;
 
 	// Free the Facial Data Blocks contained within the Facial Block
 	while (!TAILQ_EMPTY(&fb->facial_data)) {
@@ -59,24 +59,24 @@ free_fb(struct facial_block *fb)
 	free(fb);
 }
 
-int
-read_fb(FILE *fp, struct facial_block *fb)
+static int
+internal_read_fb(FILE *fp, BDB *fbdb, FB *fb)
 {
 	unsigned int i;
 	int ret;
-	struct facial_data_block *fdb;
+	FDB *fdb;
 
 	// Format ID
-	OREAD(fb->format_id, 1, FRF_FORMAT_ID_LENGTH, fp);
+	OGET(fb->format_id, 1, FRF_FORMAT_ID_LENGTH, fp, fbdb);
 
 	// Version Number
-	OREAD(fb->version_num, 1, FRF_VERSION_NUM_LENGTH, fp);
+	OGET(fb->version_num, 1, FRF_VERSION_NUM_LENGTH, fp, fbdb);
 
 	// Length of Record
-	LREAD(&fb->record_length, fp);
+	LGET(&fb->record_length, fp, fbdb);
 
 	// Number of Faces
-	SREAD(&fb->num_faces, fp);
+	SGET(&fb->num_faces, fp, fbdb);
 
 	// Read the Facial Data Blocks
 	for (i = 1; i <= fb->num_faces; i++) {
@@ -84,7 +84,10 @@ read_fb(FILE *fp, struct facial_block *fb)
 			fprintf(stderr, "error allocating FDB %d\n", i);
 			goto err_out;
 		}
-		ret = read_fdb(fp, fdb);
+		if (fp != NULL)
+			ret = read_fdb(fp, fdb);
+		else
+			ret = scan_fdb(fbdb, fdb);
 		if (ret == READ_OK)
 			add_fdb_to_fb(fdb, fb);
 		else if (ret == READ_EOF)
@@ -102,21 +105,36 @@ err_out:
 }
 
 int
-write_fb(FILE *fp, struct facial_block *fb)
+read_fb(FILE *fp, FB *fb)
+{
+	return (internal_read_fb(fp, NULL, fb));
+}
+
+int
+scan_fb(BDB *fbdb, FB *fb)
+{
+	return (internal_read_fb(NULL, fbdb, fb));
+}
+
+static int
+internal_write_fb(FILE *fp, BDB *fbdb, FB *fb)
 {
 	int ret;
-	struct facial_data_block *fdb;
+	FDB *fdb;
 
-	OWRITE(fb->format_id, 1, FRF_FORMAT_ID_LENGTH, fp);
+	OPUT(fb->format_id, 1, FRF_FORMAT_ID_LENGTH, fp, fbdb);
 
-	OWRITE(fb->version_num, 1, FRF_VERSION_NUM_LENGTH, fp);
+	OPUT(fb->version_num, 1, FRF_VERSION_NUM_LENGTH, fp, fbdb);
 
-	LWRITE(fb->record_length, fp);
+	LPUT(fb->record_length, fp, fbdb);
 
-	SWRITE(fb->num_faces, fp);
+	SPUT(fb->num_faces, fp, fbdb);
 
 	TAILQ_FOREACH(fdb, &fb->facial_data, list) {
-		ret = write_fdb(fp, fdb);
+		if (fp != NULL)
+			ret = write_fdb(fp, fdb);
+		else
+			ret = push_fdb(fbdb, fdb);
 		if (ret != WRITE_OK)
 			goto err_out;
 	}
@@ -128,10 +146,22 @@ err_out:
 }
 
 int
-print_fb(FILE *fp, struct facial_block *fb)
+write_fb(FILE *fp, FB *fb)
+{
+	return (internal_write_fb(fp, NULL, fb));
+}
+
+int
+push_fb(BDB *fbdb, FB *fb)
+{
+	return (internal_write_fb(NULL, fbdb, fb));
+}
+
+int
+print_fb(FILE *fp, FB *fb)
 {
 	int ret;
-	struct facial_data_block *fdb;
+	FDB *fdb;
 
 	// Facial Header
 	FPRINTF(fp, "Format ID\t\t: %s\nSpec Version\t\t: %s\n",
@@ -155,7 +185,7 @@ err_out:
 }
 
 void
-add_fdb_to_fb(struct facial_data_block *fdb, struct facial_block *fb)
+add_fdb_to_fb(FDB *fdb, FB *fb)
 {
 	fdb->fb = fb;
 	TAILQ_INSERT_TAIL(&fb->facial_data, fdb, list);
