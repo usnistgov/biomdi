@@ -100,7 +100,8 @@ init_color_map()
 	int PURPLE = gdTrueColor(127, 0, 127);
 	int RED = gdTrueColor(255, 0, 0);
 	int YELLOW = gdTrueColor(255, 255, 0);
-	int GRAY = gdTrueColor(128, 128, 128);
+	int GRAY = gdTrueColor(220, 220, 220);
+	int WHITE = gdTrueColor(255, 255, 255);
 	colors[0][0] = RED;
 	colors[0][1] = BLUE;
 	colors[0][2] = GREEN;
