@@ -11,18 +11,20 @@
 .Ar m1file
 .Op Fl f Ar m1file2
 .Op Fl f Ar m1file3
-.Fl i
-.Ar imgin
+.Op Fl i Ar imgin
 .Fl o
 .Ar imgout
 .Op Fl p
+.Op Fl v Ar num
 .Pp
 .Sh DESCRIPTION
 The
 .Nm
 command is used to plot the minutiae contained in ANSI/INCITS 378-2004 
 compliant files over a fingerprint image. The image is contained in a file
-as raw format (8-bit grayscale). The output file is a JPEG or PNG file
+as raw format (8-bit grayscale). If the image file name is not given, then
+the minutiae are plotted on a single color background.
+The output file is a JPEG or PNG file
 containing the original image and plotted minutiae. Multiple M1 input files
 can be given.
 .Pp
@@ -49,11 +51,16 @@ Specifies the file containing the raw fingerprint image.
 Specifies the file to contain the output image.
 .It Fl p\ \&
 Create the output file in PNG format.
+.It Fl v\ \&num
+Plot the minutiae from the finger view specified. The view numbering starts
+at ``1'' (one), and the value must be less than the number of views in the file.
+If not given, the first view is plotted.
 .El
 .Sh EXAMPLES
-fmrplot -f m1.raw -i img.raw -o m1plotted.jpg
+fmrplot -f m1.raw -i img.raw -o m1plotted.jpg -v2
 .Pp
-Produces a JPEG image with the minutiae from the input M1 file plotted.
+Produces a JPEG image with the minutiae from the input M1 file's second
+finger view plotted.
 .Pp
 fmrplot -p -f m1-1.raw -f m1-2.raw -f m1-3.raw -i img.raw -o m1plotted.jpg
 .Pp

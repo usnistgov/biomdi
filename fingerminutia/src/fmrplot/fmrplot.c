@@ -41,9 +41,10 @@
 
 static int colors[MAXPLOTS][MAXTYPES];
 static int infilecount = 0;	// tracks the number of input FMR files
+static int view = 1;
 
-static int COMCOLOR;	// Will be set later, the color for the
-			//  center-of-minutiae
+static int COMCOLOR;	// Will be set later, the color for the minutiae center
+static int BACKCOLOR;	// Will be set later, the color for the bacground
 
 /******************************************************************************/
 /* Print a how-to-use the program message.                                    */
@@ -52,15 +53,16 @@ void
 usage()
 {
 	fprintf(stderr, 
-		"usage:\n\tfmrplot -f <m1file> [-f <m1file> ...] -i <imgfile> -o <outfile> [-p]\n"
+		"usage:\n\tfmrplot -f <m1file> [-f <m1file> ...] [-i <imgfile>] -o <outfile> [-p] [-v <num>]\n"
 		"\t\t -f:  Specifies the M1 input file(s)\n"
 		"\t\t -i:  Specifies the input image file\n"
 		"\t\t -o:  Specifies the output image file\n"
-		"\t\t -p:  Output a PNG file instead of JPEG\n");
+		"\t\t -p:  Output a PNG file instead of JPEG\n"
+		"\t\t -v:  The finger view number\n");
 }
 
 /* Global option indicators */
-int i_opt, f_opt, o_opt, p_opt;
+static int p_opt;
 
 /* Global file pointers */
 FILE *fmr_fp[MAXPLOTS] = {NULL};	// the FMR (378-2004) input files
@@ -98,6 +100,7 @@ init_color_map()
 	int PURPLE = gdTrueColor(127, 0, 127);
 	int RED = gdTrueColor(255, 0, 0);
 	int YELLOW = gdTrueColor(255, 255, 0);
+	int GRAY = gdTrueColor(128, 128, 128);
 	colors[0][0] = RED;
 	colors[0][1] = BLUE;
 	colors[0][2] = GREEN;
@@ -109,6 +112,7 @@ init_color_map()
 	colors[2][2] = PURPLE;
 
 	COMCOLOR = RED;
+	BACKCOLOR = GRAY;
 }
 
 /******************************************************************************/
@@ -130,9 +134,10 @@ get_options(int argc, char *argv[])
 {
 	char ch;
 	struct stat sb;
+	int i_opt, f_opt, o_opt, v_opt;
 
-	i_opt = f_opt = o_opt = 0;
-	while ((ch = getopt(argc, argv, "i:f:o:jp")) != -1) {
+	i_opt = f_opt = o_opt = v_opt = 0;
+	while ((ch = getopt(argc, argv, "i:f:o:jpv:")) != -1) {
 		switch (ch) {
 
 		    case 'f':
@@ -151,6 +156,13 @@ get_options(int argc, char *argv[])
 			if ((img_fp = fopen(optarg, "rb")) == NULL)
 				OPEN_ERR_EXIT(optarg);
 			i_opt = 1;
+			break;
+
+		    case 'v':	// View number
+			view = strtol(optarg, NULL, 10);
+        		if (view == 0 && errno == EINVAL)
+				usage();
+			v_opt = 1;
 			break;
 
 		    case 'o':
@@ -175,7 +187,7 @@ get_options(int argc, char *argv[])
 		}
 	}
 
-	if ((i_opt && o_opt && f_opt) == 0) {
+	if ((o_opt && f_opt) == 0) {
 		usage();
 		goto err_out;
 	}
@@ -187,9 +199,8 @@ err_out:
 }
 
 /******************************************************************************/
-/* Create a new raw image from an existing image, based on the size and       */
-/* resolution of the image.                                                   */
-/*
+/* Create a new raw image from an existing image (based on the image in a     */
+/* file) or just a gray background, and the desired size of the image.        */
 /******************************************************************************/
 int
 new_image(FILE *img_fp, int x_size, int y_size, gdImagePtr *img)
@@ -204,13 +215,16 @@ new_image(FILE *img_fp, int x_size, int y_size, gdImagePtr *img)
 	img_data = (unsigned char **)malloc(y_size * sizeof(char *));
 	if (img_data == NULL)
 		ALLOC_ERR_EXIT("memory for image data");
-	for (y = 0; y < y_size; y++) {
-		img_data[y] = (unsigned char *)malloc(x_size * sizeof(char));
-		if (img_data[y] == NULL)
-			ALLOC_ERR_EXIT("memory for image data");
-		if (fread(img_data[y], sizeof(unsigned char), x_size, img_fp)
-		    != x_size)
-			ERR_OUT("reading image file");
+	if (img_fp != NULL) {
+		for (y = 0; y < y_size; y++) {
+			img_data[y] = (unsigned char *)
+			    malloc(x_size * sizeof(char));
+			if (img_data[y] == NULL)
+				ALLOC_ERR_EXIT("memory for image data");
+			if (fread(img_data[y], sizeof(unsigned char), x_size,
+			    img_fp) != x_size)
+				ERR_OUT("reading image file");
+		}
 	}
 		
 	*img = gdImageCreateTrueColor(x_size, y_size);
@@ -219,9 +233,13 @@ new_image(FILE *img_fp, int x_size, int y_size, gdImagePtr *img)
 
 	for (y = 0; y < y_size; y++)
 		for (x = 0; x < x_size; x++) {
-			color = gdTrueColor(img_data[y][x],
-			    img_data[y][x], img_data[y][x]);
-			gdImageSetPixel(*img, x, y, color);
+			if (img_fp != NULL) {
+				color = gdTrueColor(img_data[y][x],
+				    img_data[y][x], img_data[y][x]);
+				gdImageSetPixel(*img, x, y, color);
+			} else {
+				gdImageSetPixel(*img, x, y, BACKCOLOR);
+			}
 		}
 
 	ret = 0;
@@ -339,25 +357,18 @@ main(int argc, char *argv[])
 
 		// Get all of the minutiae records
 		rcount = get_fvmr_count(fmr);
-		if (rcount > 0) {
-			fvmrs = (struct finger_view_minutiae_record **)
-			    malloc(rcount * 
-			    sizeof(struct finger_view_minutiae_record **));
-			if (fvmrs == NULL)
-				ALLOC_ERR_EXIT("FVMR Array");
-			if (get_fvmrs(fmr, fvmrs) != rcount)
-				ERR_OUT("getting FVMRs from FMR");
-
-			for (r = 0; r < rcount; r++)
-				if (plot_minutiae(img, fvmrs[r]) != 0)
-					ERR_OUT("plotting minutiae");
-
-		} else {
-			if (rcount == 0)
-				ERR_OUT("there are no FVMRs in the FMR");
-			else
-				ERR_OUT("retrieving FVMRs from FMR");
-		}
+		if (rcount == 0)
+			ERR_OUT("there are no FVMRs in the FMR");
+		if (rcount < view)
+			ERR_OUT("View number greater than count in FMR");
+		fvmrs = (struct finger_view_minutiae_record **) malloc(rcount * 
+		    sizeof(struct finger_view_minutiae_record **));
+		if (fvmrs == NULL)
+			ALLOC_ERR_EXIT("FVMR Array");
+		if (get_fvmrs(fmr, fvmrs) != rcount)
+			ERR_OUT("getting FVMRs from FMR");
+		if (plot_minutiae(img, fvmrs[view - 1]) != 0)
+			ERR_OUT("plotting minutiae");
 	}
 
 	// Write out the new image file as a JPEG
