@@ -1427,7 +1427,7 @@ get_fvmrs(struct finger_minutiae_record *fmr,
 /*   Count of FMD records.                                                    */
 /******************************************************************************/
 int
-get_minutiae_count(struct finger_view_minutiae_record *fvmr);
+get_fmd_count(struct finger_view_minutiae_record *fvmr);
 
 /******************************************************************************/
 /* Fill an array of pointers to the FMD records that are part of an FVMR.     */
@@ -1440,8 +1440,8 @@ get_minutiae_count(struct finger_view_minutiae_record *fvmr);
 /*   Count of FMD records, -1 if error.                                       */
 /******************************************************************************/
 int
-get_minutiae(struct finger_view_minutiae_record *fvmr,
-	     struct finger_minutiae_data *fmds[]);
+get_fmds(struct finger_view_minutiae_record *fvmr,
+         struct finger_minutiae_data *fmds[]);
 
 /******************************************************************************/
 /* Return the count of Ridge Count Data records contained in a FVMR.          */
@@ -1453,7 +1453,7 @@ get_minutiae(struct finger_view_minutiae_record *fvmr,
 /*   Count of RCD records.                                                    */
 /******************************************************************************/
 int
-get_ridge_record_count(struct finger_view_minutiae_record *fvmr);
+get_rcd_count(struct finger_view_minutiae_record *fvmr);
 
 /******************************************************************************/
 /* Fill an array of pointers to the RCD records that are part of a FVMR.      */
@@ -1466,7 +1466,7 @@ get_ridge_record_count(struct finger_view_minutiae_record *fvmr);
 /*   Count of RCD records, -1 if error.                                       */
 /******************************************************************************/
 int
-get_ridge_records(struct finger_view_minutiae_record *fvmr,
+get_rcds(struct finger_view_minutiae_record *fvmr,
 	 struct ridge_count_data *rcds[]);
 
 /******************************************************************************/
@@ -1479,7 +1479,7 @@ get_ridge_records(struct finger_view_minutiae_record *fvmr,
 /*   Count of Core Data records.                                              */
 /******************************************************************************/
 int
-get_core_record_count(struct finger_view_minutiae_record *fvmr);
+get_core_count(struct finger_view_minutiae_record *fvmr);
 
 /******************************************************************************/
 /* Fill an array of pointers to the Core Data records that are part of        */
@@ -1493,7 +1493,7 @@ get_core_record_count(struct finger_view_minutiae_record *fvmr);
 /*   Count of Core Data records, -1 if error.                                 */
 /******************************************************************************/
 int
-get_core_records(struct finger_view_minutiae_record *fvmr,
+get_cores(struct finger_view_minutiae_record *fvmr,
 	  struct core_data *cores[]);
 
 /******************************************************************************/
@@ -1506,7 +1506,7 @@ get_core_records(struct finger_view_minutiae_record *fvmr,
 /*   Count of Delta Data records.                                             */
 /******************************************************************************/
 int
-get_delta_record_count(struct finger_view_minutiae_record *fvmr);
+get_delta_count(struct finger_view_minutiae_record *fvmr);
 
 /******************************************************************************/
 /* Fill an array of pointers to the Delta Data records that are part of       */
@@ -1520,7 +1520,7 @@ get_delta_record_count(struct finger_view_minutiae_record *fvmr);
 /*   Count of Delta Data records, -1 if error.                                */
 /******************************************************************************/
 int
-get_delta_records(struct finger_view_minutiae_record *fvmr,
-	  struct delta_data *deltas[]);
+get_deltas(struct finger_view_minutiae_record *fvmr,
+           struct delta_data *deltas[]);
 
 #endif /* !_FMR_H */

@@ -267,7 +267,7 @@ plot_minutiae(gdImagePtr img, struct finger_view_minutiae_record *fvmr)
 	float fx, fy;
 	int x, y;
 
-	count = get_minutiae_count(fvmr);
+	count = get_fmd_count(fvmr);
 	if (count == 0)
 		ERR_OUT("FVMR contains no minutiae");
 
@@ -279,7 +279,7 @@ plot_minutiae(gdImagePtr img, struct finger_view_minutiae_record *fvmr)
 	if (fmds == NULL)
 		ALLOC_ERR_OUT("memory for minutiae data");
 
-	if (get_minutiae(fvmr, fmds) != count)
+	if (get_fmds(fvmr, fmds) != count)
 		ERR_OUT("getting minutiae data");
 
 	color_map = next_color_map();

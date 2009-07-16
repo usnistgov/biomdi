@@ -36,14 +36,14 @@ ansi2iso_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 	/* XXX Convert the finger quality from ANSI07 to ISO */
 	COPY_FVMR(ifvmr, ofvmr);
 	*length = FVMR_HEADER_LENGTH;
-	mcount = get_minutiae_count(ifvmr);
+	mcount = get_fmd_count(ifvmr);
 	if (mcount == 0)
 		return (0);
 
 	ifmds = (FMD **)malloc(mcount * sizeof(FMD *));
 	if (ifmds == NULL)
 		ALLOC_ERR_RETURN("FMD array");
-	if (get_minutiae(ifvmr, ifmds) != mcount)
+	if (get_fmds(ifvmr, ifmds) != mcount)
 		ERR_OUT("getting FMDs from FVMR");
 
 	conversion_factor = 1 / FMD_ISO_ANGLE_UNIT;
@@ -118,14 +118,14 @@ ansi2isocc_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 
 	COPY_FVMR(ifvmr, ofvmr);
 	*length = FVMR_HEADER_LENGTH;
-	mcount = get_minutiae_count(ifvmr);
+	mcount = get_fmd_count(ifvmr);
 	if (mcount == 0)
 		return (0);
 
 	ifmds = (FMD **)malloc(mcount * sizeof(FMD *));
 	if (ifmds == NULL)
 		ALLOC_ERR_RETURN("FMD array");
-	if (get_minutiae(ifvmr, ifmds) != mcount)
+	if (get_fmds(ifvmr, ifmds) != mcount)
 		ERR_OUT("getting FMDs from FVMR");
 
 	conversion_factor = 1 / FMD_ISOCC_ANGLE_UNIT;

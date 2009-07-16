@@ -234,12 +234,12 @@ copy_without_conversion(FMR *ifmr, FMR *ofmr, int fmr_type)
 	                        ALLOC_ERR_RETURN("Output FVMR");
 
 			COPY_FVMR(ifvmrs[r], ofvmr);
-			mcount = get_minutiae_count(ifvmrs[r]);
+			mcount = get_fmd_count(ifvmrs[r]);
 			if (mcount != 0) {
 				ifmds = (FMD **)malloc(mcount * sizeof(FMD *));
 				if (ifmds == NULL)
 					ALLOC_ERR_RETURN("FMD array");
-				if (get_minutiae(ifvmrs[r], ifmds) != mcount)
+				if (get_fmds(ifvmrs[r], ifmds) != mcount)
 					ERR_OUT("getting FMDs from FVMR");
 
 				for (m = 0; m < mcount; m++) {

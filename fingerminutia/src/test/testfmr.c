@@ -44,13 +44,13 @@ print_fmr_stats(FMR *fmr) {
 	get_fvmrs(fmr, fvmrs);
 	for (i = 0; i < count; i++) {
 		printf("FVMR %d has %d minutiae.\n", 
-			i, get_minutiae_count(fvmrs[i]));
+			i, get_fmd_count(fvmrs[i]));
 		printf("FVMR %d has %d core records.\n", 
-			i, get_core_record_count(fvmrs[i]));
+			i, get_core_count(fvmrs[i]));
 		printf("FVMR %d has %d delta records.\n", 
-			i, get_delta_record_count(fvmrs[i]));
+			i, get_delta_count(fvmrs[i]));
 		printf("FVMR %d has %d ridge data records.\n", 
-			i, get_ridge_record_count(fvmrs[i]));
+			i, get_rcd_count(fvmrs[i]));
 	}
 }
 

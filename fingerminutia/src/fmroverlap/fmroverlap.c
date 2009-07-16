@@ -193,8 +193,8 @@ compare_fvmrs(FVMR *fvmr1, FVMR *fvmr2)
         double meanpaireddistance = 0.0;
         double meanpairedangle2 = 0.0;  /* mean square diff in angle */
 
-	mcount[0] = get_minutiae_count(fvmr1);
-	mcount[1] = get_minutiae_count(fvmr2);
+	mcount[0] = get_fmd_count(fvmr1);
+	mcount[1] = get_fmd_count(fvmr2);
 
 	if ((fvmr1->finger_number != fvmr2->finger_number) ||
 	    (mcount[0] == 0) || (mcount[1] == 0))
@@ -207,14 +207,14 @@ compare_fvmrs(FVMR *fvmr1, FVMR *fvmr2)
 	fmds[0] = (FMD **)malloc(mcount[0] * sizeof(FMD *));
 	if (fmds[0] == NULL)
 		ALLOC_ERR_OUT("FMR Array");
-	if (get_minutiae(fvmr1, fmds[0]) != mcount[0])
+	if (get_fmds(fvmr1, fmds[0]) != mcount[0])
 		ERR_OUT("getting FMRs from first FVMR");
 
 
 	fmds[1] = (FMD **)malloc(mcount[1] * sizeof(FMD *));
 	if (fmds[1] == NULL)
 		ALLOC_ERR_OUT("FMR Array");
-	if (get_minutiae(fvmr2, fmds[1]) != mcount[1])
+	if (get_fmds(fvmr2, fmds[1]) != mcount[1])
 		ERR_OUT("getting FMRs from second FVMR");
 
 	if (v_opt > 1) {

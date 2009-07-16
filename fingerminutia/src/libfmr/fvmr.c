@@ -343,14 +343,14 @@ add_fedb_to_fvmr(struct finger_extended_data_block *fedb,
 /* Implementation of the higher level access routines.                        */
 /******************************************************************************/
 int
-get_minutiae_count(struct finger_view_minutiae_record *fvmr)
+get_fmd_count(struct finger_view_minutiae_record *fvmr)
 {
 	return (int)fvmr->number_of_minutiae;
 }
 
 int
-get_minutiae(struct finger_view_minutiae_record *fvmr,
-	     struct finger_minutiae_data *fmds[])
+get_fmds(struct finger_view_minutiae_record *fvmr,
+    struct finger_minutiae_data *fmds[])
 {
 	int count = 0;
 	struct finger_minutiae_data *fmd;
@@ -364,7 +364,7 @@ get_minutiae(struct finger_view_minutiae_record *fvmr,
 }
 
 int
-get_ridge_record_count(struct finger_view_minutiae_record *fvmr)
+get_rcd_count(struct finger_view_minutiae_record *fvmr)
 {
 	struct finger_extended_data *fed;
 	struct ridge_count_data *rcd;
@@ -385,8 +385,8 @@ get_ridge_record_count(struct finger_view_minutiae_record *fvmr)
 }
 
 int
-get_ridge_records(struct finger_view_minutiae_record *fvmr,
-	 struct ridge_count_data *rcds[])
+get_rcds(struct finger_view_minutiae_record *fvmr,
+    struct ridge_count_data *rcds[])
 {
 	struct finger_extended_data *fed;
 	struct ridge_count_data *rcd;
@@ -403,7 +403,7 @@ get_ridge_records(struct finger_view_minutiae_record *fvmr,
 }
 
 int
-get_core_record_count(struct finger_view_minutiae_record *fvmr)
+get_core_count(struct finger_view_minutiae_record *fvmr)
 {
 	struct finger_extended_data *fed;
 	int count = 0;
@@ -421,8 +421,8 @@ get_core_record_count(struct finger_view_minutiae_record *fvmr)
 }
 
 int
-get_core_records(struct finger_view_minutiae_record *fvmr,
-		 struct core_data *cores[])
+get_cores(struct finger_view_minutiae_record *fvmr,
+    struct core_data *cores[])
 {
 	struct finger_extended_data *fed;
 	struct core_data *core;
@@ -439,7 +439,7 @@ get_core_records(struct finger_view_minutiae_record *fvmr,
 }
 
 int
-get_delta_record_count(struct finger_view_minutiae_record *fvmr)
+get_delta_count(struct finger_view_minutiae_record *fvmr)
 {
 	struct finger_extended_data *fed;
 	int count = 0;
@@ -458,8 +458,8 @@ get_delta_record_count(struct finger_view_minutiae_record *fvmr)
 }
 
 int
-get_delta_records(struct finger_view_minutiae_record *fvmr,
-	   struct delta_data *deltas[])
+get_deltas(struct finger_view_minutiae_record *fvmr,
+    struct delta_data *deltas[])
 {
 	struct finger_extended_data *fed;
 	struct delta_data *delta;

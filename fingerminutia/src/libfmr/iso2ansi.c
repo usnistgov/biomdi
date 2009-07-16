@@ -49,14 +49,14 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 	ofvmr->y_resolution = ifvmr->fmr->y_resolution;
 
 	*length = FVMR_HEADER_LENGTH;
-	mcount = get_minutiae_count(ifvmr);
+	mcount = get_fmd_count(ifvmr);
 	if (mcount == 0)
 		return (0);
 
 	ifmds = (FMD **)malloc(mcount * sizeof(FMD *));
 	if (ifmds == NULL)
 		ALLOC_ERR_RETURN("FMD array");
-	if (get_minutiae(ifvmr, ifmds) != mcount)
+	if (get_fmds(ifvmr, ifmds) != mcount)
 		ERR_OUT("getting FMDs from FVMR");
 
 	/* The ISO minutia record uses all possible values for the
@@ -121,14 +121,14 @@ isocc2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 
 	COPY_FVMR(ifvmr, ofvmr);
 	*length = FVMR_HEADER_LENGTH;
-	mcount = get_minutiae_count(ifvmr);
+	mcount = get_fmd_count(ifvmr);
 	if (mcount == 0)
 		return (0);
 
 	ifmds = (FMD **)malloc(mcount * sizeof(FMD *));
 	if (ifmds == NULL)
 		ALLOC_ERR_RETURN("FMD array");
-	if (get_minutiae(ifvmr, ifmds) != mcount)
+	if (get_fmds(ifvmr, ifmds) != mcount)
 		ERR_OUT("getting FMDs from FVMR");
 
 	conversion_factor = FMD_ISOCC_ANGLE_UNIT;

@@ -161,14 +161,14 @@ copy_and_modify_fvmr(FVMR *src, FVMR *dst)
 	if (dst->extended != NULL)
 		dst->extended->fvmr = dst;
 
-	mcount = get_minutiae_count(src);
+	mcount = get_fmd_count(src);
 	if (mcount == 0)
 		return (0);
 
 	fmds = (FMD **)malloc(mcount * sizeof(FMD *));
 	if (fmds == NULL)
 		ALLOC_ERR_RETURN("FMD array");
-	if (get_minutiae(src, fmds) != mcount)
+	if (get_fmds(src, fmds) != mcount)
 		ERR_OUT("getting FMDs from FVMR");
 
 	for (m = 0; m < mcount; m++) {  

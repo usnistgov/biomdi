@@ -151,8 +151,8 @@ minex_verify(FILE *fp, struct finger_minutiae_record *fmr)
 
 	// Check each extended data record
 	// First we check for Core and Delta information
-	total_cores = get_core_record_count(fvmr);
-	total_deltas = get_delta_record_count(fvmr);
+	total_cores = get_core_count(fvmr);
+	total_deltas = get_delta_count(fvmr);
 	INFOP("Core count is %u, Delta count is %u", total_cores, total_deltas);
 
 	// Next, check for Ridge Count data, and if present, is it proper type?
@@ -164,7 +164,7 @@ minex_verify(FILE *fp, struct finger_minutiae_record *fmr)
 				lret = VALIDATE_ERROR;
 	}
 
-	total_ridges = get_ridge_record_count(fvmr);
+	total_ridges = get_rcd_count(fvmr);
 	INFOP("Ridge record count is %u", total_ridges);
 	if (lret != VALIDATE_OK) {
 	    ERRP("Ridge Count extended data not eight-neighbor");
@@ -180,7 +180,7 @@ minex_verify(FILE *fp, struct finger_minutiae_record *fmr)
 			ERRP("Allocatung Ridge Count data");
 			return(VALIDATE_ERROR);
 		}
-		if (get_ridge_records(fvmr, rcds) != total_ridges) {
+		if (get_rcds(fvmr, rcds) != total_ridges) {
 			ERRP("Rretrieving ridge count data");
 			return(VALIDATE_ERROR);
 		}

@@ -205,14 +205,14 @@ sort_and_copy_fvmr(FVMR *src, FVMR *dst)
 	dst->extended = NULL;
 	fmr_length += FEDB_HEADER_LENGTH;
 
-	mcount = get_minutiae_count(src);
+	mcount = get_fmd_count(src);
 	if (mcount == 0)
 		return (0);
 
 	fmds = (FMD **)malloc(mcount * sizeof(FMD *));
 	if (fmds == NULL)
 		ALLOC_ERR_RETURN("FMD array");
-	if (get_minutiae(src, fmds) != mcount)
+	if (get_fmds(src, fmds) != mcount)
 		ERR_OUT("getting FMDs from FVMR");
 
 	switch (sort_method) {

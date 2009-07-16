@@ -133,14 +133,14 @@ modify_fvmr_theta(FVMR *fvmr)
 	double isotheta;
 	int theta;
 
-	mcount = get_minutiae_count(fvmr);
+	mcount = get_fmd_count(fvmr);
 	if (mcount == 0)
 		return (0);
 
 	fmds = (FMD **)malloc(mcount * sizeof(FMD *));
 	if (fmds == NULL)
 		ALLOC_ERR_RETURN("FMD array");
-	if (get_minutiae(fvmr, fmds) != mcount)
+	if (get_fmds(fvmr, fmds) != mcount)
 		ERR_OUT("getting FMDs from FVMR");
 
 	for (m = 0; m < mcount; m++) {

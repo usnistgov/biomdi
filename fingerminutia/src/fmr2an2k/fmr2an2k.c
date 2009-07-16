@@ -71,7 +71,7 @@ usage()
 /* ANSI/NIST format (origin at lower-left), and from a pixel number to        */
 /* units of .01mm from the origin of the AN2K coordinate system.              */
 /******************************************************************************/
-void
+static void
 convert_xy(unsigned short x_size, unsigned short y_size,
 	   unsigned short x_res, unsigned short y_res,
 	   unsigned short fmr_x, unsigned short fmr_y, 
@@ -111,7 +111,7 @@ convert_xy(unsigned short x_size, unsigned short y_size,
 /******************************************************************************/
 /* Convert an angle (theta) value from FMR format to ANSI/NIST format.        */
 /******************************************************************************/
-void
+static void
 convert_theta(unsigned char fmr_theta, unsigned int *ansi_theta)
 {
 	// FMR angles are in increments of 2, so 45 = 90 degrees.
@@ -123,8 +123,8 @@ convert_theta(unsigned char fmr_theta, unsigned int *ansi_theta)
 /******************************************************************************/
 /* Convert the quality measure from FMR format to ANSI/NIST format.           */
 /******************************************************************************/
-void
-convert_quality(unsigned char fmr_qual, int *ansi_qual)
+static void
+convert_quality(unsigned char fmr_qual, unsigned int *ansi_qual)
 {
 	// XXX implement
 	*ansi_qual = 0;
@@ -133,7 +133,7 @@ convert_quality(unsigned char fmr_qual, int *ansi_qual)
 /******************************************************************************/
 /* Convert the minutia type from FMR format to ANSI/NIST format.              */
 /******************************************************************************/
-void
+static void
 convert_type(unsigned char fmr_type, char *ansi_type)
 {
 	switch (fmr_type) {
@@ -159,7 +159,7 @@ convert_type(unsigned char fmr_type, char *ansi_type)
 /*	 0 Success                                                            */
 /*	-1 Failure                                                            */
 /******************************************************************************/
-int
+static int
 create_type1(RECORD **anrecord) 
 {
 	ITEM *item;
@@ -262,7 +262,7 @@ err_out:
 /* Update the Type-1 record with new information on other records that are    */
 /* being added to the ANSI/NIST file.                                         */
 /******************************************************************************/
-int
+static int
 update_type1(ANSI_NIST *ansi_nist, RECORD *record, unsigned int type, 
 		unsigned int idc)
 {
@@ -335,7 +335,7 @@ err_out2:	// This exit point doesn't free any memory because the
 /*	 0 Success                                                            */
 /*	-1 Failure                                                            */
 /******************************************************************************/
-int
+static int
 create_type2(RECORD **anrecord, FILE *fp, unsigned int idc)
 {
 	FIELD *field = NULL;
@@ -406,7 +406,7 @@ err_out:
 /*	 0 Success                                                            */
 /*	-1 Failure                                                            */
 /******************************************************************************/
-int
+static int
 create_type9(RECORD **anrecord, struct finger_view_minutiae_record *fvmr, 
 	     unsigned int idc)
 {
@@ -478,7 +478,7 @@ create_type9(RECORD **anrecord, struct finger_view_minutiae_record *fvmr,
 		ERR_OUT("appending Type-9 field");
 
 	/*** 9.008 - Core position                             ***/ 
-	cnt = get_core_record_count(fvmr);
+	cnt = get_core_count(fvmr);
 	if (cnt > 0) {
 		if (new_ANSI_NIST_field(&field, TYPE_9_ID, CRP_ID) != 0)
 			ERR_OUT("allocating field");
@@ -488,7 +488,7 @@ create_type9(RECORD **anrecord, struct finger_view_minutiae_record *fvmr,
 		if (cds == NULL)
 			ALLOC_ERR_EXIT("Core data");
 
-		if (get_core_records(fvmr, cds) != cnt)
+		if (get_cores(fvmr, cds) != cnt)
 			ERR_OUT("retrieving core data");
 
 		for (i = 0; i < cnt; i++) {
@@ -512,7 +512,7 @@ create_type9(RECORD **anrecord, struct finger_view_minutiae_record *fvmr,
 		ERR_OUT("getting core record count");
 
 	/*** 9.009 - Delta(s) position                         ***/ 
-	cnt = get_delta_record_count(fvmr);
+	cnt = get_delta_count(fvmr);
 	if (cnt > 0) {
 		if (new_ANSI_NIST_field(&field, TYPE_9_ID, DLT_ID) != 0)
 			ERR_OUT("creating Type-9 field");
@@ -522,7 +522,7 @@ create_type9(RECORD **anrecord, struct finger_view_minutiae_record *fvmr,
 		if (dds == NULL)
 			ALLOC_ERR_EXIT("Delta data");
 
-		if (get_delta_records(fvmr, dds) != cnt)
+		if (get_deltas(fvmr, dds) != cnt)
 			ERR_OUT("retrieving delta data");
 
 		for (i = 0; i < cnt; i++) {
@@ -546,7 +546,7 @@ create_type9(RECORD **anrecord, struct finger_view_minutiae_record *fvmr,
 		ERR_OUT("getting delta record count");
 
 	/*** 9.010 - Number of minutiae                        ***/ 
-	mincnt = get_minutiae_count(fvmr);
+	mincnt = get_fmd_count(fvmr);
 	if (mincnt < 0)
 		ERR_OUT("getting minutiae count");
 
@@ -554,14 +554,14 @@ create_type9(RECORD **anrecord, struct finger_view_minutiae_record *fvmr,
 	APPEND_TYPE9_FIELD(lrecord, MIN_ID, buf);
 
 	/*** 9.011 - Minutiae ridge count indicator            ***/ 
-	rdgcnt = get_ridge_record_count(fvmr);
+	rdgcnt = get_rcd_count(fvmr);
 	if (rdgcnt > 0) {
 		rcds = (struct ridge_count_data **) malloc(
 			rdgcnt * sizeof(struct ridge_count_data **));
 		if (rcds == NULL)
 			ALLOC_ERR_EXIT("Ridge Count data");
 
-		if (get_ridge_records(fvmr, rcds) != rdgcnt)
+		if (get_rcds(fvmr, rcds) != rdgcnt)
 			ERR_OUT("retrieving ridge count data");
 
 		APPEND_TYPE9_FIELD(lrecord, RDG_ID, "1");
@@ -576,7 +576,7 @@ create_type9(RECORD **anrecord, struct finger_view_minutiae_record *fvmr,
 	if (fmds == NULL)
 		ALLOC_ERR_EXIT("Finger Minutiae data");
 
-	if (get_minutiae(fvmr, fmds) != mincnt)
+	if (get_fmds(fvmr, fmds) != mincnt)
 		ERR_OUT("retrieving minutiae data");
 
 	if (new_ANSI_NIST_field(&field, TYPE_9_ID, MRC_ID) != 0)
@@ -677,7 +677,7 @@ err_out:
 /*	 0 Success                                                            */
 /*	-1 Failure                                                            */
 /******************************************************************************/
-int
+static int
 create_type13(RECORD **anrecord, struct finger_view_minutiae_record *fvmr, 
 	    FILE *fp, unsigned int idc)
 {
@@ -731,7 +731,7 @@ FILE *text_fp = NULL;	// for the user-defined text (Type-2) record info
 /******************************************************************************/
 /* Close all open files.                                                      */
 /******************************************************************************/
-void
+static void
 close_files()
 {
 	if (fmr_fp != NULL)
@@ -749,7 +749,7 @@ close_files()
 /* based on those options.  This function will force an exit of the program   */
 /* on error.                                                                  */
 /******************************************************************************/
-void
+static void
 get_options(int argc, char *argv[])
 {
 	char ch;
