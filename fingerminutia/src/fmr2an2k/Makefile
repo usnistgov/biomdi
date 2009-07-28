@@ -9,7 +9,16 @@
 #
 include ../common.mk
 all: fmr2an2k.c
+#
+# OS-X has a libutil.dylib which clashes with NBIS' libutil.a, so the linking
+# is done separately with the options set to find libtuil.a first.
+#
+ifeq ($(OS), Darwin)
+	$(CC) -c $(CFLAGS) fmr2an2k.c -o fmr2an2k.o
+	$(LD) -search_paths_first $(COMMONLIBOPT) -L../../lib /usr/lib/crt1.o fmr2an2k.o -lc -lfmr -lan2k -lioutil -lutil -o fmr2an2k
+else
 	$(CC) $(CFLAGS) fmr2an2k.c -lfmr -lan2k -lioutil -lutil -o fmr2an2k
+endif
 	$(CP) fmr2an2k $(LOCALBIN)
 	$(CP) fmr2an2k.1 $(LOCALMAN)
 
