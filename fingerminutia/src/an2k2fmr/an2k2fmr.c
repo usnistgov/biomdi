@@ -35,6 +35,8 @@
 /*                  won't create the M1 file.                                 */
 /*                                                                            */
 /******************************************************************************/
+#define _XOPEN_SOURCE   1
+
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/types.h>

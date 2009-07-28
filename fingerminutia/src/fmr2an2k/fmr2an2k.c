@@ -32,6 +32,8 @@
 /*                  record information. See fmr2an2k(1) for information.      */
 /*                                                                            */
 /******************************************************************************/
+#define _XOPEN_SOURCE   1
+
 #include "fmr2an2k.h"
 #include <sys/param.h>
 #include <sys/stat.h>
