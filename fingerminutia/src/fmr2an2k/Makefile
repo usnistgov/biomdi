@@ -17,9 +17,9 @@ all: fmr2an2k.c
 # directory; by defauly, dynlibs are search across all directories first.
 #
 ifeq ($(OS), Darwin)
-	$(CC) -Wl,-search_paths_first $(CFLAGS) fmr2an2k.c -L$(LOCALLIB) $(LIBS) -o fmr2an2k
+	$(CC) -Wl,-search_paths_first $(CFLAGS) fmr2an2k.c $(LIBS) -o fmr2an2k
 else
-	$(CC) $(CFLAGS) fmr2an2k.c -L$(LOCALLIB) $(LIBS) -o fmr2an2k
+	$(CC) $(CFLAGS) fmr2an2k.c $(LIBS) -o fmr2an2k
 endif
 	$(CP) fmr2an2k $(LOCALBIN)
 	$(CP) fmr2an2k.1 $(LOCALMAN)
