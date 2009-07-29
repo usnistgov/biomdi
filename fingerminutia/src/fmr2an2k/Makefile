@@ -8,16 +8,18 @@
 # about its quality, reliability, or any other characteristic.
 #
 include ../common.mk
+LIBS:=-lc -lfmr -lan2k -lioutil -lutil
 all: fmr2an2k.c
+
 #
-# OS-X has a libutil.dylib which clashes with NBIS' libutil.a, so the linking
-# is done separately with the options set to find libtuil.a first.
+# OS-X has a libutil.dylib which clashes with NBIS' libutil.a, so the linker
+# is passed an option to search for static and dynamic libraries in each
+# directory; by defauly, dynlibs are search across all directories first.
 #
 ifeq ($(OS), Darwin)
-	$(CC) -c $(CFLAGS) fmr2an2k.c -o fmr2an2k.o
-	$(LD) -search_paths_first $(COMMONLIBOPT) -L../../lib /usr/lib/crt1.o fmr2an2k.o -lc -lfmr -lan2k -lioutil -lutil -o fmr2an2k
+	$(CC) -Wl,-search_paths_first $(CFLAGS) fmr2an2k.c -L$(LOCALLIB) $(LIBS) -o fmr2an2k
 else
-	$(CC) $(CFLAGS) fmr2an2k.c -lfmr -lan2k -lioutil -lutil -o fmr2an2k
+	$(CC) $(CFLAGS) fmr2an2k.c -L$(LOCALLIB) $(LIBS) -o fmr2an2k
 endif
 	$(CP) fmr2an2k $(LOCALBIN)
 	$(CP) fmr2an2k.1 $(LOCALMAN)
