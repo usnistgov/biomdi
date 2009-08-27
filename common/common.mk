@@ -90,4 +90,4 @@ $(MANPATH):
 # be searched prior to the 'standard' libraries, add the to the CFLAGS
 # variable.
 
-CFLAGS := -g -std=c99 -I$(BIOMDIINC) $(COMMONINCOPT) -I$(LOCALINC) -I$(INCPATH) $(COMMONLIBOPT) -L$(LOCALLIB) -L$(LIBPATH) $(EXTRACFLAGS)
+CFLAGS := -Wall -g -std=c99 -I$(BIOMDIINC) $(COMMONINCOPT) -I$(LOCALINC) -I$(INCPATH) $(COMMONLIBOPT) -L$(LOCALLIB) -L$(LIBPATH) $(EXTRACFLAGS)
