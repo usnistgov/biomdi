@@ -101,7 +101,7 @@ convert_xy(unsigned short x_size, unsigned short y_size,
 
 		// Because the coordinate system is based at 0, subtract one 
 		// from size
-		tsize = (float)y_size / factor - 1.0;
+		tsize = (float)(y_size - 1) / factor;
 		ty = (float)fmr_y / factor;
 		//*ansi_y = (unsigned short)((tsize - ty) + 0.5);
 		// NOT compensating for truncation appears more accurate
@@ -226,7 +226,7 @@ create_type1(RECORD **anrecord)
 	// Use the current UTC time string YYYYMMDDHHMMSS
 	tod = time(NULL);
 	tm = gmtime(&tod);
-	snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02",
+	snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02d",
 	    tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday, tm->tm_hour, 
 	    tm->tm_min, tm->tm_sec);
 	
@@ -342,7 +342,6 @@ create_type2(RECORD **anrecord, FILE *fp, unsigned int idc)
 {
 	FIELD *field = NULL;
 	SUBFIELD *subfield = NULL;
-	ITEM *item = NULL;
 	RECORD *lrecord;	// For local convenience
 	int field_num;
 	char buf[MAX_TYPE2_FIELD_SIZE + 1];
@@ -364,21 +363,23 @@ create_type2(RECORD **anrecord, FILE *fp, unsigned int idc)
 	while (1) {
 		// Read the field number, followed by single whitespace char,
 		// followed by the string to place in the field.
-		if (fscanf(fp, "%d", &field_num) < 0)
-			if (feof(fp))
+		if (fscanf(fp, "%d", &field_num) < 0) {
+			if (feof(fp)) {
 				break;
-			else
+			} else {
 				ERR_OUT("reading Type-2 buf file.\n");
-
+			}
+		}
 		fgetc(fp);	// skip the single whitespace char
 		s = fgets(buf, MAX_TYPE2_FIELD_SIZE, fp);
 		buf[strlen(buf) - 1] = '\0';
-		if (s == NULL)
-			if (feof(fp))
+		if (s == NULL) {
+			if (feof(fp)) {
 				break;
-			else
+			} else {
 				ERR_OUT("reading Type-2 buf file.\n");
-
+			}
+		}
 		/*** 2.xxx - User-defined field   ***/
 		if (value2subfield(&subfield, buf) != 0)
 			ERR_OUT("creating new Type-2 subfield");
@@ -683,13 +684,7 @@ static int
 create_type13(RECORD **anrecord, struct finger_view_minutiae_record *fvmr, 
 	    FILE *fp, unsigned int idc)
 {
-	FIELD *field = NULL;
-	SUBFIELD *subfield = NULL;
-	ITEM *item = NULL;
-	RECORD *lrecord;	// For local convenience
 	char fn[MAXPATHLEN];
-	char buf[32];
-	char *date_str;
 	unsigned char *imgdata;
 	int imgsize;
 

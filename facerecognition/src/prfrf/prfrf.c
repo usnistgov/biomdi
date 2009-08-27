@@ -166,13 +166,13 @@ int main(int argc, char *argv[])
 		}
 
 		// Optionally validate the FB
-		if (vflag) 
+		if (vflag) {
 			if (validate_fb(fb) != VALIDATE_OK) {
 			    fprintf(stdout, "Facial Image Record is invalid.\n");
 			} else {
 			    fprintf(stdout, "Facial Image Record is valid.\n");
 			}
-
+		}
 		// Dump the entire FB
 		fprintf(stdout, "------------ Record Contents ------------\n");
 		print_fb(stdout, fb);

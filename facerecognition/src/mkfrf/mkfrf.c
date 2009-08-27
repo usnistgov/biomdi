@@ -113,7 +113,6 @@ load_fdb(FILE *fp, struct facial_block *fb)
 	int i;
 	int ret;
 	char buf[MAXPATHLEN];
-	struct stat sb;
 
 	if (new_fdb(&fdb) < 0)
 		ALLOC_ERR_RETURN("Facial Data Block");
@@ -193,7 +192,6 @@ main(int argc, char *argv[])
 	struct facial_block *fb;
 	struct stat sb;
 	char ch;
-	int i, j;
 	int ret, exit_code;
 
 	h_opt = f_opt = o_opt = p_opt = 0;

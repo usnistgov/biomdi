@@ -88,12 +88,13 @@ int main(int argc, char *argv[])
 		else
 			total_length += iibdb->record_header.record_length;
 
-		if (vflag)
-			if (validate_iibdb(iibdb) != VALIDATE_OK)
+		if (vflag) {
+			if (validate_iibdb(iibdb) != VALIDATE_OK) {
 				INFOP("Iris Image Data Record is invalid");
-			else
+			} else {
 				INFOP("Iris Image Data Record is valid");
-
+			}
+		}
 		print_iibdb(stdout, iibdb);
 
 		free_iibdb(iibdb);

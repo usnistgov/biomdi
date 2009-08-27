@@ -111,7 +111,6 @@ int
 load_fivr(FILE *fp, struct finger_image_record *fir)
 {
 	struct finger_image_view_record *fivr;
-	int i;
 	int ret;
 	char filename[MAXPATHLEN];
 	char *buf;
@@ -184,7 +183,6 @@ main(int argc, char *argv[])
 	struct finger_image_record *fir;
 	struct stat sb;
 	char ch;
-	int i, j;
 	int ret, exit_code;
 	int out_type;
 	char pm;

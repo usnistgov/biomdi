@@ -96,7 +96,7 @@ convert_xy(unsigned short x_size, unsigned short y_size,
 		// from size
 		factor = (float)y_res / 1000;
 		ty = (float)ansi_y * factor;
-                *fmr_y = (unsigned short)(y_size - ty);
+                *fmr_y = (unsigned short)(y_size - 1 - ty);
 	} else 
 		*fmr_y = 0;
 
