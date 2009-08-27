@@ -42,7 +42,7 @@ usage()
 	fprintf(stderr, 
 	    "usage:\n"
 	    "\tfmr2fmr -i <infile> -ti <type> -o <outfile> -to <type>\n"
-	    "\t\t[-rx <res> -ry <res>]\n",
+	    "\t\t[-rx <res> -ry <res>]\n"
 	    "\twhere:\n"
 	    "\t   -i:  Specifies the input FMR file\n"
 	    "\t   -ti: Specifies the input file type\n"
@@ -213,7 +213,7 @@ copy_without_conversion(FMR *ifmr, FMR *ofmr, int fmr_type)
 	FVMR **ifvmrs = NULL;
 	FMD **ifmds = NULL;
 	FMD *ofmd;
-	int r, rcount, m, mcount, fvmr_len;
+	int r, rcount, m, mcount;
 	int retval;
 
 	retval = -1;			/* Assume failure, for now */

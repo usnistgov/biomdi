@@ -429,7 +429,6 @@ scan_fed(BDB *fmdb, struct finger_extended_data *fed)
 static int
 internal_write_fed(FILE *fp, BDB *fmdb, struct finger_extended_data *fed)
 {
-	int ret = WRITE_OK;
 
 	SPUT(fed->type_id, fp, fmdb);
 	SPUT(fed->length, fp, fmdb);

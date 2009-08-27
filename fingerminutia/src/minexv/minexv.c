@@ -53,7 +53,9 @@ minex_verify(FILE *fp, struct finger_minutiae_record *fmr)
 	int ret = VALIDATE_OK;
 	int lret;
 	struct finger_view_minutiae_record *fvmr;
+#if (MINEX04 || OMINEX)
 	struct finger_minutiae_data *fmd;
+#endif
 	struct finger_extended_data *fed;
 	struct ridge_count_data **rcds;
 	int total_cores, total_deltas, total_ridges;
@@ -228,7 +230,9 @@ main(int argc, char *argv[])
 #endif
 	FILE *fp;
 	struct finger_minutiae_record *fmr;
+#if (MINEX04)
 	int ch;
+#endif
 	int exit_code = EXIT_SUCCESS;
 
 #if (MINEX04)

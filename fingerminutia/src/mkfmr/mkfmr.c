@@ -164,12 +164,13 @@ load_rcs(FILE *fp, struct finger_view_minutiae_record *fvmr)
 		if (new_rcd(&rcd) != 0)
 			ALLOC_ERR_RETURN("Ridge Count record");
 		if (fscanf(fp, "%hhu %hhu %hhu",
-			&rcd->index_one, &rcd->index_two, &rcd->count) < 0)
-			if (feof(fp))
+		    &rcd->index_one, &rcd->index_two, &rcd->count) < 0) {
+			if (feof(fp)) {
 				break;
-			else
+			} else {
 				READ_ERR_RETURN("Ridge Count record");
-
+			}
+		}
 		add_rcd_to_rcdb(rcd, fed->rcdb);
 		length += RIDGE_COUNT_DATA_LENGTH;
 	}
@@ -231,12 +232,13 @@ load_cds(FILE *fp, struct finger_view_minutiae_record *fvmr)
 		else
 			ret = fscanf(fp, "%hu %hu", &cd->y_coord, &cd->x_coord);
 
-		if (ret < 0)
-			if (feof(fp))
+		if (ret < 0) {
+			if (feof(fp)) {
 				READ_ERR_RETURN("Core record, premature EOF");
-			else
+			} else {
 				READ_ERR_RETURN("Core record");
-
+			}
+		}
 		add_cd_to_cddb(cd, fed->cddb);
 		if (fed->cddb->core_type != CORE_TYPE_NONANGULAR)
 			length += CORE_DATA_MIN_LENGTH + CORE_ANGLE_LENGTH;
@@ -261,12 +263,13 @@ load_cds(FILE *fp, struct finger_view_minutiae_record *fvmr)
 		else
 			ret = fscanf(fp, "%hu %hu", &dd->y_coord, &dd->x_coord);
 
-		if (ret < 0)
-			if (feof(fp))
+		if (ret < 0) {
+			if (feof(fp)) {
 				READ_ERR_RETURN("Delta record, premature EOF");
-			else
+			} else {
 				READ_ERR_RETURN("Delta record");
-
+			}
+		}
 		add_dd_to_cddb(dd, fed->cddb);
 		if (fed->cddb->delta_type != DELTA_TYPE_NONANGULAR)
 			length += CORE_DATA_MIN_LENGTH + (3*DELTA_ANGLE_LENGTH);
@@ -301,8 +304,6 @@ main(int argc, char *argv[])
 
 	struct finger_minutiae_record *fmr;
 	struct finger_view_minutiae_record *fvmr;
-	struct finger_minutiae_data *fmd;
-	struct finger_extended_data *fedb;
 	struct stat sb;
 	char ch;
 	int i;

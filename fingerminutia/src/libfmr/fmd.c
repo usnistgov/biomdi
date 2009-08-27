@@ -293,7 +293,8 @@ print_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 /******************************************************************************/
 /* Find the center-of-mass for a set of minutiae.                             */
 /******************************************************************************/
-int find_center_of_minutiae_mass(FMD **fmds, int mcount, int *x, int *y)
+void
+find_center_of_minutiae_mass(FMD **fmds, int mcount, int *x, int *y)
 {
 	int lx, ly, i;
 

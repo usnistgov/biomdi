@@ -101,7 +101,6 @@ init_color_map()
 	int RED = gdTrueColor(255, 0, 0);
 	int YELLOW = gdTrueColor(255, 255, 0);
 	int GRAY = gdTrueColor(220, 220, 220);
-	int WHITE = gdTrueColor(255, 255, 255);
 	colors[0][0] = RED;
 	colors[0][1] = BLUE;
 	colors[0][2] = GREEN;
@@ -255,7 +254,7 @@ err_out:
 /******************************************************************************/
 /* Plot the minutiae from a finger view mintuiae record onto the image        */
 /* passed in as a parameter.                                                  */
-/*
+/*                                                                            */
 /******************************************************************************/
 int
 plot_minutiae(gdImagePtr img, struct finger_view_minutiae_record *fvmr)
@@ -326,7 +325,7 @@ main(int argc, char *argv[])
 	struct finger_view_minutiae_record **fvmrs = NULL;
 	gdImagePtr img;
 
-	int rcount, i, r;
+	int rcount, i;
 	int first = 1;
 
 	get_options(argc, argv);

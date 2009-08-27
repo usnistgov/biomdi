@@ -81,8 +81,6 @@ static unsigned int fmr_length;
 static FILE *in_fp = NULL;	// the FMR input file
 static FILE *out_fp = NULL;	// for the output file
 
-static long selected_minutiae_count;
-
 /******************************************************************************/
 /* Close all open files.                                                      */
 /******************************************************************************/

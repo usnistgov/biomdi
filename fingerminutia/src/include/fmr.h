@@ -561,7 +561,7 @@ free_fmd(struct finger_minutiae_data *fmd);
 /*   y      Pointer to the Y coordiniate of center, set on return             */
 /*                                                                            */
 /******************************************************************************/
-int
+void
 find_center_of_minutiae_mass(FMD **fmds, int mcount, int *x, int *y);
 
 /******************************************************************************/

@@ -82,7 +82,7 @@ static void
 get_options(int argc, char *argv[])
 {
 	int ch, i_opt, o_opt, q_opt;
-	char pm, *out_file;
+	char *out_file;
 	struct stat sb;
 	long qval;
 
@@ -150,7 +150,6 @@ static int
 copy_and_modify_fvmr(FVMR *src, FVMR *dst)
 {
 	FMD **fmds, *ofmd = NULL;
-	FEDB *fedb;
 	int m, mcount;
 
 	COPY_FVMR(src, dst);

@@ -147,6 +147,8 @@ distance2D(const FMD *a, const FMD *b)
 
 #define DEGTORAD(d)	((d) * M_PI / 180.0)
 
+#if 0
+/* distance3D is not used, but leave it in for future use. */
 static double
 distance3D(const FMD *a, const FMD *b)
 {
@@ -171,6 +173,7 @@ distance3D(const FMD *a, const FMD *b)
 	d = d / (MAX(0.25, fabs(cos(DEGTORAD(dtheta)))));
 	return (d);
 }
+#endif
 
 /*
  * Compare the minutia records contained in two finger view records.
@@ -187,7 +190,7 @@ compare_fvmrs(FVMR *fvmr1, FVMR *fvmr2)
 	int mcount[2];
         int mcount_common = 0;
 	unsigned char *paired[2] = {NULL, NULL};
-	int i, j, n, r, minj;
+	int i, j, r, minj;
 	double **dmat = NULL;
 	double mind, ratio;
         double meanpaireddistance = 0.0;
@@ -322,7 +325,7 @@ main(int argc, char *argv[])
 {
 	FMR *fmrs[2] = {NULL, NULL};
 	FVMR **fvmrs[2] = {NULL, NULL};
-	int i, j, fvmrcnt[2];
+	int i, fvmrcnt[2];
 	int exit_status = EXIT_FAILURE;
 
 	get_options(argc, argv);

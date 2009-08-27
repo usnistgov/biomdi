@@ -41,7 +41,6 @@ int main(int argc, char *argv[])
 	FILE *fp;
 	struct stat sb;
 	struct finger_minutiae_record *fmr;
-	int ch;
 	int ret;
 	unsigned int total_length;
 

@@ -203,7 +203,6 @@ internal_write_fvmr(FILE *fp, BDB *fmdb,
 {
 	struct finger_minutiae_data *fmd;
 	unsigned char cval;
-	unsigned short sval;
 	int ret;
 
 	/* ISO normal and compact card formats don't have a finger view
