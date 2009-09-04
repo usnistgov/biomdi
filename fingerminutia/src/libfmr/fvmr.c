@@ -279,7 +279,6 @@ int
 print_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 {
 	struct finger_minutiae_data *fmd;
-	int i;
 
 	if ((fvmr->format_std == FMR_STD_ANSI) ||
 	    (fvmr->format_std == FMR_STD_ANSI07) ||
@@ -305,7 +304,6 @@ print_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 		fprintf(fp, "\n");
 	}
 
-	i = 1;
 	TAILQ_FOREACH(fmd, &fvmr->minutiae_data, list) {
 		fprintf(fp, "(%03d) ", fmd->index);
 		if (print_fmd(fp, fmd) != PRINT_OK)

@@ -276,7 +276,7 @@ struct core_delta_data_block {
 	unsigned char			core_type;	// Only for ANSI
 	unsigned char			num_cores;
 	TAILQ_HEAD(, core_data)		cores;
-	unsigned char			delta_type;
+	unsigned char			delta_type;	// Only for ANSI
 	unsigned char			num_deltas;
 #define	cddb_endcopy			deltas
 	TAILQ_HEAD(, delta_data)	deltas;

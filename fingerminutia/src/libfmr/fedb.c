@@ -1284,7 +1284,7 @@ print_dd(FILE *fp, struct delta_data *dd)
 		
 	FPRINTF(fp, "\t\tCoordinate = (%u,%u), ", dd->x_coord, dd->y_coord);
 
-	if (dd->cddb->delta_type == DELTA_TYPE_ANGULAR)
+	if (type == DELTA_TYPE_ANGULAR)
 		FPRINTF(fp, "angles are %u,%u,%u\n",
 			dd->angle1, dd->angle2, dd->angle3);
 	else

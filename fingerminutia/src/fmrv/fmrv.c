@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
 		ALLOC_ERR_EXIT("Could not allocate FMR\n");
 
 	total_length = 0;
+	ret = READ_ERROR;
 	while (total_length < sb.st_size) {
 		ret = read_fmr(fp, fmr);
 		if (ret != READ_OK)

@@ -164,8 +164,8 @@ convert_type(unsigned char fmr_type, char *ansi_type)
 static int
 create_type1(RECORD **anrecord) 
 {
-	ITEM *item;
-	SUBFIELD *subfield;
+	ITEM *item = NULL;
+	SUBFIELD *subfield = NULL;
 	FIELD *field = NULL;
 	RECORD *lrecord;	// For local convenience
 	char buf[32];
@@ -417,8 +417,8 @@ create_type9(RECORD **anrecord, struct finger_view_minutiae_record *fvmr,
 	SUBFIELD *subfield = NULL;
 	ITEM *item = NULL;
 	RECORD *lrecord;	// For local convenience
-	struct finger_minutiae_data **fmds;
-	struct ridge_count_data **rcds;
+	struct finger_minutiae_data **fmds = NULL;
+	struct ridge_count_data **rcds = NULL;
 	struct core_data **cds;
 	struct delta_data **dds;
 	char buf[16];

@@ -79,6 +79,7 @@ internal_read_fmr(FILE *fp, BDB *fmdb, struct finger_minutiae_record *fmr)
 	int i;
 	int ret;
 
+	fvmr = NULL;
 	/* ISO normal and compact card formats have no record header, so
 	 * we just set some FMR fields, allocate one FVMR, and proceed to
 	 * read into that FVMR.
@@ -153,7 +154,7 @@ internal_read_fmr(FILE *fp, BDB *fmdb, struct finger_minutiae_record *fmr)
 	}
 
 	// Read the finger views
-        for (i = 1; i <= fmr->num_views; i++) {
+	for (i = 1; i <= fmr->num_views; i++) {
 		if (new_fvmr(fmr->format_std, &fvmr) < 0)
 			ERR_OUT("Could not allocate FVMR %d", i);
 

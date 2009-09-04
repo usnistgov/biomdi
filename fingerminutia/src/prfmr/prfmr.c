@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 	if ((argc < 2) || (argc > 5))
 		usage();
 
-	/* Default to readin an ANSI record */
+	/* Default to read in an ANSI record */
 	in_type = FMR_STD_ANSI;
 	while ((ch = getopt(argc, argv, "vt:")) != -1) {
 		switch (ch) {
@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
 	}
 
 	total_length = 0;
+	ret = READ_ERROR;
 	while (total_length < sb.st_size) {
 		ret = read_fmr(fp, fmr);
 		if (ret != READ_OK)
