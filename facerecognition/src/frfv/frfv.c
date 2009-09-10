@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
 		ALLOC_ERR_EXIT("Could not allocate Facial Block\n");
 
 	total_length = 0;
+	ret = READ_ERROR;
 	while (total_length < sb.st_size) {
 		ret = read_fb(fp, fb);
 		if (ret != READ_OK)

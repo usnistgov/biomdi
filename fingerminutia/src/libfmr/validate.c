@@ -29,8 +29,8 @@ validate_fmr(struct finger_minutiae_record *fmr)
 	struct finger_view_minutiae_record *fvmr;
 	int ret = VALIDATE_OK;
 	int error;
-	int min_hdr_len;
-	char *ver;
+	int min_hdr_len = 0;	/* shut up the static analyzer */
+	char *ver = NULL;
 
 	if ((fmr->format_std == FMR_STD_ANSI) ||
 	    (fmr->format_std == FMR_STD_ISO) ||

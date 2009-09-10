@@ -176,9 +176,9 @@ load_fivr(FILE *fp, struct finger_image_record *fir)
 int
 main(int argc, char *argv[])
 {
-	FILE *out_fp;	// for the output file
-	FILE *hdr_fp;	// the header input file
-	FILE *fivr_fp;	// the finger image view record files
+	FILE *out_fp = NULL;	// for the output file
+	FILE *hdr_fp = NULL;	// the header input file
+	FILE *fivr_fp = NULL;	// the finger image view record files
 	int h_opt, f_opt, o_opt, to_opt, p_opt;
 	struct finger_image_record *fir;
 	struct stat sb;

@@ -105,6 +105,7 @@ int main(int argc, char *argv[])
 	}
 
 	total_length = 0;
+	ret = READ_ERROR;
 	while (total_length < sb.st_size) {
 		ret = read_fir(fp, fir);
 		if (ret != READ_OK)

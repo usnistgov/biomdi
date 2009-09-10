@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
 		ERR_EXIT("Could not get stats on input file");
 
 	total_length = 0;
+	ret = READ_ERROR;	/* In case of zero length file */
 	while (total_length < sb.st_size) {
 		ret = read_iibdb(fp, iibdb);
 		if (ret != READ_OK)

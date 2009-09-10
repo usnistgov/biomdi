@@ -91,6 +91,7 @@ int main(int argc, char *argv[])
 		ALLOC_ERR_EXIT("Could not allocate FIR\n");
 
 	total_length = 0;
+	ret = READ_ERROR;	/* In case the file is empty */
 	while (total_length < sb.st_size) {
 		ret = read_fir(fp, fir);
 		if (ret != READ_OK)

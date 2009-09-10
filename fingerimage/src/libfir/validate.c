@@ -181,32 +181,38 @@ validate_impression_type(unsigned char code)
 int
 validate_fivr(struct finger_image_view_record *fivr)
 {
-	int ret = VALIDATE_OK;
+	int ret;
+	int status = VALIDATE_OK;
 
 	if (fivr->length < FIVR_HEADER_LENGTH) {
 		ERRP("Record length is less than minimum");
-		ret = VALIDATE_ERROR;
+		status = VALIDATE_ERROR;
 	}
 	ret = validate_finger_palm_position(fivr->finger_palm_position);
+	if (ret != VALIDATE_OK)
+		status = VALIDATE_ERROR;
 
 	if ((fivr->count_of_views < FIR_MIN_VIEW_COUNT) ||
 	    (fivr->count_of_views > FIR_MAX_VIEW_COUNT)) {
 		ERRP("Count of views is invalid");
-		ret = VALIDATE_ERROR;
+		status = VALIDATE_ERROR;
 	}
 	if ((fivr->view_number < FIR_MIN_VIEW_COUNT) ||
 	    (fivr->view_number > FIR_MAX_VIEW_COUNT)) {
 		ERRP("View number is invalid");
-		ret = VALIDATE_ERROR;
+		status = VALIDATE_ERROR;
 	}
 	if (fivr->quality != UNDEFINED_IMAGE_QUALITY) {
 		ERRP("Quality is invalid");
-		ret = VALIDATE_ERROR;
+		status = VALIDATE_ERROR;
 	}
 	ret = validate_impression_type(fivr->impression_type);
+	if (ret != VALIDATE_OK)
+		status = VALIDATE_ERROR;
+	
 	if (fivr->reserved != 0) {
 		ERRP("Reserved is not 0");
-		ret = VALIDATE_ERROR;
+		status = VALIDATE_ERROR;
 	}
-	return (ret);
+	return (status);
 }
