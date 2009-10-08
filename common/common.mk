@@ -14,6 +14,7 @@
 # and man pages are to be installed.
 
 BIOMDIINC := ../../../common/src/include
+BIOMDILIB := ../../../common/lib
 PREFIX := /usr/local
 INCPATH := $(PREFIX)/include
 LIBPATH := $(PREFIX)/lib
@@ -86,8 +87,10 @@ $(MANPATH):
 		@echo "$(MANPATH) does not exist";
 		exit 2
 
+#
+# Define CFLAGS for clients of the common BIOMDI APIs and libraries.
 # If there are any 'non-standard' include or lib directories that need to
 # be searched prior to the 'standard' libraries, add the to the CFLAGS
 # variable.
 
-CFLAGS := -Wall -g -std=c99 -I$(BIOMDIINC) $(COMMONINCOPT) -I$(LOCALINC) -I$(INCPATH) $(COMMONLIBOPT) -L$(LOCALLIB) -L$(LIBPATH) $(EXTRACFLAGS)
+CFLAGS := -Wall -g -std=c99 -I$(BIOMDIINC) $(COMMONINCOPT) -I$(LOCALINC) -I$(INCPATH) $(COMMONLIBOPT) -L$(BIOMDILIB) -lbiomdi -L$(LOCALLIB) -L$(LIBPATH) $(EXTRACFLAGS)

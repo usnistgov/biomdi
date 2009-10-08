@@ -23,11 +23,35 @@
 /* Records according to ISO/IEC 29109-4 conformance testing.                  */
 /******************************************************************************/
 
+static biomdiIntSet ansi_image_acquisition_levels = {
+	.is_size   = 6,
+	.is_values = {
+	    10, 20, 30, 31, 40, 41
+	}
+};
+static biomdiIntSet iso_image_acquisition_levels = {
+	.is_size   = 7,
+	.is_values = {
+	    10, 20, 30, 35, 31, 40, 41
+	}
+};
+static biomdiIntSet image_compression_algorithms = {
+	.is_size   = 6,
+	.is_values = {
+	    COMPRESSION_ALGORITHM_UNCOMPRESSED_NO_BIT_PACKED,
+	    COMPRESSION_ALGORITHM_UNCOMPRESSED_BIT_PACKED,
+	    COMPRESSION_ALGORITHM_COMPRESSED_WSQ,
+	    COMPRESSION_ALGORITHM_COMPRESSED_JPEG,
+	    COMPRESSION_ALGORITHM_COMPRESSED_JPEG2000,
+	    COMPRESSION_ALGORITHM_COMPRESSED_PNG
+	}
+};
 int
 validate_fir(struct finger_image_record *fir)
 {
 	int ret = VALIDATE_OK;
 	int hdr_len;
+	int check;
 
 	if (strncmp(fir->format_id, FIR_FORMAT_ID, FIR_FORMAT_ID_LEN) != 0) {
 		ERRP("Header format ID is [%s], should be [%s]",
@@ -54,12 +78,13 @@ validate_fir(struct finger_image_record *fir)
 			ret = VALIDATE_ERROR;
 		}
 	}
-	if ((fir->image_acquisition_level != 10) &&
-	    (fir->image_acquisition_level != 20) &&
-	    (fir->image_acquisition_level != 30) &&
-	    (fir->image_acquisition_level != 31) &&
-	    (fir->image_acquisition_level != 40) &&
-	    (fir->image_acquisition_level != 41)) {
+	if (fir->format_std == FIR_STD_ANSI)
+		check = inIntSet(ansi_image_acquisition_levels, 
+		    fir->image_acquisition_level);
+	else
+		check = inIntSet(iso_image_acquisition_levels, 
+		    fir->image_acquisition_level);
+	if (!check) {
 		ERRP("Image acquisition level is invalid");
 		ret = VALIDATE_ERROR;
 	}
@@ -93,18 +118,8 @@ validate_fir(struct finger_image_record *fir)
 		ERRP("Pixel depth is invalid");
 		ret = VALIDATE_ERROR;
 	}
-	if ((fir->image_compression_algorithm !=
-		COMPRESSION_ALGORITHM_UNCOMPRESSED_NO_BIT_PACKED) &&
-	    (fir->image_compression_algorithm !=
-		COMPRESSION_ALGORITHM_UNCOMPRESSED_BIT_PACKED) &&
-	    (fir->image_compression_algorithm !=
-		COMPRESSION_ALGORITHM_COMPRESSED_WSQ) &&
-	    (fir->image_compression_algorithm !=
-		COMPRESSION_ALGORITHM_COMPRESSED_JPEG) &&
-	    (fir->image_compression_algorithm !=
-		COMPRESSION_ALGORITHM_COMPRESSED_JPEG2000) &&
-	    (fir->image_compression_algorithm !=
-		COMPRESSION_ALGORITHM_COMPRESSED_PNG)) {
+	if (!inIntSet(image_compression_algorithms,
+	    fir->image_compression_algorithm)) {
 		ERRP("Image compression algorithm is invalid");
 		ret = VALIDATE_ERROR;
 	}
@@ -116,68 +131,54 @@ validate_fir(struct finger_image_record *fir)
 	return (ret);
 }
 
-static int
-validate_finger_palm_position(unsigned char code)
-{
-	switch (code) {
-	case UNKNOWN_FINGER:
-	case RIGHT_THUMB:
-	case RIGHT_INDEX:
-	case RIGHT_MIDDLE:
-	case RIGHT_RING:
-	case RIGHT_LITTLE:
-	case LEFT_THUMB:
-	case LEFT_INDEX:
-	case LEFT_MIDDLE:
-	case LEFT_RING:
-	case LEFT_LITTLE:
-	case PLAIN_RIGHT_FOUR:
-	case PLAIN_LEFT_FOUR:
-	case PLAIN_THUMBS:
-	case UNKNOWN_PALM:
-	case RIGHT_FULL_PALM:
-	case RIGHT_WRITERS_PALM:
-	case LEFT_FULL_PALM:
-	case LEFT_WRITERS_PALM:
-	case RIGHT_LOWER_PALM:
-	case RIGHT_UPPER_PALM:
-	case LEFT_LOWER_PALM:
-	case LEFT_UPPER_PALM:
-	case RIGHT_OTHER_PALM:
-	case LEFT_OTHER_PALM:
-	case RIGHT_INTERDIGITAL_PALM:
-	case RIGHT_THENAR_PALM:
-	case RIGHT_HYPOTHENAR_PALM:
-	case LEFT_INTERDIGITAL_PALM:
-	case LEFT_THENAR_PALM:
-	case LEFT_HYPOTHENAR_PALM:
-		return (VALIDATE_OK);
-		break;
-	default:
-		return (VALIDATE_ERROR);
-		break;
+static biomdiIntSet finger_palm_positions = {
+	.is_size   = 31,
+	.is_values = {
+	    UNKNOWN_FINGER,
+	    RIGHT_THUMB,
+	    RIGHT_INDEX,
+	    RIGHT_MIDDLE,
+	    RIGHT_RING,
+	    RIGHT_LITTLE,
+	    LEFT_THUMB,
+	    LEFT_INDEX,
+	    LEFT_MIDDLE,
+	    LEFT_RING,
+	    LEFT_LITTLE,
+	    PLAIN_RIGHT_FOUR,
+	    PLAIN_LEFT_FOUR,
+	    PLAIN_THUMBS,
+	    UNKNOWN_PALM,
+	    RIGHT_FULL_PALM,
+	    RIGHT_WRITERS_PALM,
+	    LEFT_FULL_PALM,
+	    LEFT_WRITERS_PALM,
+	    RIGHT_LOWER_PALM,
+	    RIGHT_UPPER_PALM,
+	    LEFT_LOWER_PALM,
+	    LEFT_UPPER_PALM,
+	    RIGHT_OTHER_PALM,
+	    LEFT_OTHER_PALM,
+	    RIGHT_INTERDIGITAL_PALM,
+	    RIGHT_THENAR_PALM,
+	    RIGHT_HYPOTHENAR_PALM,
+	    LEFT_INTERDIGITAL_PALM,
+	    LEFT_THENAR_PALM,
+	    LEFT_HYPOTHENAR_PALM
 	}
-}
-
-static int
-validate_impression_type(unsigned char code)
-{
-	switch (code) {
-	case LIVE_SCAN_PLAIN:
-	case LIVE_SCAN_ROLLED:
-	case NONLIVE_SCAN_PLAIN:
-	case NONLIVE_SCAN_ROLLED:
-	case LATENT:
-	case SWIPE:
-	case LIVE_SCAN_CONTACTLESS:
-		return (VALIDATE_OK);
-		break;
-	default:
-		return (VALIDATE_ERROR);
-		break;
+};
+static biomdiIntSet impression_types = {
+	.is_size   = 7,
+	.is_values = {
+	    LIVE_SCAN_PLAIN,
+	    LIVE_SCAN_ROLLED,
+	    NONLIVE_SCAN_PLAIN,
+	    NONLIVE_SCAN_ROLLED,
+	    LATENT,
+	    SWIPE,
+	    LIVE_SCAN_CONTACTLESS
 	}
-}
-
+};
 int
 validate_fivr(struct finger_image_view_record *fivr)
 {
@@ -188,10 +189,10 @@ validate_fivr(struct finger_image_view_record *fivr)
 		ERRP("Record length is less than minimum");
 		status = VALIDATE_ERROR;
 	}
-	ret = validate_finger_palm_position(fivr->finger_palm_position);
-	if (ret != VALIDATE_OK)
-		status = VALIDATE_ERROR;
-
+	if (!inIntSet(finger_palm_positions, fivr->finger_palm_position)) {
+		ERRP("Finger position is invalid");
+		ret = VALIDATE_ERROR;
+	}
 	if ((fivr->count_of_views < FIR_MIN_VIEW_COUNT) ||
 	    (fivr->count_of_views > FIR_MAX_VIEW_COUNT)) {
 		ERRP("Count of views is invalid");
@@ -206,10 +207,10 @@ validate_fivr(struct finger_image_view_record *fivr)
 		ERRP("Quality is invalid");
 		status = VALIDATE_ERROR;
 	}
-	ret = validate_impression_type(fivr->impression_type);
-	if (ret != VALIDATE_OK)
-		status = VALIDATE_ERROR;
-	
+	if (!inIntSet(impression_types, fivr->impression_type)) {
+		ERRP("Finger position is invalid");
+		ret = VALIDATE_ERROR;
+	}
 	if (fivr->reserved != 0) {
 		ERRP("Reserved is not 0");
 		status = VALIDATE_ERROR;

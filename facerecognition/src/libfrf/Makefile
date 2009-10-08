@@ -25,7 +25,7 @@ endif
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
 	$(CC) -c $(CFLAGS) $(SOURCES)
-	libtool -dynamic -o libfrf.dylib -lc $(EXTRALIBS) $(OBJECTS)
+	libtool -dynamic -o libfrf.dylib -lc -lbiomdi $(EXTRALIBS) -L$(BIOMDILIB) $(OBJECTS)
 	$(CP) libfrf.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)

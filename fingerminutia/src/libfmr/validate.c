@@ -118,6 +118,17 @@ validate_fmr(struct finger_minutiae_record *fmr)
 	return (ret);
 }
 
+static biomdiIntSet impressions = {
+	.is_size   = 6,
+	.is_values = {
+	    LIVE_SCAN_PLAIN,
+	    LIVE_SCAN_ROLLED,
+	    NONLIVE_SCAN_PLAIN,
+	    NONLIVE_SCAN_ROLLED,
+	    SWIPE,
+	    LIVE_SCAN_CONTACTLESS
+	}
+};
 int
 validate_fvmr(struct finger_view_minutiae_record *fvmr)
 {
@@ -162,12 +173,7 @@ validate_fvmr(struct finger_view_minutiae_record *fvmr)
 		}
 
 		// Validate impression type code
-		if ((fvmr->impression_type != LIVE_SCAN_PLAIN) &&
-		    (fvmr->impression_type != LIVE_SCAN_ROLLED) &&
-		    (fvmr->impression_type != NONLIVE_SCAN_PLAIN) &&
-		    (fvmr->impression_type != NONLIVE_SCAN_ROLLED) &&
-		    (fvmr->impression_type != SWIPE) &&
-		    (fvmr->impression_type != LIVE_SCAN_CONTACTLESS)) {
+		if (!inIntSet(impressions, fvmr->impression_type)) {
 			ERRP("Impression Type %u is invalid",
 				fvmr->impression_type);
 			ret = VALIDATE_ERROR;
@@ -204,6 +210,14 @@ validate_fvmr(struct finger_view_minutiae_record *fvmr)
 	return ret;
 }
 
+static biomdiIntSet types = {
+	.is_size   = 3,
+	.is_values = {
+	    FMD_MINUTIA_TYPE_OTHER,
+	    FMD_MINUTIA_TYPE_RIDGE_ENDING,
+	    FMD_MINUTIA_TYPE_BIFURCATION
+	}
+};
 int
 validate_fmd(struct finger_minutiae_data *fmd)
 {
@@ -233,9 +247,7 @@ validate_fmd(struct finger_minutiae_data *fmd)
 	}
 	
 	// Minutia type is one of these values
-	if ((fmd->type != FMD_MINUTIA_TYPE_OTHER) &
-	    (fmd->type != FMD_MINUTIA_TYPE_RIDGE_ENDING) &
-	    (fmd->type != FMD_MINUTIA_TYPE_BIFURCATION)) {
+	if (!inIntSet(types, fmd->type)) {
 		ERRP("Minutia Type %u is not valid", fmd->type);
 		ret = VALIDATE_ERROR;
 	}
@@ -323,6 +335,14 @@ validate_fed(struct finger_extended_data *fed)
  * This routine will validate the entire record, even if a validation error is
  * encountered at any point.
  */
+static biomdiIntSet methods = {
+	.is_size   = 3,
+	.is_values = {
+	    RCE_NONSPECIFIC,
+	    RCE_FOUR_NEIGHBOR,
+	    RCE_EIGHT_NEIGHBOR
+	}
+};
 int
 validate_rcdb(struct ridge_count_data_block *rcdb)
 {
@@ -330,9 +350,7 @@ validate_rcdb(struct ridge_count_data_block *rcdb)
 	int ret = VALIDATE_OK;
 
 	// Test the extraction method
-	if ((rcdb->method != RCE_NONSPECIFIC) &&
-	    (rcdb->method != RCE_FOUR_NEIGHBOR) &&
-	    (rcdb->method != RCE_EIGHT_NEIGHBOR)) {
+	if (!inIntSet(methods, rcdb->method)) {
 		ERRP("Extraction method of %u undefined", rcdb->method);
 		ret = VALIDATE_ERROR;
 	}

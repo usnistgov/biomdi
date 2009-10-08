@@ -93,7 +93,7 @@ add_fivr_to_fir(struct finger_image_view_record *fivr,
 }
 
 /******************************************************************************/
-/* Implement the interface for reading/writing/verifying finger image records */
+/* Implement the interface for reading/writing/printing finger image records  */
 /******************************************************************************/
 int
 read_fir(FILE *fp, struct finger_image_record *fir)
@@ -120,8 +120,13 @@ read_fir(FILE *fp, struct finger_image_record *fir)
 
 	// Capture Eqpt Compliance/Scanner ID
 	SREAD(&sval, fp);
-	fir->scanner_id = sval & HDR_SCANNER_ID_MASK;
-	fir->compliance = (sval & HDR_COMPLIANCE_MASK) >> HDR_COMPLIANCE_SHIFT;
+	if (fir->format_std == FIR_STD_ANSI) {
+		fir->scanner_id = sval & HDR_SCANNER_ID_MASK;
+		fir->compliance = (sval & HDR_COMPLIANCE_MASK) >>
+		    HDR_COMPLIANCE_SHIFT;
+	} else {
+		fir->scanner_id = sval & HDR_SCANNER_ID_MASK;
+	}
 
 	SREAD(&fir->image_acquisition_level, fp);
 	CREAD(&fir->num_fingers_or_palm_images, fp);
@@ -183,8 +188,13 @@ write_fir(FILE *fp, struct finger_image_record *fir)
 		SWRITE(fir->product_identifier_type, fp);
 	}
 
-	sval = (fir->compliance << HDR_COMPLIANCE_SHIFT) | fir->scanner_id;
-	SWRITE(sval, fp);
+	if (fir->format_std == FIR_STD_ANSI) {
+		sval = (fir->compliance << HDR_COMPLIANCE_SHIFT) |
+		    fir->scanner_id;
+		SWRITE(sval, fp);
+	} else {
+		SWRITE(fir->scanner_id, fp);
+	}
 
 	SWRITE(fir->image_acquisition_level, fp);
         CWRITE(fir->num_fingers_or_palm_images, fp);
@@ -229,19 +239,23 @@ print_fir(FILE *fp, struct finger_image_record *fir)
 		    fir->product_identifier_type);
 	}
 
-	FPRINTF(fp, "Capture Eqpt\t\t\t: Compliance, ");
-	if (fir->compliance == 0) {
-		FPRINTF(fp, "None given");
-	} else {
-		if (fir->compliance & HDR_APPENDIX_F_MASK) {
-			FPRINTF(fp, "Appendix F");
+	if (fir->format_std == FIR_STD_ANSI) {
+		FPRINTF(fp, "Capture Eqpt\t\t\t: Compliance, ");
+		if (fir->compliance == 0) {
+			FPRINTF(fp, "None given");
 		} else {
-			FPRINTF(fp, "Unknown");
+			if (fir->compliance & HDR_APPENDIX_F_MASK) {
+				FPRINTF(fp, "Appendix F");
+			} else {
+				FPRINTF(fp, "Unknown");
+			}
 		}
+		FPRINTF(fp, "; ID, 0x%03x\n", fir->scanner_id);
+		FPRINTF(fp, "Image acquisition level\t\t: %u\n",
+		    fir->image_acquisition_level);
+	} else {
+		FPRINTF(fp, "Capture Device ID: 0x%04x\n", fir->scanner_id);
 	}
-	FPRINTF(fp, "; ID, 0x%03x\n", fir->scanner_id);
-	FPRINTF(fp, "Image acquisition level\t\t: %u\n",
-	    fir->image_acquisition_level);
 	FPRINTF(fp, "Number of images\t\t: %u\n",
 	    fir->num_fingers_or_palm_images);
 

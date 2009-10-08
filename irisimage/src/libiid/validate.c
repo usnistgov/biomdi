@@ -49,6 +49,14 @@ validate_iih(IIH *iih)
 	return (ret);
 }
 
+static biomdiIntSet eye_positions = {
+	.is_size   = 3,
+	.is_values = {
+	    IID_EYE_UNDEF,
+	    IID_EYE_RIGHT,
+	    IID_EYE_LEFT,
+	}
+};
 int
 validate_ibsh(IBSH *ibsh)
 {
@@ -56,9 +64,7 @@ validate_ibsh(IBSH *ibsh)
 	int error;
 	IIH *iih;
 
-	if ((ibsh->eye_position != IID_EYE_UNDEF) &&
-	    (ibsh->eye_position != IID_EYE_RIGHT) &&
-	    (ibsh->eye_position != IID_EYE_LEFT)) {
+	if (!inIntSet(eye_positions, ibsh->eye_position)) {
 		ERRP("Eye Position 0x%02hhX invalid", ibsh->eye_position);
 		ret = VALIDATE_ERROR;
 	}
@@ -72,6 +78,36 @@ validate_ibsh(IBSH *ibsh)
 	return (ret);
 }
 
+static biomdiIntSet kinds_of_imagery = {
+	.is_size   = 5,
+	.is_values = {
+	    IID_IMAGE_KIND_RECTLINEAR_NO_ROI_NO_CROPPING,
+	    IID_IMAGE_KIND_RECTLINEAR_NO_ROI_CROPPING,
+	    IID_IMAGE_KIND_RECTLINEAR_MASKING_CROPPING,
+	    IID_IMAGE_KIND_UNSEGMENTED_POLAR,
+	    IID_IMAGE_KIND_RECTILINEAR_UNSEGMENTED_POLAR,
+	}
+};
+static biomdiIntSet image_formats = {
+	.is_size   = 8,
+	.is_values = {
+	    IID_IMAGEFORMAT_MONO_RAW,
+	    IID_IMAGEFORMAT_RGB_RAW,
+	    IID_IMAGEFORMAT_MONO_JPEG,
+	    IID_IMAGEFORMAT_RGB_JPEG,
+	    IID_IMAGEFORMAT_MONO_JPEG_LS,
+	    IID_IMAGEFORMAT_RGB_JPEG_LS,
+	    IID_IMAGEFORMAT_MONO_JPEG2000,
+	    IID_IMAGEFORMAT_RGB_JPEG2000
+	}
+};
+static biomdiIntSet image_transformations = {
+	.is_size   = 2,
+	.is_values = {
+	    IID_TRANS_UNDEF,
+	    IID_TRANS_STD
+	}
+};
 int
 validate_iibdb(IIBDB *iibdb)
 {
@@ -105,14 +141,7 @@ validate_iibdb(IIBDB *iibdb)
 			break;
 		}
 	}
-	if ((rh.kind_of_imagery !=
-		IID_IMAGE_KIND_RECTLINEAR_NO_ROI_NO_CROPPING) &&
-	    (rh.kind_of_imagery != IID_IMAGE_KIND_RECTLINEAR_NO_ROI_CROPPING) &&
-	    (rh.kind_of_imagery !=
-		IID_IMAGE_KIND_RECTLINEAR_MASKING_CROPPING) &&
-	    (rh.kind_of_imagery != IID_IMAGE_KIND_UNSEGMENTED_POLAR) &&
-	    (rh.kind_of_imagery !=
-		IID_IMAGE_KIND_RECTILINEAR_UNSEGMENTED_POLAR)) {
+	if (!inIntSet(kinds_of_imagery, rh.kind_of_imagery)) {
 		ERRP("Kind of imagery %hhu invalid", rh.kind_of_imagery);
 		ret = VALIDATE_ERROR;
 	}
@@ -123,19 +152,11 @@ validate_iibdb(IIBDB *iibdb)
 	//XXX Should we check bitfields in iris image properties?
 	//XXX should we check iris diameter against image size?
 
-	if ((rh.image_format != IID_IMAGEFORMAT_MONO_RAW) &&
-	    (rh.image_format != IID_IMAGEFORMAT_RGB_RAW) &&
-	    (rh.image_format != IID_IMAGEFORMAT_MONO_JPEG) &&
-	    (rh.image_format != IID_IMAGEFORMAT_RGB_JPEG) &&
-	    (rh.image_format != IID_IMAGEFORMAT_MONO_JPEG_LS) &&
-	    (rh.image_format != IID_IMAGEFORMAT_RGB_JPEG_LS) &&
-	    (rh.image_format != IID_IMAGEFORMAT_MONO_JPEG2000) &&
-	    (rh.image_format != IID_IMAGEFORMAT_RGB_JPEG2000)) {
+	if (!inIntSet(image_formats, rh.image_format)) {
 		ERRP("Image format 0x%04hX invalid", rh.image_format);
 		ret = VALIDATE_ERROR;
 	}
-	if ((rh.image_transformation != IID_TRANS_UNDEF) &&
-	    (rh.image_transformation != IID_TRANS_STD)) {
+	if (!inIntSet(image_transformations, rh.image_transformation)) {
 		ERRP("Image transformation %hhu invalid",
 		    rh.image_transformation);
 		ret = VALIDATE_ERROR;

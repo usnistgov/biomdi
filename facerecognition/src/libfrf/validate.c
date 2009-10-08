@@ -65,6 +65,59 @@ validate_fb(struct facial_block *fb)
 	return (ret);
 }
 
+static biomdiIntSet genders = {
+	.is_size   = 4,
+	.is_values = {
+	    GENDER_UNSPECIFIED,
+	    GENDER_MALE,
+	    GENDER_FEMALE,
+	    GENDER_UNKNOWN
+	}
+};
+static biomdiIntSet eye_colors = {
+	.is_size   = 9,
+	.is_values = {
+	    EYE_COLOR_UNSPECIFIED,
+	    EYE_COLOR_BLUE,
+	    EYE_COLOR_BROWN,
+	    EYE_COLOR_GREEN,
+	    EYE_COLOR_HAZEL,
+	    EYE_COLOR_MAROON,
+	    EYE_COLOR_MULTI,
+	    EYE_COLOR_PINK,
+	    EYE_COLOR_UNKNOWN
+	}
+};
+static biomdiIntSet hair_colors = {
+	.is_size   = 16,
+	.is_values = {
+	    HAIR_COLOR_UNSPECIFIED,
+	    HAIR_COLOR_BALD,
+	    HAIR_COLOR_BLACK,
+	    HAIR_COLOR_BLONDE,
+	    HAIR_COLOR_BROWN,
+	    HAIR_COLOR_GRAY,
+	    HAIR_COLOR_RED,
+	    HAIR_COLOR_BLUE,
+	    HAIR_COLOR_GREEN,
+	    HAIR_COLOR_ORANGE,
+	    HAIR_COLOR_PINK,
+	    HAIR_COLOR_SANDY,
+	    HAIR_COLOR_AUBURN,
+	    HAIR_COLOR_WHITE,
+	    HAIR_COLOR_STRAWBERRY,
+	    HAIR_COLOR_UNKNOWN
+	}
+};
+static biomdiIntSet face_image_types = {
+	.is_size   = 4,
+	.is_values = {
+	    FACE_IMAGE_TYPE_BASIC,
+	    FACE_IMAGE_TYPE_FULL_FRONTAL,
+	    FACE_IMAGE_TYPE_TOKEN_FRONTAL,
+	    FACE_IMAGE_TYPE_OTHER
+	}
+};
 int
 validate_fdb(struct facial_data_block *fdb)
 {
@@ -73,45 +126,19 @@ validate_fdb(struct facial_data_block *fdb)
 	struct feature_point_block *fpb;
 
 	// Gender
-	if ((fdb->gender != GENDER_UNSPECIFIED) &&
-	    (fdb->gender != GENDER_MALE) &&
-	    (fdb->gender != GENDER_FEMALE) &&
-	    (fdb->gender != GENDER_UNKNOWN)) {
+	if (!inIntSet(genders, fdb->gender)) {
 		fprintf(stderr, "Gender is invalid.\n");
                 ret = VALIDATE_ERROR;
 	}
 
 	// Eye color
-	if ((fdb->eye_color != EYE_COLOR_UNSPECIFIED) &&
-	    (fdb->eye_color != EYE_COLOR_BLUE) &&
-	    (fdb->eye_color != EYE_COLOR_BROWN) &&
-	    (fdb->eye_color != EYE_COLOR_GREEN) &&
-	    (fdb->eye_color != EYE_COLOR_HAZEL) &&
-	    (fdb->eye_color != EYE_COLOR_MAROON) &&
-	    (fdb->eye_color != EYE_COLOR_MULTI) &&
-	    (fdb->eye_color != EYE_COLOR_PINK) &&
-	    (fdb->eye_color != EYE_COLOR_UNKNOWN)) {
+	if (!inIntSet(eye_colors, fdb->eye_color)) {
 		fprintf(stderr, "Eye color is invalid.\n");
                 ret = VALIDATE_ERROR;
 	}
 
 	// Hair color
-	if ((fdb->hair_color != HAIR_COLOR_UNSPECIFIED) &&
-	    (fdb->hair_color != HAIR_COLOR_BALD) &&
-	    (fdb->hair_color != HAIR_COLOR_BLACK) &&
-	    (fdb->hair_color != HAIR_COLOR_BLONDE) &&
-	    (fdb->hair_color != HAIR_COLOR_BROWN) &&
-	    (fdb->hair_color != HAIR_COLOR_GRAY) &&
-	    (fdb->hair_color != HAIR_COLOR_RED) &&
-	    (fdb->hair_color != HAIR_COLOR_BLUE) &&
-	    (fdb->hair_color != HAIR_COLOR_GREEN) &&
-	    (fdb->hair_color != HAIR_COLOR_ORANGE) &&
-	    (fdb->hair_color != HAIR_COLOR_PINK) &&
-	    (fdb->hair_color != HAIR_COLOR_SANDY) &&
-	    (fdb->hair_color != HAIR_COLOR_AUBURN) &&
-	    (fdb->hair_color != HAIR_COLOR_WHITE) &&
-	    (fdb->hair_color != HAIR_COLOR_STRAWBERRY) &&
-	    (fdb->hair_color != HAIR_COLOR_UNKNOWN)) {
+	if (!inIntSet(hair_colors, fdb->hair_color)) {
 		fprintf(stderr, "Hair color is invalid.\n");
                 ret = VALIDATE_ERROR;
 	}
@@ -184,10 +211,7 @@ validate_fdb(struct facial_data_block *fdb)
 
 	// Image Information Block
 	// Facial Image Type
-	if ((fdb->face_image_type != FACE_IMAGE_TYPE_BASIC) &&
-	    (fdb->face_image_type != FACE_IMAGE_TYPE_FULL_FRONTAL) &&
-	    (fdb->face_image_type != FACE_IMAGE_TYPE_TOKEN_FRONTAL) &&
-	    (fdb->face_image_type != FACE_IMAGE_TYPE_OTHER)) {
+	if (!inIntSet(face_image_types, fdb->face_image_type)) {
 		fprintf(stderr, "Image Type is invalid.\n");
 		ret = VALIDATE_ERROR;
 	}

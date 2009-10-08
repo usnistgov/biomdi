@@ -3,13 +3,28 @@
  * Technology (NIST) by employees of the Federal Government in the course
  * of their official duties. Pursuant to title 17 Section 105 of the
  * United States Code, this software is not subject to copyright protection
- * and is in the public domain. NIST assumes no responsibility  whatsoever for
+ * and is in the public domain. NIST assumes no responsibility whatsoever for
  * its use by other parties, and makes no guarantees, expressed or implied,
  * about its quality, reliability, or any other characteristic.
  */
 
 #ifndef _BIOMDI_H
 #define _BIOMDI_H
+
+/*
+ * Declare a type, and a function, that will enable the creation of sets of
+ * data items as simple arrays, and check for membership. These sets can be
+ * used to manage the set of valid values for fields in the biometric data
+ * record.
+ */
+
+struct intSet {
+	unsigned int is_size;
+	uint32_t is_values[];
+};
+typedef struct intSet biomdiIntSet;
+
+int inIntSet(biomdiIntSet S, uint32_t val);
 
 // Header CBEFF ID fields
 #define HDR_PROD_ID_OWNER_MASK	0xFFFF0000
