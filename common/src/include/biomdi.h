@@ -18,9 +18,10 @@
  * record.
  */
 
+#define MAX_INT_SET_SIZE	32
 struct intSet {
 	unsigned int is_size;
-	uint32_t is_values[];
+	uint32_t is_values[MAX_INT_SET_SIZE];
 };
 typedef struct intSet biomdiIntSet;
 

@@ -8,14 +8,19 @@
  * about its quality, reliability, or any other characteristic.
  */
 
+#include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <biomdi.h>
+#include <biomdimacro.h>
 
 int
 inIntSet(biomdiIntSet S, uint32_t val)
 {
 	int i;
 
+	if (S.is_size > MAX_INT_SET_SIZE)
+		ERR_EXIT("Set size exceeds maximum");
 	for (i = 0; i < S.is_size; i++)
 		if (S.is_values[i] == val)
 			return (1);
