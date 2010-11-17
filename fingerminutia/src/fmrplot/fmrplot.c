@@ -16,6 +16,7 @@
 /* This program uses the GD Graphics Library, last available at               */
 /* http://www.libgd.org and distributed in many ported packages.              */
 /******************************************************************************/
+#define _XOPEN_SOURCE   1
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/queue.h>
