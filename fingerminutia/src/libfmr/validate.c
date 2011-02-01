@@ -297,7 +297,7 @@ validate_fedb(struct finger_extended_data_block *fedb)
 		ERRP("Extended Data Block length (%u) is not "\
 			"sum of individual data lengths (%u)",
 			fedb->block_length, sum);
-		ret = VALIDATE_OK;
+		ret = VALIDATE_ERROR;
 	}
 
 	// Validate the extended data records
