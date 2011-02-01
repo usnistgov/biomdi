@@ -341,11 +341,10 @@ new_fed(unsigned int format_std, struct finger_extended_data **fed,
 
 	default :
 		lfed->data = (char *)malloc(length - EXTENDED_DATA_HDR_LEN);
-		if (lfed->data == NULL) {
+		if (lfed->data == NULL)
 			ERR_OUT("Could not allocate extended data block");
 		memset((void *)lfed->data, 0, sizeof(char));
 		break;
-		}
 	}
 
 	*fed = lfed;
