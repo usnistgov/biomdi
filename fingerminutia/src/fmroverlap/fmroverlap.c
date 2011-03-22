@@ -32,6 +32,10 @@
 #include <biomdimacro.h>
 #include <fmr.h>
 
+#ifndef M_PI
+#define M_PI           3.14159265358979323846
+#endif
+
 /* Global option indicators */
 static int v_opt;
 static long r_opt;

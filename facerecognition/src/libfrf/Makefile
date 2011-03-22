@@ -30,9 +30,9 @@ ifeq ($(OS), Darwin)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CC) $(CFLAGS) -c $(SOURCES)
-	ar rs $(OBJECTS)
+	ar rs libfrf.a $(OBJECTS)
 	ranlib libfrf.a
-	$(CC) -shared -o libfrf.dll -Wl,--out-implib=libfrf.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfrf.a -Wl,--no-whole-archive
+	$(CC) $(CFLAGS) -shared -o libfrf.dll -Wl,--out-implib=libfrf.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfrf.a -Wl,--no-whole-archive -lbiomdi
 	$(CP) libfrf.a $(LOCALLIB)
 	$(CP) libfrf.dll.a $(LOCALLIB)
 	$(CP) libfrf.dll $(LOCALLIB)

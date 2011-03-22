@@ -35,7 +35,7 @@ ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CC) -c $(CFLAGS) $(SOURCES)
 	ar rs libfir.a $(OBJECTS)
 	ranlib libfir.a
-	$(CC) -shared -o libfir.dll -Wl,--out-implib=libfir.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfir.a -Wl,--no-whole-archive
+	$(CC) $(CFLAGS) -shared -o libfir.dll -Wl,--out-implib=libfir.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfir.a -Wl,--no-whole-archive -lbiomdi
 	$(CP) libfir.a $(LOCALLIB)
 	$(CP) libfir.dll.a $(LOCALLIB)
 	$(CP) libfir.dll $(LOCALLIB)
