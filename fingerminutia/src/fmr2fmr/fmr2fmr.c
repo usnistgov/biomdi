@@ -134,6 +134,8 @@ get_options(int argc, char *argv[])
 			break;
 				
 		    case 't':
+			if (argv[optind] == NULL)
+				goto err_usage_out;
 			pm = *(char *)optarg;
 			switch (pm) {
 			    case 'i':
@@ -154,6 +156,8 @@ get_options(int argc, char *argv[])
 			break;
 
 		    case 'r':
+			if (argv[optind] == NULL)
+				goto err_usage_out;
 			pm = *(char *)optarg;
 			switch (pm) {
 			    case 'x':
