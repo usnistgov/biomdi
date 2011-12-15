@@ -32,6 +32,7 @@ fmd_convert_angle(FMD *fmd)
 
 	switch (fmd->format_std) {
 		case FMR_STD_ANSI:
+		case FMR_STD_ANSI07:
 			return ((int)fmd->angle * FMD_ANSI_ANGLE_UNIT);
 			break;			/* not reached */
 		case FMR_STD_ISO:

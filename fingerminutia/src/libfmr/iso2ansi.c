@@ -22,7 +22,7 @@
 /*
  * Convert an FVMR from ISO and ISO Normal Card formats to ANSI.
  * The finger minutiae data is copied, and the angle is converted to the
- * ANSI representation. The quality value is set to the unknown value.
+ * ANSI representation.
  */
 int
 iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
@@ -36,8 +36,8 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 	double xcm, ycm;
 	double xunits, yunits;
 
-	/* Convert the ISO quality to ANSI07 quality. */
 	COPY_FVMR(ifvmr, ofvmr);
+
 	/* For ANSI07, the coord and resolution info
 	 * is stored in the FVMR; copy it from the
 	 * FMR header into each FVMR; it doesn't hurt
@@ -88,8 +88,14 @@ iso2ansi_fvmr(FVMR *ifvmr, FVMR *ofvmr, unsigned int *length,
 		 * max angle value */
 		if (ofmd->angle > FMD_MAX_MINUTIA_ANGLE)
 			ofmd->angle = FMD_MAX_MINUTIA_ANGLE;
-		/* XXX Need to convert minutia quality to ANSI07 spec */
-		ofmd->quality = FMD_UNKNOWN_MINUTIA_QUALITY;
+
+		/* Convert quality from ANSI04/ISO05 to ANSI07. */
+		ofmd->quality = ifmds[m]->quality;
+		if (ofvmr->format_std == FMR_STD_ANSI07) {
+			if (ifmds[m]->quality == FMD_UNKNOWN_MINUTIA_QUALITY) {
+				ofmd->quality = FMD_NOATTTEMPT_MINUTIA_QUALITY;
+			}
+		}
 		add_fmd_to_fvmr(ofmd, ofvmr);
 		*length += FMD_DATA_LENGTH;
 	}
