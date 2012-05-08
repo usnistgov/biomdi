@@ -14,6 +14,7 @@
 .Fl r
 .Ar radius
 .Op Fl v
+.Op Fl vv
 .Pp
 .Sh DESCRIPTION
 The
@@ -43,19 +44,46 @@ Specifies the second M1 file.
 .It Fl r\ \&radius
 Specifies the radius to use when calculating nearness of two minutiae. 
 .It Fl v
-Be verbose, meaning that matching minutiae are printed when
+Be verbose, the overlapping minutiae are printed.
+.It Fl vv
+In addition to
 .Fl v
-is given, as well as information about the containing finger view records
-when
-.Fl vv
-is given.
+information, the contents of the input records are printed.
 .El
+.Pp
+Six fields are displayed in the output:
+.Bl -tag -width -indent
+.It Count One
+The number of minutiae in the first input file.
+.It Count Two
+The number of minutiae in the second input file.
+.It Overlap Count
+The number of minutiae that overlap.
+.It Overlap Ratio
+Ratio of the overlap count to the smaller of the input minutiae counts.
+.It Mean Distance
+The average of the calculated displacement for the overlapping minutiae.
+.It Root Mean Square Angular Difference
+Calculated by first squaring the difference of the angle values for two
+overlapping minutiae, summing those squared differences, dividing by overlap
+count to get an average angular delta, and finally taking the square root of
+that average.
+.El
+.Pp
+When angular are calculated, units are in terms of degrees.
 .Sh EXAMPLES
 fmroverlap -i file1.raw -i file2.raw -r 16 -vv
 .Pp
 Produces some statistics on the number of minutiae that are found to be
 the same in the two input files. The finger view records and all the
 minutiae records are printed as well.
+.Pp
+If the two input files are identical, the output would be similar to this:
+.Pp
+22 22 22 1.000000 0.000000 0.000000
+.Pp
+Showing that there is 100 percent overlap with a mean distance of 0 and a
+root mean square value of 0 for the angles.
 .Pp
 .Sh SEE ALSO
 .Xr mkfmr 1 ,
