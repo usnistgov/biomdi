@@ -14,17 +14,6 @@ include ../common.mk
 SOURCES = fir.c fivr.c validate.c
 OBJECTS = fir.o fivr.o validate.o
 
-#
-# On OS-X, when using gcc 4.0 or later, the SystemStubs library must be
-# linked in. This may be true on other OS as well.
-#
-ifeq ($(OS), Darwin)
-#ifeq ($(findstring gcc-4, $(GCCV)), gcc-4)
-ifeq ($(GCCV), 4)
-EXTRALIBS := -lSystemStubs
-endif
-endif
-
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
 	$(CC) -c $(CFLAGS) $(SOURCES)
