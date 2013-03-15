@@ -294,6 +294,19 @@ print_fedb(FILE *fp, struct finger_extended_data_block *fedb)
 	return (PRINT_OK);
 }
 
+int
+print_raw_fedb(FILE *fp, struct finger_extended_data_block *fedb)
+{
+	struct finger_extended_data *fed;
+
+	TAILQ_FOREACH(fed, &fedb->extended_data, list) {
+		print_raw_fed(fp, fed);
+		fprintf(fp, "\n");
+	}
+
+	return (PRINT_OK);
+}
+
 void
 add_fed_to_fedb(struct finger_extended_data *fed,
                 struct finger_extended_data_block *fedb)
@@ -489,6 +502,36 @@ print_fed(FILE *fp, struct finger_extended_data *fed)
 		break;
 	}
 	return (PRINT_OK);
+}
+
+int
+print_raw_fed(FILE *fp, struct finger_extended_data *fed)
+{
+	int i;
+
+	switch (fed->type_id) {
+
+	case FED_RIDGE_COUNT :
+		FPRINTF(fp, "--Ridge Count Data--\n");
+		print_raw_rcdb(fp, fed->rcdb);
+		break;
+
+	case FED_CORE_AND_DELTA :
+		FPRINTF(fp, "--Core/Delta Data--\n");
+		print_raw_cddb(fp, fed->cddb);
+		break;
+
+	default :
+		// Data; length of data is length in record - 4
+		FPRINTF(fp, "--Unknown Extended Data--\n");
+		for (i = 0; i < fed->length - 4; i++) {
+			fprintf(fp, "%02x", fed->data[i]);
+		}
+		break;
+	}
+	return (PRINT_OK);
+err_out:
+	return (PRINT_ERROR);
 }
 
 /******************************************************************************/
@@ -734,12 +777,46 @@ err_out:
 }
 
 int
+print_raw_rcdb(FILE *fp, struct ridge_count_data_block *rcdb)
+{
+	struct ridge_count_data *rcd;
+	int ret;
+
+	/* Count the number of ridge count records */
+	int count = 0;
+	TAILQ_FOREACH(rcd, &rcdb->ridge_counts, list)
+		count++;
+
+	if (!TAILQ_EMPTY(&rcdb->ridge_counts)) {
+		FPRINTF(fp, "%hhu %u\n", rcdb->method, count);
+		TAILQ_FOREACH(rcd, &rcdb->ridge_counts, list) {
+			ret = print_raw_rcd(fp, rcd);
+			if (ret != PRINT_OK)
+				ERR_OUT("Could not write ridge count data");
+		}
+	}
+	return (PRINT_OK);
+
+err_out:
+	return (PRINT_ERROR);
+}
+
+int
 print_rcd(FILE *fp, struct ridge_count_data *rcd)
 {
 	FPRINTF(fp, "\t\tIndex 1 = %u, Index 2 = %u, Count = %u\n",
-			rcd->index_one, rcd->index_two, rcd->count);
+		rcd->index_one, rcd->index_two, rcd->count);
 	return (PRINT_OK);
+err_out:
+	return (PRINT_ERROR);
+}
 
+int
+print_raw_rcd(FILE *fp, struct ridge_count_data *rcd)
+{
+	FPRINTF(fp, "%hhu %hhu %hhu\n",
+		rcd->index_one, rcd->index_two, rcd->count);
+	return (PRINT_OK);
 err_out:
 	return (PRINT_ERROR);
 }
@@ -1288,6 +1365,92 @@ print_dd(FILE *fp, struct delta_data *dd)
 			dd->angle1, dd->angle2, dd->angle3);
 	else
 		FPRINTF(fp, "no angles\n");
+
+	return (PRINT_OK);
+
+err_out:
+	return (PRINT_ERROR);
+}
+
+int
+print_raw_cddb(FILE *fp, struct core_delta_data_block *cddb)
+{
+	struct core_data *cd;
+	struct delta_data *dd;
+
+	if (!TAILQ_EMPTY(&cddb->cores)) {
+	
+		FPRINTF(fp, "\tCore information: ");
+		if (cddb->format_std == FMR_STD_ANSI)
+			FPRINTF(fp, "%hhu ", cddb->core_type);
+		FPRINTF(fp, "%hhu\n", cddb->num_cores);
+
+		TAILQ_FOREACH(cd, &cddb->cores, list) {
+			if (print_raw_cd(fp, cd) != PRINT_OK)
+				ERR_OUT("Could not print core data record");
+		}
+	}
+
+	if (!TAILQ_EMPTY(&cddb->deltas)) {
+		FPRINTF(fp, "\tDelta information: ");
+		if (cddb->format_std == FMR_STD_ANSI)
+			FPRINTF(fp, "%hhu ", cddb->delta_type);
+		FPRINTF(fp, "%hhu\n", cddb->num_deltas);
+
+		TAILQ_FOREACH(dd, &cddb->deltas, list) {
+			if (print_raw_dd(fp, dd) != PRINT_OK)
+				ERR_OUT("Could not print delta data record");
+		}
+	}
+
+	return (PRINT_OK);
+
+err_out:
+	return (PRINT_ERROR);
+}
+
+int
+print_raw_cd(FILE *fp, struct core_data *cd)
+{
+	unsigned char type;
+
+	if ((cd->format_std == FMR_STD_ISO) ||
+	    (cd->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (cd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
+		FPRINTF(fp, "%hhu ", cd->type);
+		type = cd->type;
+	} else {
+		type = cd->cddb->core_type;
+	}
+	FPRINTF(fp, "%hu %hu ", cd->x_coord, cd->y_coord);
+	if (type == CORE_TYPE_ANGULAR)
+		FPRINTF(fp, "%hhu", cd->angle);
+
+	return (PRINT_OK);
+
+err_out:
+	return (PRINT_ERROR);
+}
+
+int
+print_raw_dd(FILE *fp, struct delta_data *dd)
+{
+	unsigned char type;
+
+	if ((dd->format_std == FMR_STD_ISO) ||
+	    (dd->format_std == FMR_STD_ISO_NORMAL_CARD) ||
+	    (dd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
+		FPRINTF(fp, "%hhu ", dd->type);
+		type = dd->type;
+	} else {
+		type = dd->cddb->delta_type;
+	}
+		
+	FPRINTF(fp, "%hu %hu ", dd->x_coord, dd->y_coord);
+
+	if (type == DELTA_TYPE_ANGULAR)
+		FPRINTF(fp, "%hhu %hhu %hhu",
+			dd->angle1, dd->angle2, dd->angle3);
 
 	return (PRINT_OK);
 

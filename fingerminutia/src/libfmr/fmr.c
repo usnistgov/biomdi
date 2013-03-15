@@ -350,6 +350,50 @@ err_out:
 	return PRINT_ERROR;
 }
 
+int
+print_raw_fmr(FILE *fp, struct finger_minutiae_record *fmr)
+{
+	int ret;
+	struct finger_view_minutiae_record *fvmr;
+
+	if ((fmr->format_std == FMR_STD_ANSI) ||
+	    (fmr->format_std == FMR_STD_ISO) ||
+	    (fmr->format_std == FMR_STD_ANSI07)) {
+
+		FPRINTF(fp, "--Header--\n");
+		// Print the header information 
+		FPRINTF(fp, "%s %s %u",
+			fmr->format_id, fmr->spec_version, fmr->record_length);
+
+		if (fmr->format_std == FMR_STD_ANSI)
+			FPRINTF(fp, " 0x%04x%04x",
+			    fmr->product_identifier_owner,
+			    fmr->product_identifier_type);
+
+		/* Compliance and scanner ID as one field */
+		short sval = (fmr->compliance << HDR_COMPLIANCE_SHIFT) |
+		    fmr->scanner_id;
+		FPRINTF(fp, " 0x%04x", sval);
+
+		if ((fmr->format_std == FMR_STD_ANSI) ||
+		    (fmr->format_std == FMR_STD_ISO)) {
+			FPRINTF(fp, " %hu %hu %hu %hu",
+				fmr->x_image_size, fmr->y_image_size,
+				fmr->x_resolution, fmr->y_resolution);
+		}
+		FPRINTF(fp, " %hhu\n", fmr->num_views);
+	}
+	// Print the finger views
+	TAILQ_FOREACH(fvmr, &fmr->finger_views, list) {
+		ret = print_raw_fvmr(stdout, fvmr);
+		if (ret != PRINT_OK)
+			ERR_OUT("Could not print FVMR");
+	}
+	return PRINT_OK;
+
+err_out:
+	return PRINT_ERROR;
+}
 void
 add_fvmr_to_fmr(struct finger_view_minutiae_record *fvmr, 
 		struct finger_minutiae_record *fmr)

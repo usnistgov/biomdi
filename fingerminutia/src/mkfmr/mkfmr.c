@@ -87,18 +87,15 @@ int
 load_fvmr(FILE *fp, struct finger_minutiae_record *fmr)
 {
 	struct finger_view_minutiae_record *fvmr;
-	unsigned char cval;
 
 	if (new_fvmr(FMR_STD_ANSI, &fvmr) < 0)
 		ALLOC_ERR_RETURN("FVMR");
 
-	if (fscanf(fp, "%hhu %hhx %hhu %hhu",
-		&fvmr->finger_number, &cval,
-		&fvmr->finger_quality, &fvmr->number_of_minutiae) < 0)
+	if (fscanf(fp, "%hhu %hhu %hhu %hhu %hhu",
+		&fvmr->finger_number, &fvmr->view_number,
+		&fvmr->impression_type, &fvmr->finger_quality,
+		&fvmr->number_of_minutiae) < 0)
 			READ_ERR_RETURN("FVMR");
-	fvmr->impression_type = cval & FVMR_IMPRESSION_MASK;
-	fvmr->view_number = 
-		(cval & FVMR_VIEW_NUMBER_MASK) >> FVMR_VIEW_NUMBER_SHIFT;
 	add_fvmr_to_fmr(fvmr, fmr);
 	total_length += FVMR_HEADER_LENGTH;
 	return 0;

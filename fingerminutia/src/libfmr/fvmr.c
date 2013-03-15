@@ -320,6 +320,44 @@ err_out:
 	return PRINT_ERROR;
 }
 
+int
+print_raw_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
+{
+	struct finger_minutiae_data *fmd;
+
+	FPRINTF(fp, "--FVMR--\n");
+	if ((fvmr->format_std == FMR_STD_ANSI) ||
+	    (fvmr->format_std == FMR_STD_ANSI07) ||
+	    (fvmr->format_std == FMR_STD_ISO)) {
+		FPRINTF(fp, "%hhu %hhu %hhu %hhu",
+		    fvmr->finger_number, fvmr->view_number,
+		    fvmr->impression_type, fvmr->finger_quality);
+		if (fvmr->format_std == FMR_STD_ANSI07) {
+			FPRINTF(fp, " 0x%08X", fvmr->algorithm_id);
+			FPRINTF(fp, " %hu %hu %hu %hu",
+				fvmr->x_image_size, fvmr->y_image_size,
+				fvmr->x_resolution, fvmr->y_resolution);
+		}
+		FPRINTF(fp, " %hhu\n", fvmr->number_of_minutiae);
+	}
+
+	FPRINTF(fp, "--XYT--\n");
+	TAILQ_FOREACH(fmd, &fvmr->minutiae_data, list) {
+		FPRINTF(fp, "%d ", fmd->index);
+		if (print_raw_fmd(fp, fmd) != PRINT_OK)
+			ERR_OUT("Could not print minutiae data");
+	}
+	if (fvmr->extended != NULL)
+		if (print_raw_fedb(fp, fvmr->extended) != PRINT_OK)
+			ERR_OUT("Could not write extended data block");
+
+	fprintf(fp, "----------------------------------------------------\n");
+	return PRINT_OK;
+
+err_out:
+	return PRINT_ERROR;
+}
+
 void
 add_fmd_to_fvmr(struct finger_minutiae_data *fmd,
                 struct finger_view_minutiae_record *fvmr)

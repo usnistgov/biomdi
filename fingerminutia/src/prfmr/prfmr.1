@@ -8,6 +8,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl v
+.Op Fl k
 .Oo Fl ti Ar type Oc
 .Ar m1file
 .Pp
@@ -31,6 +32,8 @@ The options are as follows:
 .Bl -tag -width "xxxxxxxx"
 .It Fl v
 causes the file records to be verified before printing;
+.It Fl k
+causes the file records to be printed in a format consumable by mkfmr(1).
 .It Fl ti\ \&type
 Specifies the input file type.
 .El

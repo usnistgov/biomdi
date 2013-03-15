@@ -58,6 +58,7 @@ usage()
 {
 	fprintf(stderr, "usage: prfmr [-v] [-ti <type] <datafile>\n"
 		"\t -v Validate the record\n"
+		"\t -k Format output for consumption by mkfmr\n"
 		"\t -ti <type> is one of ISO | ISONC | ISOCC | ANSI | ANSI07\n");
 	exit (EXIT_FAILURE);
 }
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
 	FILE *fp;
 	struct stat sb;
 	struct finger_minutiae_record *fmr;
-	int v_opt = 0;
+	int v_opt, k_opt = 0;
 	int ti_opt = 0;
 	int ch;
 	int ret;
@@ -79,10 +80,13 @@ int main(int argc, char *argv[])
 
 	/* Default to read in an ANSI record */
 	in_type = FMR_STD_ANSI;
-	while ((ch = getopt(argc, argv, "vt:")) != -1) {
+	while ((ch = getopt(argc, argv, "vkt:")) != -1) {
 		switch (ch) {
 			case 'v':
 				v_opt = 1;
+				break;
+			case 'k':
+				k_opt = 1;
 				break;
 			case 't':
 				pm = *(char *)optarg;
@@ -150,7 +154,10 @@ int main(int argc, char *argv[])
 				    "Finger Minutiae Record is valid.\n");
 			}
 		}
-		print_fmr(stdout, fmr);
+		if (k_opt)
+			print_raw_fmr(stdout, fmr);
+		else
+			print_fmr(stdout, fmr);
 		//free_fmr(fmr);
 	}
 	if (ret != READ_OK) {

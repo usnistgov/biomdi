@@ -277,18 +277,36 @@ push_fmd(BDB *fmdb, struct finger_minutiae_data *fmd)
 int
 print_fmd(FILE *fp, struct finger_minutiae_data *fmd)
 {
-	fprintf(fp, "Finger Minutiae Data:\n");
-	fprintf(fp, "\tType\t\t: 0x%01x (%s)\n", fmd->type,
+	FPRINTF(fp, "Finger Minutiae Data:\n");
+	FPRINTF(fp, "\tType\t\t: 0x%01x (%s)\n", fmd->type,
 	    fmd_type_string(fmd));
-	fprintf(fp, "\tCoordinate\t: (%u,%u)\n", fmd->x_coord, fmd->y_coord);
-	fprintf(fp, "\tAngle\t\t: %u (%u degrees)\n",
+	FPRINTF(fp, "\tCoordinate\t: (%u,%u)\n", fmd->x_coord, fmd->y_coord);
+	FPRINTF(fp, "\tAngle\t\t: %u (%u degrees)\n",
 	    fmd->angle, fmd_convert_angle(fmd));
 	if ((fmd->format_std == FMR_STD_ANSI) ||
 	    (fmd->format_std == FMR_STD_ISO) ||
 	    (fmd->format_std == FMR_STD_ANSI07))
-		fprintf(fp, "\tQuality\t\t: %u\n", fmd->quality);
+		FPRINTF(fp, "\tQuality\t\t: %u\n", fmd->quality);
 
-	return 0;
+	return (PRINT_OK);
+err_out:
+	return (PRINT_ERROR);
+}
+
+int
+print_raw_fmd(FILE *fp, struct finger_minutiae_data *fmd)
+{
+	FPRINTF(fp, "%hhu %hu %hu %hhu",
+	    fmd->type, fmd->x_coord, fmd->y_coord, fmd->angle);
+	if ((fmd->format_std == FMR_STD_ANSI) ||
+	    (fmd->format_std == FMR_STD_ISO) ||
+	    (fmd->format_std == FMR_STD_ANSI07))
+		FPRINTF(fp, " %hhu\n", fmd->quality);
+	else
+		FPRINTF(fp, "\n");	/* No quality value present */
+	return (PRINT_OK);
+err_out:
+	return (PRINT_ERROR);
 }
 
 /******************************************************************************/

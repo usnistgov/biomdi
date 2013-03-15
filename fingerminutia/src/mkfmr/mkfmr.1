@@ -58,11 +58,13 @@ Decimal number of finger views
 .It Fl f\ \&fvmrinfo
 Specifies the file containing the Finger View Minutiae Record (FVMR) info,
 single line, in this form:
-.Bl -tag -width "View/Type " -compact
+.Bl -tag -width "Position " -compact
 .It Cm Position
 Decimal finger postion number
-.It Cm View/Type
-Hex view number and impression type
+.It Cm View
+Decimal View number
+.It Cm Type
+Decimal Impression type
 .It Cm Quality
 Decimal quality value
 .It Cm Number
@@ -178,7 +180,7 @@ FMR 20  0 00000000 0000 191 357 197 197 01
 .Pp
 Example FVMR info file:
 .Bd -literal -compact
-07 03 90 4
+07 0 3 90 4
 .Ed
 .Pp
 Example minutiae data file:
@@ -219,8 +221,8 @@ FMR 20  0 00000000 0000 191 357 197 197 02
 .Pp
 FVMR:
 .Bd -literal -compact
-02 03 90 2
-07 03 90 2
+02 0 3 90 2
+07 0 3 90 2
 .Ed
 .Pp
 Minutiae:

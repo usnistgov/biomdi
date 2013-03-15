@@ -863,6 +863,22 @@ int
 print_fmr(FILE *fp, struct finger_minutiae_record *fmr);
 
 /******************************************************************************/
+/* Print an entire finger Minutiae Record to a file in 'raw' format, data     */
+/* only in text form.                                                         */
+/* This function does not validate the record.                                */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   fmr    Pointer to the Finger Minutiae Record.                            */
+/*                                                                            */
+/* Returns:                                                                   */
+/*       PRINT_OK     Success                                                 */
+/*       PRINT_ERROR  Failure                                                 */
+/******************************************************************************/
+int
+print_raw_fmr(FILE *fp, struct finger_minutiae_record *fmr);
+
+/******************************************************************************/
 /* Validate a Finger Minutiae Record by checking the conformance of the       *//* header and all of the Finger Views to the ANSI/INCITS 378-2004             */
 /* specification. Diagnostic messages are written to stderr.                  */
 /*                                                                            */
@@ -932,6 +948,20 @@ push_fvmr(BDB *fmdb, struct finger_view_minutiae_record *fvmr);
 /******************************************************************************/
 int
 print_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr);
+
+/******************************************************************************/
+/* Print a FVMR to a file in 'raw' format, data only, in text form.           */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   fvmr   Pointer to the FVMR                                               */
+/*                                                                            */
+/* Returns:                                                                   */
+/*       PRINT_OK     Success                                                 */
+/*       PRINT_ERROR  Failure                                                 */
+/******************************************************************************/
+int
+print_raw_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr);
 
 /******************************************************************************/
 /* Validate a Finger View Minutiae Record by checking the conformance of the  */
@@ -1020,6 +1050,21 @@ int
 print_fmd(FILE *fp, struct finger_minutiae_data *fmd);
 
 /******************************************************************************/
+/* Print a single Finger Minutiae Data record to a file in 'raw' format, data */
+/* only, in text form.                                                        */
+/*                                                                            */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   fmd    Pointer to the Finger Minutiae Data record.                       */
+/*                                                                            */
+/* Returns:                                                                   */
+/*       PRINT_OK     Success                                                 */
+/*       PRINT_ERROR  Failure                                                 */
+/******************************************************************************/
+int
+print_raw_fmd(FILE *fp, struct finger_minutiae_data *fmd);
+
+/******************************************************************************/
 /* Validate a Finger Minutiae Data record by checking the conformance of the  */
 /* minutiae data to the ANSI/INCITS 378-2004 specification.                   */
 /* Diagnostic messages are written to stderr.                                 */
@@ -1092,6 +1137,20 @@ int
 print_fedb(FILE *fp, struct finger_extended_data_block *fed);
 
 /******************************************************************************/
+/* Print an entire Extended Data Block to a file in 'raw' format, data only,  */
+/* in text form.                                                              */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   fedb   Pointer to the Extended Data block.                               */
+/*                                                                            */
+/* Returns:                                                                   */
+/*       PRINT_OK     Success                                                 */
+/*       PRINT_ERROR  Failure                                                 */
+/******************************************************************************/
+int
+print_raw_fedb(FILE *fp, struct finger_extended_data_block *fed);
+
+/******************************************************************************/
 /* Validate a entire Extended Data Block by checking the conformance of the   */
 /* set of extended data records to the ANSI/INCITS 378-2004 specification.    */
 /* Diagnostic messages are written to stderr.                                 */
@@ -1158,6 +1217,20 @@ push_fed(BDB *fmdb, struct finger_extended_data *fed);
 /******************************************************************************/
 int
 print_fed(FILE *fp, struct finger_extended_data *fed);
+
+/******************************************************************************/
+/* Print a single Extended Data record to a file in 'raw' format, data only,  */
+/* in text form.                                                              */
+/* Parameters:                                                                */
+/*   fp     The open file pointer.                                            */
+/*   fed    Pointer to the Extended Data record.                              */
+/*                                                                            */
+/* Returns:                                                                   */
+/*       PRINT_OK     Success                                                 */
+/*       PRINT_ERROR  Failure                                                 */
+/******************************************************************************/
+int
+print_raw_fed(FILE *fp, struct finger_extended_data *fed);
 
 /******************************************************************************/
 /* Validate a single Extended Data record by checking the conformance of the  */
@@ -1249,6 +1322,24 @@ print_rcdb(FILE *fp, struct ridge_count_data_block *rcdb);
 
 int
 print_rcd(FILE *fp, struct ridge_count_data *rcd);
+
+/******************************************************************************/
+/* Functions to print an entire Ridge Count Data Block, and a single Ridge    */
+/* Count Data record to a file in 'raw' format, data only, in text form.      */
+/*                                                                            */
+/*   fp     The open file pointer.                                            */
+/*   rcdb   Pointer to the Ridge Count Data Block record.                     */
+/*   rcd    Pointer to the Ridge Count Data record.                           */
+/*                                                                            */
+/* Returns:                                                                   */
+/*       PRINT_OK     Success                                                 */
+/*       PRINT_ERROR  Failure                                                 */
+/******************************************************************************/
+int
+print_raw_rcdb(FILE *fp, struct ridge_count_data_block *rcdb);
+
+int
+print_raw_rcd(FILE *fp, struct ridge_count_data *rcd);
 
 /******************************************************************************/
 /* Functions to validate an entire Ridge Count Data Block, and a single Ridge */
@@ -1344,8 +1435,8 @@ int
 push_dd(BDB *fmdb, struct delta_data *dd);
 
 /******************************************************************************/
-/* Functions to print an entire Core Data Block, and a single Core Data       */
-/* record to a file in human-readable form.                                   */
+/* Functions to print an entire Core Data Block, a single Core Data record,   */
+/* and a Delta Data record to a file in human-readable form.                  */
 /*                                                                            */
 /*   fp     The open file pointer.                                            */
 /*   cddb   Pointer to the Core and Delta Data Block record.                  */
@@ -1364,6 +1455,28 @@ print_cd(FILE *fp, struct core_data *cd);
 
 int
 print_dd(FILE *fp, struct delta_data *dd);
+
+/******************************************************************************/
+/* Functions to print an entire Core Data Block, a single Core Data record,   */
+/* and a Delta Data record to a file in 'raw' format, data only, in text form.*/
+/*                                                                            */
+/*   fp     The open file pointer.                                            */
+/*   cddb   Pointer to the Core and Delta Data Block record.                  */
+/*   cd     Pointer to the Core Data record.                                  */
+/*   dd     Pointer to the Delta Data record.                                 */
+/*                                                                            */
+/* Returns:                                                                   */
+/*       PRINT_OK     Success                                                 */
+/*       PRINT_ERROR  Failure                                                 */
+/******************************************************************************/
+int
+print_raw_cddb(FILE *fp, struct core_delta_data_block *cddb);
+
+int
+print_raw_cd(FILE *fp, struct core_data *cd);
+
+int
+print_raw_dd(FILE *fp, struct delta_data *dd);
 
 /******************************************************************************/
 /* Functions to validate an entire Core Data Block, and a single Core Data    */
