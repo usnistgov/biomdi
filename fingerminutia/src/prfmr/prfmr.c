@@ -68,8 +68,7 @@ int main(int argc, char *argv[])
 	FILE *fp;
 	struct stat sb;
 	struct finger_minutiae_record *fmr;
-	int v_opt, k_opt = 0;
-	int ti_opt = 0;
+	int v_opt = 0, k_opt = 0, ti_opt = 0;
 	int ch;
 	int ret;
 	unsigned int total_length;
