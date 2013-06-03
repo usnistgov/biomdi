@@ -156,7 +156,7 @@ static int
 internal_read_fedb(FILE *fp, BDB *fmdb, struct finger_extended_data_block *fedb)
 {
 	unsigned short sval1, sval2;
-	short block_length;
+	int block_length;
 	struct finger_extended_data *fed = NULL;
 	int ret;
 
@@ -201,6 +201,7 @@ internal_read_fedb(FILE *fp, BDB *fmdb, struct finger_extended_data_block *fedb)
 		if (ret == READ_ERROR)
 			ERR_OUT("Could not extended data record");
 		add_fed_to_fedb(fed, fedb);
+
 		block_length -= fed->length;
 	}
 
@@ -1019,6 +1020,8 @@ internal_read_cd(FILE *fp, BDB *fmdb, struct core_data *cd,
 	    (cd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
 		cd->type = (unsigned char) ((sval & ISO_CORE_TYPE_MASK) >>
 		    ISO_CORE_TYPE_SHIFT);
+		// Override the local copy of the core type
+		core_type = cd->type;
 	}
 
 	// Y Coordinate
@@ -1070,6 +1073,8 @@ internal_read_dd(FILE *fp, BDB *fmdb, struct delta_data *dd,
 	    (dd->format_std == FMR_STD_ISO_COMPACT_CARD)) {
 		dd->type = (unsigned char) ((sval & ISO_DELTA_TYPE_MASK) >>
 		    ISO_DELTA_TYPE_SHIFT);
+		// Override the local copy of the delta type
+		delta_type = dd->type;
 	}
 
 	// Y Coordinate
