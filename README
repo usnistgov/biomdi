@@ -40,6 +40,15 @@ directories can be added in order to build the sub-package that is dependent
 on other packages. For example, the fingerminutia sub-package optionally
 requires the NBIS package.
 
+For RedHat and CentOS Linux systems, it is preferable to install BIOMDI into
+the /usr/local/ hierarchy, which may require the creation of some directories
+first (e.g. /usr/local/man/man1). On a 64-bit system, the LIBPATH setting in
+common/common.mk should be set to $(PREFIX)/lib64. The Linux dynamic linker ld
+may need to have its cache loaded as well, usually by creating a file in
+/etc/ld.so.conf.d and running the ldconfig command as root. Alternatively, if
+system-wide settings can not be changed, each user can set the LD_LIBRARY_PATH
+environment variable.
+
 When installing on a Windows system, the location of the dynamic link libraries
 (DLL) must be in the user's PATH environment variable in order for the programs
 to execute. By default, DLLs are installed in /usr/local/lib, while the programs
@@ -54,4 +63,5 @@ BIOMDI Release 1.0:
 fingerminutia: ANSI/INCITS 378-2004 and ISO 19794-2 2005-09-15.
 fingerimage: ANSI/INCITS 381-2004 and ISO/IEC 19794-4:2004.
 facerecognition: ANSI/INCITS 385-2004.
-irisimage: ISO/IEC 19794-6:2005.
+irisimage: ISO/IEC 19794-6:20xx; developed in support of the Iris Exchange
+(IREX) Evaluation 2008 (iris.nist.gov).
