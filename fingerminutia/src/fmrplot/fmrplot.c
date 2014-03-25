@@ -267,6 +267,7 @@ plot_minutiae(gdImagePtr img, struct finger_view_minutiae_record *fvmr)
 	float fx, fy;
 	int x, y;
 
+	fmds = NULL;
 	count = get_fmd_count(fvmr);
 	if (count == 0)
 		ERR_OUT("FVMR contains no minutiae");

@@ -422,7 +422,7 @@ create_type9(RECORD **anrecord, struct finger_view_minutiae_record *fvmr,
 	struct core_data **cds;
 	struct delta_data **dds;
 	char buf[16];
-	unsigned int mincnt, minidx, rdgcnt;
+	int mincnt, minidx, rdgcnt;
 	int cnt, i;
 	unsigned int x, y; 
 

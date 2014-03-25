@@ -161,7 +161,7 @@ convert_type4_ISR(RECORD *rec, unsigned short *x_res, unsigned short *y_res)
 
 	if (lookup_ANSI_NIST_field(&field, &idx, ISR_ID, rec) == FALSE)
 		ERR_OUT("Lookup of Type-4 ISR_ID");
-	val = strtol(field->subfields[0]->items[0]->value, NULL, 10);
+	val = strtol((char *)field->subfields[0]->items[0]->value, NULL, 10);
 
 	if ((val != 0) && (val != 1))
 			ERR_OUT("Type-4 ISR is invalid");
@@ -198,15 +198,17 @@ convert_type13_SLC(RECORD *rec, unsigned short *x_res, unsigned short *y_res)
 
 	if (lookup_ANSI_NIST_field(&field, &idx, SLC_ID, rec) == FALSE)
 		ERR_OUT("Lookup of SLC_ID");
-	val = strtol(field->subfields[0]->items[0]->value, NULL, 10);
+	val = strtol((char *)field->subfields[0]->items[0]->value, NULL, 10);
 
 	if ((val == 1) || (val == 2)) {
 		if (lookup_ANSI_NIST_field(&field, &idx, HPS_ID, rec) == FALSE)
 			ERR_OUT("Lookup of HPS_ID");
-		hps = strtol(field->subfields[0]->items[0]->value, NULL, 10);
+		hps = strtol((char *)field->subfields[0]->items[0]->value,
+		    NULL, 10);
 		if (lookup_ANSI_NIST_field(&field, &idx, VPS_ID, rec) == FALSE)
 			ERR_OUT("Lookup of VPS_ID");
-		vps = strtol(field->subfields[0]->items[0]->value, NULL, 10);
+		vps = strtol((char *)field->subfields[0]->items[0]->value,
+		    NULL, 10);
 	}
 
 	switch (val) {
@@ -273,12 +275,12 @@ set_fmr_img(struct finger_minutiae_record *fmr, RECORD *rec)
 	if (lookup_ANSI_NIST_field(&field, &idx, HLL_ID, rec) == FALSE)
 		ERR_OUT("Lookup of field HLL_ID");
 	fmr->x_image_size = 
-	    strtol(field->subfields[0]->items[0]->value, NULL, 10);
+	    strtol((char *)field->subfields[0]->items[0]->value, NULL, 10);
 
 	if (lookup_ANSI_NIST_field(&field, &idx, VLL_ID, rec) == FALSE)
 		ERR_OUT("Lookup of VLL_ID");
 	fmr->y_image_size =
-	    strtol(field->subfields[0]->items[0]->value, NULL, 10);;
+	    strtol((char *)field->subfields[0]->items[0]->value, NULL, 10);;
 
 	return 0;
 
@@ -363,7 +365,7 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 	if (lookup_ANSI_NIST_field(&field, &idx, FGP2_ID, anrecord) == FALSE)
 		ERR_OUT("FGP field not found");
 	fvmr->finger_number = (unsigned char)
-	    strtol(field->subfields[0]->items[0]->value, NULL, 10);
+	    strtol((char *)field->subfields[0]->items[0]->value, NULL, 10);
 
 	/*** View number/impression type    ***/
 	// XXX: Check finger_number in range
@@ -373,13 +375,14 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 	if (lookup_ANSI_NIST_field(&field, &idx, IMP_ID, anrecord) == FALSE)
 		ERR_OUT("IMP_ID field not found");
 	fvmr->impression_type = (unsigned char)
-	    strtol(field->subfields[0]->items[0]->value, NULL, 10);
+	    strtol((char *)field->subfields[0]->items[0]->value, NULL, 10);
 
 	/*** Finger quality                 ***/
 	// XXX: What should the overall finger quality be set to?
 	fvmr->finger_quality = 0;
 
 	/* Add the core records */
+	fed = NULL;
 	if (lookup_ANSI_NIST_field(&field, &idx, CRP_ID, anrecord) == TRUE) {
 		 if (have_fedb == 0) {
 			if (new_fedb(FMR_STD_ANSI, &fedb) != 0)
@@ -467,7 +470,8 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 	/*** Number of minutiae             ***/
 	if (lookup_ANSI_NIST_field(&field, &idx, MIN_ID, anrecord) == FALSE)
 		ERR_OUT("Number of minutiae field not found");
-	tval = (int) strtol(field->subfields[0]->items[0]->value, NULL, 10);
+	tval = (int)strtol((char *)field->subfields[0]->items[0]->value,
+	    NULL, 10);
 	if (tval > FMR_MAX_NUM_MINUTIAE) {
 		INFOP("Using %d minutiae instead of AN2K record value of %d",
 			FMR_MAX_NUM_MINUTIAE, tval);
@@ -505,7 +509,7 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 		convert_theta(strtoul(buf, (char **)NULL, 10), &fmd->angle);
 
 		q = (unsigned short)strtoul(
-		    field->subfields[subfield]->items[2]->value,
+		    (char *)field->subfields[subfield]->items[2]->value,
 			(char **)NULL, 10);
 		convert_quality(q, &fmd->quality);
 
@@ -542,10 +546,10 @@ init_fvmr(struct finger_view_minutiae_record *fvmr, RECORD *anrecord)
 				if (new_rcd(&rcd) != 0)
 					ALLOC_ERR_EXIT("Ridge Count Data");
 				rcd->index_one = (unsigned short)strtoul(
-				    field->subfields[subfield]->items[0]->value,
+				    (char *)field->subfields[subfield]->items[0]->value,
 				    (char **)NULL, 10);
 				c = strtok(
-				    field->subfields[subfield]->items[item]->value,
+				    (char *)field->subfields[subfield]->items[item]->value,
 				    ",");
 				rcd->index_two = (unsigned short)strtoul(c,
 				    (char **)NULL, 10);
@@ -674,7 +678,7 @@ main(int argc, char *argv[])
 			if (lookup_ANSI_NIST_field(&field, &idx, IDC_ID, 
 			    ansi_nist->records[i]) == FALSE)
 				ERR_OUT("IDC field not found");
-			idc = strtol(field->subfields[0]->items[0]->value, 
+			idc = strtol((char *)field->subfields[0]->items[0]->value, 
 			    NULL, 10);
 
 			if (new_fmr(FMR_STD_ANSI, &fmr) != 0)
