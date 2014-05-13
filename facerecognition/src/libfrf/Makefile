@@ -13,8 +13,7 @@ OBJECTS = fb.o fdb.o fpb.o validate.o
 
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
-	$(CC) -c $(CFLAGS) $(SOURCES)
-	libtool -dynamic -o libfrf.dylib -lc -lbiomdi $(EXTRALIBS) -L$(BIOMDILIB) $(OBJECTS)
+	$(CC) -dynamiclib $(CFLAGS) $(SOURCES) $(EXTRALIBS) -L$(BIOMDILIB) -lbiomdi -o libfrf.dylib
 	$(CP) libfrf.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)

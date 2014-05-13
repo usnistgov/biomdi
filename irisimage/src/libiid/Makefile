@@ -17,8 +17,7 @@ OBJECTS = iid.o iid_ext.o validate.o
 
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
-	$(CC) -c $(CFLAGS) $(SOURCES)
-	libtool -dynamic -o libiid.dylib -lc -lbiomdi -L$(BIOMDILIB) $(OBJECTS) $(EXTRALIBS)
+	$(CC) -dynamiclib $(CFLAGS) $(SOURCES) $(EXTRALIBS) -L$(BIOMDILIB) -lbiomdi -o libiid.dylib
 	$(CP) libiid.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)

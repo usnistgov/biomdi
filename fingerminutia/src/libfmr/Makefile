@@ -13,8 +13,7 @@ OBJECTS = fmr.o fvmr.o fmd.o fedb.o polar.o random.o xy.o angle.o quality.o ansi
 
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
-	$(CC) -c $(CFLAGS) $(SOURCES)
-	libtool -dynamic -o libfmr.dylib -lbiomdi -lc -L$(BIOMDILIB) $(OBJECTS) $(EXTRALIBS)
+	$(CC) -dynamiclib $(CFLAGS) $(SOURCES) $(EXTRALIBS) -L$(BIOMDILIB) -lbiomdi -o libfmr.dylib
 	$(CP) libfmr.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)

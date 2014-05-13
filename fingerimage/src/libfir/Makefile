@@ -17,7 +17,7 @@ OBJECTS = fir.o fivr.o validate.o
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
 	$(CC) -c $(CFLAGS) $(SOURCES)
-	libtool -dynamic -o libfir.dylib -lc -lbiomdi -L$(BIOMDILIB) $(OBJECTS) $(EXTRALIBS)
+	$(CC) -dynamiclib $(CFLAGS) $(SOURCES) $(EXTRALIBS) -L$(BIOMDILIB) -lbiomdi -o libfir.dylib
 	$(CP) libfir.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)

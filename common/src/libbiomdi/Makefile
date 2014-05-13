@@ -13,8 +13,7 @@ OBJECTS = biomdi.o
 
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
-	$(CC) -c $(CFLAGS) $(SOURCES)
-	libtool -dynamic -o libbiomdi.dylib -lc $(OBJECTS) $(EXTRALIBS)
+	$(CC) -dynamiclib $(EXTRALIBS) $(CFLAGS) $(SOURCES) -o libbiomdi.dylib
 	$(CP) libbiomdi.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
