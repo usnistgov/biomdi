@@ -59,7 +59,7 @@ usage()
 		"\t\t -i:  Specifies the input image file\n"
 		"\t\t -o:  Specifies the output image file\n"
 		"\t\t -p:  Output a PNG file instead of JPEG\n"
-		"\t\t -v:  The finger view number\n");
+		"\t\t -v:  The finger view number (>= 1)\n");
 }
 
 /* Global option indicators */
@@ -161,8 +161,14 @@ get_options(int argc, char *argv[])
 
 		    case 'v':	// View number
 			view = strtol(optarg, NULL, 10);
-        		if (view == 0 && errno == EINVAL)
+			/*
+			 * view will be 0 when a non-numeric is given, or
+			 * lteral '0' is given; either is not acceptable.
+			 */
+        		if (view == 0) {
 				usage();
+				goto err_out;
+			}
 			v_opt = 1;
 			break;
 
