@@ -9,7 +9,7 @@
 #
 include ../common.mk
 all: fmrisocompact.c
-	$(CC) $(CFLAGS) fmrisocompact.c -lm -lfmr -o fmrisocompact
+	$(CC) fmrisocompact.c -lm -lfmr $(CFLAGS) -o fmrisocompact
 	$(CP) fmrisocompact $(LOCALBIN)
 	$(CP) fmrisocompact.1 $(LOCALMAN)
 

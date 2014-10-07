@@ -9,7 +9,7 @@
 #
 include ../common.mk
 all: firv.c
-	$(CC) $(CFLAGS) firv.c -lfir -o firv
+	$(CC) firv.c -lfir $(CFLAGS) -o firv
 	$(CP) firv $(LOCALBIN)
 	$(CP) firv.1 $(LOCALMAN)
 clean:

@@ -9,7 +9,7 @@
 #
 include ../common.mk
 all: prfir.c
-	$(CC) $(CFLAGS) prfir.c -lfir -o prfir
+	$(CC) prfir.c -lfir $(CFLAGS) -o prfir
 	$(CP) prfir $(LOCALBIN)
 	$(CP) prfir.1 $(LOCALMAN)
 

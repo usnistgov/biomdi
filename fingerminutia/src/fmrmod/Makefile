@@ -12,7 +12,7 @@ include ../common.mk
 all:	fmrmod
 
 fmrmod: fmrmod.c
-	$(CC) $(CFLAGS) $? -lfmr -o $@
+	$(CC) $? -lfmr $(CFLAGS) -o $@
 	$(CP) $@ $(LOCALBIN)
 	$(CP) $@.1 $(LOCALMAN)
 

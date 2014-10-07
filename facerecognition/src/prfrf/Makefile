@@ -9,7 +9,7 @@
 #
 include ../common.mk
 all: prfrf.c
-	$(CC) $(CFLAGS) $? -lfrf -o prfrf
+	$(CC) $? -lfrf $(CFLAGS) -o prfrf
 	$(CP) prfrf $(LOCALBIN)
 #	$(CP) prfrf.1 $(LOCALMAN)
 

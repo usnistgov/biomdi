@@ -9,7 +9,7 @@
 #
 include ../common.mk
 all: fmrv.c
-	$(CC) $(CFLAGS) fmrv.c -lfmr -o fmrv
+	$(CC) fmrv.c -lfmr $(CFLAGS) -o fmrv
 	$(CP) fmrv $(LOCALBIN)
 	$(CP) fmrv.1 $(LOCALMAN)
 

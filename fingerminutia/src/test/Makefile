@@ -9,7 +9,7 @@
 #
 include ../common.mk
 all: testfmr.c
-	cc $(CFLAGS) testfmr.c -lfmr -o testfmr
+	cc testfmr.c -lfmr $(CFLAGS) -o testfmr
 
 clean:
 	$(RM) testfmr $(DISPOSABLEFILES)

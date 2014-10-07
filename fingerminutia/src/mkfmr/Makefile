@@ -9,7 +9,7 @@
 #
 include ../common.mk
 all: mkfmr.c
-	$(CC) $(CFLAGS) mkfmr.c -lfmr -o mkfmr
+	$(CC) mkfmr.c -lfmr $(CFLAGS) -o mkfmr
 	$(CP) mkfmr $(LOCALBIN)
 	$(CP) mkfmr.1 $(LOCALMAN)
 

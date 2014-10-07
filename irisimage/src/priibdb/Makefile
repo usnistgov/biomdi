@@ -10,7 +10,7 @@
 include ../common.mk
 all: priibdb
 priibdb: priibdb.c
-	$(CC) $(CFLAGS) $? -liid -o $@
+	$(CC) $? -liid $(CFLAGS) -o $@
 	$(CP) $@ $(LOCALBIN)
 	$(CP) $@.1 $(LOCALMAN)
 

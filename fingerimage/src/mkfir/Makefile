@@ -9,7 +9,7 @@
 #
 include ../common.mk
 all: mkfir.c
-	$(CC) $(CFLAGS) $? -lfir -o mkfir
+	$(CC) $? -lfir $(CFLAGS) -o mkfir
 	$(CP) mkfir $(LOCALBIN)
 	$(CP) mkfir.1 $(LOCALMAN)
 

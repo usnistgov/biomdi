@@ -10,7 +10,7 @@
 include ../common.mk
 all: fmr2fmr
 fmr2fmr: fmr2fmr.c
-	$(CC) $(CFLAGS) fmr2fmr.c -lfmr -o fmr2fmr
+	$(CC) fmr2fmr.c -lfmr $(CFLAGS) -o fmr2fmr
 	$(CP) fmr2fmr $(LOCALBIN)
 	$(CP) fmr2fmr.1 $(LOCALMAN)
 

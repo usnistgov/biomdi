@@ -9,7 +9,7 @@
 #
 include ../common.mk
 all: pgm2fir.cpp
-	$(CPP) $(CFLAGS) $? -lnetpbm -lfing -lwsq -llfs -ljpegl -lmlp -lfet -lcblas -lioutil -lutil -o pgm2fir
+	$(CPP) $? -lnetpbm -lfing -lwsq -llfs -ljpegl -lmlp -lfet -lcblas -lioutil -lutil $(CFLAGS) -o pgm2fir
 	${CP} pgm2fir $(LOCALBIN)
 	${CP} pgm2fir.1 $(LOCALMAN)
 

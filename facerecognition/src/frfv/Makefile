@@ -9,7 +9,7 @@
 #
 include ../common.mk
 all: frfv.c
-	$(CC) $(CFLAGS) frfv.c -lfrf -o frfv
+	$(CC) frfv.c -lfrf $(CFLAGS) -o frfv
 	$(CP) frfv $(LOCALBIN)
 	$(CP) frfv.1 $(LOCALMAN)
 

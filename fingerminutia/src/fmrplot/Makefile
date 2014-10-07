@@ -9,7 +9,7 @@
 #
 include ../common.mk
 all: fmrplot.c
-	$(CC) $(CFLAGS) fmrplot.c -lfmr -lgd -ljpeg -lz -o fmrplot
+	$(CC) fmrplot.c -lfmr -lgd -ljpeg -lz $(CFLAGS) -o fmrplot
 	$(CP) fmrplot $(LOCALBIN)
 	$(CP) fmrplot.1 $(LOCALMAN)
 
