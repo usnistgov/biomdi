@@ -25,7 +25,7 @@ ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CP) libfrf.dll.a $(LOCALLIB)
 	$(CP) libfrf.dll $(LOCALLIB)
 else
-	$(CC) $(CFLAGS) -shared $(SOURCES) -o libfrf.so
+	$(CC) -shared $(SOURCES) $(CFLAGS) -o libfrf.so
 	$(CP) libfrf.so $(LOCALLIB)
 endif
 endif

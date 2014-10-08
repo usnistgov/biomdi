@@ -29,7 +29,7 @@ ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CP) libfir.dll.a $(LOCALLIB)
 	$(CP) libfir.dll $(LOCALLIB)
 else
-	$(CC) $(CFLAGS) -shared $(SOURCES) -o libfir.so
+	$(CC) -shared $(SOURCES) $(CFLAGS) -o libfir.so
 	$(CP) libfir.so $(LOCALLIB)
 endif
 endif
