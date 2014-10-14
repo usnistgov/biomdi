@@ -17,19 +17,19 @@ OBJECTS = iid.o iid_ext.o validate.o
 
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
-	$(CC) -dynamiclib $(CFLAGS) $(SOURCES) $(EXTRALIBS) -L$(BIOMDILIB) -lbiomdi -o libiid.dylib
+	$(CC) -dynamiclib $(CFLAGS) $(SOURCES) $(EXTRALIBS) $(BIOMDIINC) $(BIOMDILIB) -o libiid.dylib
 	$(CP) libiid.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CC) $(CFLAGS) -c $(SOURCES)
 	ar rs libiid.a $(OBJECTS)
 	ranlib libiid.a
-	$(CC) $(CFLAGS)-shared -o libiid.dll -Wl,--out-implib=libiid.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libiid.a -Wl,--no-whole-archive -lbiomdi
+	$(CC) $(CFLAGS)-shared -o libiid.dll -Wl,--out-implib=libiid.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libiid.a -Wl,--no-whole-archive $(BIOMDIINC) $(BIOMDILIB)
 	$(CP) libiid.a $(LOCALLIB)
 	$(CP) libiid.dll.a $(LOCALLIB)
 	$(CP) libiid.dll $(LOCALLIB)
 else
-	$(CC) -shared $(SOURCES) $(CFLAGS) -o libiid.so
+	$(CC) -shared $(SOURCES) $(CFLAGS) $(BIOMDIINC) $(BIOMDILIB) -o libiid.so
 	$(CP) libiid*.so $(LOCALLIB)
 endif
 endif

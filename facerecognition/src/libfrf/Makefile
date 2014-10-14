@@ -13,19 +13,19 @@ OBJECTS = fb.o fdb.o fpb.o validate.o
 
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
-	$(CC) -dynamiclib $(CFLAGS) $(SOURCES) $(EXTRALIBS) -L$(BIOMDILIB) -lbiomdi -o libfrf.dylib
+	$(CC) -dynamiclib $(CFLAGS) $(SOURCES) $(EXTRALIBS) $(BIOMDIINC) $(BIOMDILIB) -o libfrf.dylib
 	$(CP) libfrf.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CC) $(CFLAGS) -c $(SOURCES)
 	ar rs libfrf.a $(OBJECTS)
 	ranlib libfrf.a
-	$(CC) $(CFLAGS) -shared -o libfrf.dll -Wl,--out-implib=libfrf.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfrf.a -Wl,--no-whole-archive -lbiomdi
+	$(CC) $(CFLAGS) -shared -o libfrf.dll -Wl,--out-implib=libfrf.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfrf.a -Wl,--no-whole-archive $(BIOMDIINC) $(BIOMDILIB)
 	$(CP) libfrf.a $(LOCALLIB)
 	$(CP) libfrf.dll.a $(LOCALLIB)
 	$(CP) libfrf.dll $(LOCALLIB)
 else
-	$(CC) -shared $(SOURCES) $(CFLAGS) -o libfrf.so
+	$(CC) -shared $(SOURCES) $(CFLAGS) $(BIOMDIINC) $(BIOMDILIB) -o libfrf.so
 	$(CP) libfrf.so $(LOCALLIB)
 endif
 endif

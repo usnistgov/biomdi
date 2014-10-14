@@ -13,11 +13,11 @@ OBJECTS = fmr.o fvmr.o fmd.o fedb.o polar.o random.o xy.o angle.o quality.o ansi
 
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
-	$(CC) -dynamiclib $(CFLAGS) $(SOURCES) $(EXTRALIBS) -L$(BIOMDILIB) -lbiomdi -o libfmr.dylib
+	$(CC) -dynamiclib $(CFLAGS) $(SOURCES) $(EXTRALIBS) $(BIOMDIINC) $(BIOMDILIB) -o libfmr.dylib
 	$(CP) libfmr.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
-	$(CC) $(CFLAGS) -c $(SOURCES)
+	$(CC) $(CFLAGS) $(BIOMDIINC) $(BIOMDILIB) -c $(SOURCES)
 	ar rs libfmr.a $(OBJECTS)
 	ranlib libfmr.a
 	$(CC) $(CFLAGS) -shared -o libfmr.dll -Wl,--out-implib=libfmr.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfmr.a -Wl,--no-whole-archive -lbiomdi
@@ -25,7 +25,7 @@ ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CP) libfmr.dll.a $(LOCALLIB)
 	$(CP) libfmr.dll $(LOCALLIB)
 else
-	$(CC) -shared $(SOURCES) $(CFLAGS) -lm -o libfmr.so
+	$(CC) -shared $(SOURCES) $(CFLAGS) $(BIOMDIINC) $(BIOMDILIB) -lm -o libfmr.so
 	$(CP) libfmr.so $(LOCALLIB)
 endif
 endif
