@@ -17,19 +17,19 @@ OBJECTS = fir.o fivr.o validate.o
 all: $(SOURCES)
 ifeq ($(OS), Darwin)
 	$(CC) -c $(CFLAGS) $(SOURCES)
-	$(CC) -dynamiclib $(CFLAGS) $(SOURCES) $(EXTRALIBS) $(BIOMDIINC) $(BIOMDILIB) -o libfir.dylib
+	$(CC) -dynamiclib $(CFLAGS) $(SOURCES) $(EXTRALIBS) -o libfir.dylib
 	$(CP) libfir.dylib $(LOCALLIB)
 else
 ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CC) -c $(CFLAGS) $(SOURCES)
 	ar rs libfir.a $(OBJECTS)
 	ranlib libfir.a
-	$(CC) $(CFLAGS) -shared -o libfir.dll -Wl,--out-implib=libfir.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfir.a -Wl,--no-whole-archive $(BIOMDIINC) $(BIOMDILIB)
+	$(CC) $(CFLAGS) -shared -o libfir.dll -Wl,--out-implib=libfir.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfir.a -Wl,--no-whole-archive
 	$(CP) libfir.a $(LOCALLIB)
 	$(CP) libfir.dll.a $(LOCALLIB)
 	$(CP) libfir.dll $(LOCALLIB)
 else
-	$(CC) -shared $(SOURCES) $(CFLAGS) $(BIOMDIINC) $(BIOMDILIB) -o libfir.so
+	$(CC) -shared $(SOURCES) $(CFLAGS) -o libfir.so
 	$(CP) libfir.so $(LOCALLIB)
 endif
 endif

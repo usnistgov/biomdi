@@ -15,16 +15,16 @@ LIBFMRSRC = ../libfmr/fedb.c ../libfmr/fmd.c ../libfmr/fmr.c ../libfmr/fvmr.c ..
 all:	minexv minexov minex2v
 
 minexv: minexv.c $(LIBFMRSRC)
-	$(CC) -DMINEX $(LIBFMRSRC) -DMINEX04 minexv.c -o minexv -lm $(BIOMDIINC) $(BIOMDILIB) $(CFLAGS) 
+	$(CC) -DMINEX $(LIBFMRSRC) -DMINEX04 minexv.c -o minexv -lm $(CFLAGS) 
 	$(CP) minexv.1 $(LOCALMAN)
 	$(CP) minexv $(LOCALBIN)
 
 minexov: minexv.c $(LIBFMRSRC)
-	$(CC) -DMINEX $(LIBFMRSRC) -DOMINEX minexv.c -o minexov -lm $(BIOMDIINC) $(BIOMDILIB) $(CFLAGS) 
+	$(CC) -DMINEX $(LIBFMRSRC) -DOMINEX minexv.c -o minexov -lm $(CFLAGS) 
 	$(CP) minexov $(LOCALBIN)
 
 minex2v: minexv.c $(LIBFMR)
-	$(CC) -DMINEX2 minexv.c -lfmr -o minex2v -lm $(BIOMDIINC) $(BIOMDILIB) $(CFLAGS) 
+	$(CC) -DMINEX2 minexv.c -lfmr -o minex2v -lm $(CFLAGS) 
 	$(CP) minex2v $(LOCALBIN)
 
 clean:
