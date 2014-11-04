@@ -20,7 +20,7 @@ ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CC) $(CFLAGS) -c $(SOURCES)
 	ar rs libfrf.a $(OBJECTS)
 	ranlib libfrf.a
-	$(CC) $(CFLAGS) -shared -o libfrf.dll -Wl,--out-implib=libfrf.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfrf.a -Wl,--no-whole-archive
+	$(CC) -shared -o libfrf.dll -Wl,--out-implib=libfrf.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfrf.a -Wl,--no-whole-archive $(CFLAGS)
 	$(CP) libfrf.a $(LOCALLIB)
 	$(CP) libfrf.dll.a $(LOCALLIB)
 	$(CP) libfrf.dll $(LOCALLIB)

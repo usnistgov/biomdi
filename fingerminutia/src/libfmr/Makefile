@@ -20,7 +20,7 @@ ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CC) $(CFLAGS) -c $(SOURCES)
 	ar rs libfmr.a $(OBJECTS)
 	ranlib libfmr.a
-	$(CC) $(CFLAGS) -shared -o libfmr.dll -Wl,--out-implib=libfmr.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfmr.a -Wl,--no-whole-archive -lbiomdi
+	$(CC) -shared -o libfmr.dll -Wl,--out-implib=libfmr.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfmr.a -Wl,--no-whole-archive -lbiomdi $(CFLAGS)
 	$(CP) libfmr.a $(LOCALLIB)
 	$(CP) libfmr.dll.a $(LOCALLIB)
 	$(CP) libfmr.dll $(LOCALLIB)

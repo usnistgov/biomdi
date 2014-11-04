@@ -24,7 +24,7 @@ ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CC) -c $(CFLAGS) $(SOURCES)
 	ar rs libfir.a $(OBJECTS)
 	ranlib libfir.a
-	$(CC) $(CFLAGS) -shared -o libfir.dll -Wl,--out-implib=libfir.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfir.a -Wl,--no-whole-archive
+	$(CC) -shared -o libfir.dll -Wl,--out-implib=libfir.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libfir.a -Wl,--no-whole-archive $(CFLAGS)
 	$(CP) libfir.a $(LOCALLIB)
 	$(CP) libfir.dll.a $(LOCALLIB)
 	$(CP) libfir.dll $(LOCALLIB)

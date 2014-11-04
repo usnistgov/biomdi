@@ -24,7 +24,7 @@ ifeq ($(findstring CYGWIN,$(OS)), CYGWIN)
 	$(CC) $(CFLAGS) -c $(SOURCES)
 	ar rs libiid.a $(OBJECTS)
 	ranlib libiid.a
-	$(CC) $(CFLAGS) -shared -o libiid.dll -Wl,--out-implib=libiid.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libiid.a -Wl,--no-whole-archive
+	$(CC) -shared -o libiid.dll -Wl,--out-implib=libiid.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive libiid.a -Wl,--no-whole-archive $(CFLAGS)
 	$(CP) libiid.a $(LOCALLIB)
 	$(CP) libiid.dll.a $(LOCALLIB)
 	$(CP) libiid.dll $(LOCALLIB)
