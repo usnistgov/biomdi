@@ -739,7 +739,7 @@ clone_iibdb(IIBDB *src, IIBDB **dst, int cloneimg)
 				    (uint8_t *)malloc(srciih->image_length);
 				if (dstiih->image_data == NULL)
 					ALLOC_ERR_OUT("Cloned image data");
-				bcopy(srciih->image_data, dstiih->image_data,
+				memcpy(dstiih->image_data, srciih->image_data,
 				    srciih->image_length);
 			} else {
 				dstiih->image_data = NULL;

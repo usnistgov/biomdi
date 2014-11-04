@@ -56,7 +56,6 @@ print_fmr_stats(FMR *fmr) {
 
 int main(int argc, char *argv[])
 {
-	char *usage = "usage: test_fmr <infile> (must be ANSI FMR)";
 	FILE *infp;
 	FILE *outfp;
 	FMR *fmr;
@@ -65,7 +64,7 @@ int main(int argc, char *argv[])
 	struct stat sb;
 
 	if (argc != 2) {
-		printf("%s\n", usage);
+		printf("usage: %s <infile> (must be ANSI FMR)\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 

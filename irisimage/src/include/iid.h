@@ -41,6 +41,8 @@
 #ifndef _IID_H
 #define _IID_H
 
+#include <string.h>
+
 #define IID_FORMAT_ID				"IIR"
 #define IID_FORMAT_ID_LEN			4
 
@@ -324,19 +326,19 @@ char * iid_code_to_str(int category, int code);
  */
 int clone_iibdb(IIBDB *src, IIBDB **dst, int cloneimg);
 
-#define COPY_IIH(_src, _dst)						\
-	bcopy(&_src->iih_startcopy, &_dst->iih_startcopy,		\
-	    (unsigned)((uint8_t *)&_dst->iih_endcopy -			\
-		(uint8_t *)&_dst->iih_startcopy))
+#define COPY_IIH(src, dst)						\
+	memcpy(&dst->iih_startcopy, &src->iih_startcopy,		\
+	    (unsigned)((uint8_t *)&dst->iih_endcopy -			\
+		(uint8_t *)&dst->iih_startcopy))
 
-#define COPY_IRH(_src, _dst)						\
-	bcopy(&_src->irh_startcopy, &_dst->irh_startcopy,		\
-	    (unsigned)((uint8_t *)&_dst->irh_endcopy -			\
-		(uint8_t *)&_dst->irh_startcopy))
+#define COPY_IRH(src, dst)						\
+	memcpy(&dst->irh_startcopy, &src->irh_startcopy,		\
+	    (unsigned)((uint8_t *)&dst->irh_endcopy -			\
+		(uint8_t *)&dst->irh_startcopy))
 
-#define COPY_IBSH(_src, _dst)						\
-	bcopy(&_src->ibsh_startcopy, &_dst->ibsh_startcopy,		\
-	    (unsigned)((uint8_t *)&_dst->ibsh_endcopy -			\
-		(uint8_t *)&_dst->ibsh_startcopy))
+#define COPY_IBSH(src, dst)						\
+	memcpy(&dst->ibsh_startcopy, &src->ibsh_startcopy,		\
+	    (unsigned)((uint8_t *)&dst->ibsh_endcopy -			\
+		(uint8_t *)&dst->ibsh_startcopy))
 
 #endif 	/* _IID_H */

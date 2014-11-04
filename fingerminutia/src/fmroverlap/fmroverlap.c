@@ -237,8 +237,8 @@ compare_fvmrs(FVMR *fvmr1, FVMR *fvmr2)
 	paired[1] = (unsigned char *)malloc(mcount[1] * sizeof(unsigned char));
 	if (paired[1] == NULL)
 		ALLOC_ERR_OUT("Paired flags");
-	bzero((void *)paired[0], mcount[0]);
-	bzero((void *)paired[1], mcount[1]);
+	memset((void *)paired[0], 0, mcount[0]);
+	memset((void *)paired[1], 0, mcount[1]);
 
 	dmat = (double **)malloc(mcount[0] * sizeof(double *));
 	if (dmat == NULL)

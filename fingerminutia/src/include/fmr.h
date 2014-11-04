@@ -52,6 +52,8 @@
 #ifndef _FMR_H
 #define _FMR_H
 
+#include <string.h>
+
 // Stupid
 #ifndef TRUE
 #define TRUE (1)
@@ -197,7 +199,7 @@ struct finger_minutiae_data {
 };
 typedef struct finger_minutiae_data FMD;
 #define COPY_FMD(src, dst)				\
-	bcopy(&src->fmd_startcopy, &dst->fmd_startcopy, \
+	memcpy(&dst->fmd_startcopy, &src->fmd_startcopy, \
             (unsigned) ((uint8_t *)&dst->fmd_endcopy -	\
 		(uint8_t *)&dst->fmd_startcopy))
 
@@ -215,7 +217,7 @@ struct ridge_count_data {
 };
 typedef struct ridge_count_data RCD;
 #define COPY_RCD(src, dst)				\
-	bcopy(&src->rcd_startcopy, &dst->rcd_startcopy, \
+	memcpy(&dst->rcd_startcopy, &src->rcd_startcopy, \
             (unsigned) ((uint8_t *)&dst->rcd_endcopy -	\
 		(uint8_t *)&dst->rcd_startcopy))
 
@@ -244,7 +246,7 @@ struct core_data {
 };
 typedef struct core_data CD;
 #define COPY_CD(src, dst)				\
-	bcopy(&src->cd_startcopy, &dst->cd_startcopy,	\
+	memcpy(&dst->cd_startcopy, &src->cd_startcopy,	\
             (unsigned) ((uint8_t *)&dst->cd_endcopy -	\
 		(uint8_t *)&dst->cd_startcopy))
 
@@ -267,7 +269,7 @@ struct delta_data {
 };
 typedef struct delta_data DD;
 #define COPY_DD(src, dst)				\
-	bcopy(&src->dd_startcopy, &dst->dd_startcopy,	\
+	memcpy(&dst->dd_startcopy, &src->dd_startcopy,	\
             (unsigned) ((uint8_t *)&dst->dd_endcopy -	\
 		(uint8_t *)&dst->dd_startcopy))
 
@@ -286,7 +288,7 @@ struct core_delta_data_block {
 };
 typedef struct core_delta_data_block CDDB;
 #define COPY_CDDB(src, dst)					\
-	bcopy(&src->cddb_startcopy, &dst->cddb_startcopy,	\
+	memcpy(&dst->cddb_startcopy, &src->cddb_startcopy,	\
             (unsigned) ((uint8_t *)&dst->cddb_endcopy -		\
 		(uint8_t *)&dst->cddb_startcopy))
 
@@ -311,7 +313,7 @@ struct finger_extended_data {
 };
 typedef struct finger_extended_data FED;
 #define COPY_FED(src, dst)				\
-	bcopy(&src->fed_startcopy, &dst->fed_startcopy,	\
+	memcpy(&dst->fed_startcopy, &src->fed_startcopy,	\
             (unsigned) ((uint8_t *)&dst->fed_endcopy -	\
 		(uint8_t *)&dst->fed_startcopy))
 
@@ -330,7 +332,7 @@ struct finger_extended_data_block {
 };
 typedef struct finger_extended_data_block FEDB;
 #define COPY_FEDB(src, dst)					\
-	bcopy(&src->fedb_startcopy, &dst->fedb_startcopy,	\
+	memcpy(&dst->fedb_startcopy, &src->fedb_startcopy,	\
             (unsigned) ((uint8_t *)&dst->fedb_endcopy -		\
 		(uint8_t *)&dst->fedb_startcopy))
 
@@ -365,7 +367,7 @@ struct finger_view_minutiae_record {
 };
 typedef struct finger_view_minutiae_record FVMR;
 #define COPY_FVMR(src, dst)					\
-	bcopy(&src->fvmr_startcopy, &dst->fvmr_startcopy,	\
+	memcpy(&dst->fvmr_startcopy, &src->fvmr_startcopy,	\
             (unsigned) ((uint8_t *)&dst->fvmr_endcopy -		\
 		(uint8_t *)&dst->fvmr_startcopy))
 
@@ -417,7 +419,7 @@ struct finger_minutiae_record {
 };
 typedef struct finger_minutiae_record FMR;
 #define COPY_FMR(src, dst)				\
-	bcopy(&src->fmr_startcopy, &dst->fmr_startcopy,	\
+	memcpy(&dst->fmr_startcopy, &src->fmr_startcopy,	\
             (unsigned) ((uint8_t *)&dst->fmr_endcopy -	\
 		(uint8_t *)&dst->fmr_startcopy))
 

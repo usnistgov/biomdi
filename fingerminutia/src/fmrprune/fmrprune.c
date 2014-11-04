@@ -279,7 +279,7 @@ copy_and_select_fvmr(FVMR *src, FVMR *dst, int mcount)
 	int m, num;
 
 	/* Copy the header information from the source FVMR */
-	bcopy(&src->fvmr_startcopy, &dst->fvmr_startcopy,
+	memcpy(&dst->fvmr_startcopy, &src->fvmr_startcopy,
             (unsigned) ((uint8_t *)&dst->fvmr_endcopy -
 		(uint8_t *)&dst->fvmr_startcopy));
 	/* Reset the minutiae count in the output as it will be incremented

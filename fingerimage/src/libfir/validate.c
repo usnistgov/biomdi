@@ -182,12 +182,11 @@ static biomdiIntSet impression_types = {
 int
 validate_fivr(struct finger_image_view_record *fivr)
 {
-	int ret;
-	int status = VALIDATE_OK;
+	int ret = VALIDATE_OK;
 
 	if (fivr->length < FIVR_HEADER_LENGTH) {
 		ERRP("Record length is less than minimum");
-		status = VALIDATE_ERROR;
+		ret = VALIDATE_ERROR;
 	}
 	if (!inIntSet(finger_palm_positions, fivr->finger_palm_position)) {
 		ERRP("Finger position is invalid");
@@ -196,16 +195,16 @@ validate_fivr(struct finger_image_view_record *fivr)
 	if ((fivr->count_of_views < FIR_MIN_VIEW_COUNT) ||
 	    (fivr->count_of_views > FIR_MAX_VIEW_COUNT)) {
 		ERRP("Count of views is invalid");
-		status = VALIDATE_ERROR;
+		ret = VALIDATE_ERROR;
 	}
 	if ((fivr->view_number < FIR_MIN_VIEW_COUNT) ||
 	    (fivr->view_number > FIR_MAX_VIEW_COUNT)) {
 		ERRP("View number is invalid");
-		status = VALIDATE_ERROR;
+		ret = VALIDATE_ERROR;
 	}
 	if (fivr->quality != UNDEFINED_IMAGE_QUALITY) {
 		ERRP("Quality is invalid");
-		status = VALIDATE_ERROR;
+		ret = VALIDATE_ERROR;
 	}
 	if (!inIntSet(impression_types, fivr->impression_type)) {
 		ERRP("Finger position is invalid");
@@ -213,7 +212,7 @@ validate_fivr(struct finger_image_view_record *fivr)
 	}
 	if (fivr->reserved != 0) {
 		ERRP("Reserved is not 0");
-		status = VALIDATE_ERROR;
+		ret = VALIDATE_ERROR;
 	}
-	return (status);
+	return (ret);
 }
