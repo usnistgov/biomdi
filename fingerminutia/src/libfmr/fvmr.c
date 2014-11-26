@@ -309,9 +309,12 @@ print_fvmr(FILE *fp, struct finger_view_minutiae_record *fvmr)
 		if (print_fmd(fp, fmd) != PRINT_OK)
 			ERR_OUT("Could not print minutiae data");
 	}
-	if (fvmr->extended != NULL)
+	if (fvmr->extended != NULL) {
 		if (print_fedb(fp, fvmr->extended) != PRINT_OK)
-			ERR_OUT("Could not write extended data block");
+			ERR_OUT("Could not print extended data block");
+	} else {
+		fprintf(fp, "\nFinger Extended Data: None present.\n");
+	}
 
 	fprintf(fp, "----------------------------------------------------\n");
 	return PRINT_OK;
