@@ -59,6 +59,9 @@ minex_verify(FILE *fp, struct finger_minutiae_record *fmr)
 	struct finger_extended_data *fed;
 	struct ridge_count_data **rcds;
 	int total_cores, total_deltas, total_ridges;
+#if (OMINEX)
+	uint16_t expected_length;
+#endif
 
 	// Check the header info against file reality
 	if (fstat(fileno(fp), &sb) < 0) {
@@ -145,11 +148,27 @@ minex_verify(FILE *fp, struct finger_minutiae_record *fmr)
 	}
 #endif
 
+#if (OMINEX)
+	expected_length = FMR_ANSI_SMALL_HEADER_LENGTH + FVMR_HEADER_LENGTH +
+	    (fvmr->number_of_minutiae * FMD_DATA_LENGTH) + FEDB_HEADER_LENGTH;
+	if (fmr->record_length != expected_length) {
+		ERRP("Unexpected file size (expected: %u, actual: %u)",
+		    expected_length, fmr->record_length);
+		return(VALIDATE_ERROR);
+	}
+#endif
+
 	// Check the extended data attached to the FVMR
 	if (fvmr->extended == NULL) {
+#if !(OMINEX)
 		INFOP("There is no extended data on the FVMR");
+#endif
 		return (ret); 	// All remaining checks involved extended data
 	}
+#if (OMINEX)
+	ERRP("There is extended data on the FVMR");
+	return (VALIDATE_ERROR);
+#endif
 
 	// Check each extended data record
 	// First we check for Core and Delta information
@@ -292,9 +311,21 @@ main(int argc, char *argv[])
 		printf("MINEX Validation\n");
 		printf("----------------\n");
 		if (minex_verify(fp, fmr) == VALIDATE_OK) {
-			fprintf(stdout, "Passes MINEX04 criteria.\n");
+#if (OMINEX)
+			printf("Passes Ongoing MINEX criteria.\n");
+#elif (MINEX2)
+			printf("Passes MINEXII criteria.\n");
+#elif (MINEX04)
+			printf("Passes MINEX04 criteria.\n");
+#endif
 		} else {
-			fprintf(stdout, "Does not pass MINEX04 criteria.\n");
+#if (OMINEX)
+			printf("Does not pass Ongoing MINEX criteria.\n");
+#elif (MINEX2)
+			printf("Does not pass MINEXII criteria.\n");
+#elif (MINEX04)
+			printf("Does not pass MINEX04 criteria.\n");
+#endif
 			exit_code = EXIT_FAILURE;
 		}
 
