@@ -661,6 +661,7 @@ main(int argc, char *argv[])
 	int i;
 	int idc;
 	int idx;
+	int type9_count;
 
 	get_options(argc, argv);
 
@@ -671,8 +672,10 @@ main(int argc, char *argv[])
 		ERR_OUT("Could not read AN2K file.");
 
 	/* Create the M1 finger minutiae record */
+	type9_count = 0;
 	for (i = 1; i < ansi_nist->num_records; i++) {
 		if (ansi_nist->records[i]->type == TYPE_9_ID) {
+			type9_count++;
 
 			/*** Image designation character   ***/
 			if (lookup_ANSI_NIST_field(&field, &idx, IDC_ID, 
@@ -709,11 +712,10 @@ main(int argc, char *argv[])
 				else
 				    fprintf(stdout, "Finger Minutiae Record is valid.\n");
 			}
-
 			free_fmr(fmr);
-
 		}
 	}
+	printf("Type-9 (finger minutiae) record count is %d.\n", type9_count);
 
 	free_ANSI_NIST(ansi_nist);
 
