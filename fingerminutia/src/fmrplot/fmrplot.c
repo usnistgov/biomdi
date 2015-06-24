@@ -213,16 +213,16 @@ int
 new_image(FILE *img_fp, int x_size, int y_size, gdImagePtr *img)
 {
 	int x, y;
-	unsigned char **img_data;
+	unsigned char **img_data = NULL;
 	int color;
 	int ret = -1;
 
 	// Allocate memory for the image data that will be read from
 	// a file: Y rows of X samples
-	img_data = (unsigned char **)malloc(y_size * sizeof(char *));
-	if (img_data == NULL)
-		ALLOC_ERR_EXIT("memory for image data");
 	if (img_fp != NULL) {
+		img_data = (unsigned char **)malloc(y_size * sizeof(char *));
+		if (img_data == NULL)
+			ALLOC_ERR_EXIT("memory for image data");
 		for (y = 0; y < y_size; y++) {
 			img_data[y] = (unsigned char *)
 			    malloc(x_size * sizeof(char));
@@ -251,10 +251,14 @@ new_image(FILE *img_fp, int x_size, int y_size, gdImagePtr *img)
 
 	ret = 0;
 err_out:
-	for (y = 0; y < y_size; y++)
-		if (img_data[y] != NULL)
-			free(img_data[y]);
-	free(img_data);
+	if (img_data != NULL) {
+		for (y = 0; y < y_size; y++) {
+			if (img_data[y] != NULL) {
+				free(img_data[y]);
+			}
+		}
+		free(img_data);
+	}
 	return (ret);
 }
 
