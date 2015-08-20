@@ -31,7 +31,8 @@ extern "C"
 #include <vector>
 #include <iostream>
 
-#include <m1io.h>
+#include <biomdimacro.h>
+#include <biomdi.h>
 #include <fir.h>
 
 // #include <sys/param.h>
@@ -138,31 +139,31 @@ fir_general_header::write(FILE *fp) const
 	unsigned char c2[2] = {0, 0};
 	unsigned short sval;
 
-	OWRITE(header.format_id, sizeof(char), FORMAT_ID_LEN, fp);
-	OWRITE(header.spec_version, sizeof(char), SPEC_VERSION_LEN, fp);
+	OWRITE(header.format_id, sizeof(char), FIR_FORMAT_ID_LEN, fp);
+	OWRITE(header.spec_version, sizeof(char), FIR_SPEC_VERSION_LEN, fp);
 
 	// INICTS 381 is perverse in that the length field is 6 bytes.
 	// This program internally uses a four byte uint up until it
 	// has to be written.  This is implemented by writing two 0 bytes,
 	// then writing the record length.
 	OWRITE(c2, sizeof(char), 2, fp);
-	LWRITE(&header.record_length, fp);
+	LWRITE(header.record_length, fp);
 
-	SWRITE(&header.product_identifier_owner, fp);
-        SWRITE(&header.product_identifier_type, fp);
+	SWRITE(header.product_identifier_owner, fp);
+        SWRITE(header.product_identifier_type, fp);
 	sval = header.compliance << HDR_COMPLIANCE_SHIFT;
 	sval += header.scanner_id;
-	SWRITE(&sval, fp);
-	SWRITE(&header.image_acquisition_level, fp);
-	CWRITE(&header.num_fingers_or_palm_images, fp);
-	CWRITE(&header.scale_units, fp);
-	SWRITE(&header.x_scan_resolution, fp);
-	SWRITE(&header.y_scan_resolution, fp);
-	SWRITE(&header.x_image_resolution, fp);
-	SWRITE(&header.y_image_resolution, fp);
-	CWRITE(&header.pixel_depth, fp);
-	CWRITE(&header.image_compression_algorithm, fp);
-	SWRITE(&header.reserved, fp);
+	SWRITE(sval, fp);
+	SWRITE(header.image_acquisition_level, fp);
+	CWRITE(header.num_fingers_or_palm_images, fp);
+	CWRITE(header.scale_units, fp);
+	SWRITE(header.x_scan_resolution, fp);
+	SWRITE(header.y_scan_resolution, fp);
+	SWRITE(header.x_image_resolution, fp);
+	SWRITE(header.y_image_resolution, fp);
+	CWRITE(header.pixel_depth, fp);
+	CWRITE(header.image_compression_algorithm, fp);
+	SWRITE(header.reserved, fp);
 
 	return;
 
@@ -235,15 +236,15 @@ fir_view::fir_view(
 void
 fir_view::write(FILE *fp) const
 {
-	LWRITE(&fivr.length, fp);
-	CWRITE(&fivr.finger_palm_position, fp);
-	CWRITE(&fivr.count_of_views, fp);
-	CWRITE(&fivr.view_number, fp);
-	CWRITE(&fivr.quality, fp);
-	CWRITE(&fivr.impression_type, fp);
-	SWRITE(&fivr.horizontal_line_length, fp);
-	SWRITE(&fivr.vertical_line_length, fp);
-	CWRITE(&fivr.reserved, fp);
+	LWRITE(fivr.length, fp);
+	CWRITE(fivr.finger_palm_position, fp);
+	CWRITE(fivr.count_of_views, fp);
+	CWRITE(fivr.view_number, fp);
+	CWRITE(fivr.quality, fp);
+	CWRITE(fivr.impression_type, fp);
+	SWRITE(fivr.horizontal_line_length, fp);
+	SWRITE(fivr.vertical_line_length, fp);
+	CWRITE(fivr.reserved, fp);
 	
 	fwrite(compressed_data, sizeof(unsigned char), compressed_data_size, fp);
 	return;
@@ -276,7 +277,7 @@ fir::add_view(const unsigned char *uncompressed_raster_data,
 	}
 
 	// keep the total volume of data up to data also
-	gh.set_record_length(FIR_HEADER_LENGTH);
+	gh.set_record_length(FIR_ANSI_HEADER_LENGTH);
 	for (unsigned int i = 0; i < n; i++)
 		gh.set_record_length(gh.get_record_length() +
 		    views[i]->fivr.length);
@@ -289,8 +290,8 @@ fir::add_view(const unsigned char *uncompressed_raster_data,
 fir_general_header::fir_general_header()
 {
 
-	strcpy(header.format_id, FORMAT_ID);
-	strcpy(header.spec_version, SPEC_VERSION);
+	strcpy(header.format_id, FIR_FORMAT_ID);
+	strcpy(header.spec_version, FIR_SPEC_VERSION);
 
 	header.record_length = 0;
 	header.product_identifier_owner = 0x00;

@@ -1,3 +1,9 @@
 The pgm2fir program requires the WSQ compression library to be installed
-on the system. This library is included in the NFIS distribution available
-from the NIST image group. See http://fingerprint.nist.gov/NFIS/index.html
+on the system. This library is included in the NBIS distribution available
+from the NIST image group. See 
+http://www.itl.nist.gov/iad/894.03/nigos/nigos.html
+
+Also needed is a PGM support, provided by netpbm, available at:
+http://netpbm.sourceforge.net/
+You can usually install NETPBM from your OS distribution, or MacPorts on
+Mac OS-X or FreeBSD.

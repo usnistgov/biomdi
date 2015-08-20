@@ -8,8 +8,11 @@
 # about its quality, reliability, or any other characteristic.
 #
 include ../common.mk
+ifeq ($(OS), Darwin)
+	LDEXTRA=-Wl,-search_paths_first
+endif
 all: pgm2fir.cpp
-	$(CPP) $? -lnetpbm -lfing -lwsq -llfs -ljpegl -lmlp -lfet -lcblas -lioutil -lutil $(CFLAGS) -o pgm2fir
+	$(CC) $(LDEXTRA) $? -lstdc++ -lnfiq -lmindtct -lnetpbm -lwsq -lutil -ljpegl -lmlp -lfet -lcblas -lioutil -lutil $(CFLAGS) -o pgm2fir
 	${CP} pgm2fir $(LOCALBIN)
 	${CP} pgm2fir.1 $(LOCALMAN)
 
