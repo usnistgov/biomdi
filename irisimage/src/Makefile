@@ -7,13 +7,6 @@
 # its use by other parties, and makes no guarantees, expressed or implied,
 # about its quality, reliability, or any other characteristic.
 #
-#
-# Top-level make file to build all of the M1 source code (library and binaries).
-#
-# If you wish to build pgm2fir, use the following SUBDIRS line. The pgm2fir
-# program requires the WSQ library to be installed. See the pgm2fir/README
-# file for details.
-#
 SUBDIRS := libiid priibdb iibdbv
 
 all:

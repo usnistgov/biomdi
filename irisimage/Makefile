@@ -7,10 +7,6 @@
 # its use by other parties, and makes no guarantees, expressed or implied,
 # about its quality, reliability, or any other characteristic.
 #
-#
-# Top-level make file to build all of the INCITS 381 source code
-# (library and binaries).
-#
 include ../common/common.mk
 SUBDIRS := src
 
