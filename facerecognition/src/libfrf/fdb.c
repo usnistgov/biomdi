@@ -293,7 +293,7 @@ print_fdb(FILE *fp, FDB *fdb)
 	FPRINTF(fp, "\tSize is %ux%u\n", fdb->width, fdb->height);
 
 	FPRINTF(fp, "\tColor Space is %u, Source Type is %u, "
-			"Device Type is %u\n",
+			"Device Type is 0x%04x\n",
 			fdb->image_color_space, fdb->source_type,
 			fdb->device_type);
 	FPRINTF(fp, "\tQuality is %u\n", fdb->quality);
