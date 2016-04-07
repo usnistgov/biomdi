@@ -7,6 +7,7 @@
 .Nd Prints a Finger Image Record in human-readable form.
 .Sh SYNOPSIS
 .Nm
+.Op Fl s
 .Op Fl v
 .Oo Fl ti Ar type Oc
 .Ar file
@@ -30,6 +31,10 @@ specification.
 .Pp
 The options are as follows:
 .Bl -tag
+.It Fl s
+causes the image data to be written to separate files for each image. File
+names are based on the input file name, finger image number, view number,
+and image type.
 .It Fl v
 causes the image file to be verified before printing.
 .It Fl ti\ \&type
@@ -45,9 +50,9 @@ ISO/IEC 19794-4:2005 format.
 The default input type is ANSI.
 .El
 .Sh EXAMPLES
-prfir lfing.381
+prfir -s lfing.381
 .Pp
-Print the finger image records in the file.
+Print the finger image records in the file and save the images.
 .Pp
 prfir -v -ti ISO lfing.ISO
 .Pp

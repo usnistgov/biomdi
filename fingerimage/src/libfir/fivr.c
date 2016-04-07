@@ -69,13 +69,12 @@ read_fivr(FILE *fp, struct finger_image_view_record *fivr)
 	CREAD(&fivr->reserved, fp);
 	// XXX Need stronger constraints here on length
 	if (fivr->length > FIVR_HEADER_LENGTH) {
-		fivr->image_data = (char *)malloc(
-		    fivr->length - FIVR_HEADER_LENGTH);
+		fivr->image_length = fivr->length - FIVR_HEADER_LENGTH;
+		fivr->image_data = (char *)malloc(fivr->image_length);
 		if (fivr->image_data == NULL)
 			ERR_OUT("Could not allocate memory for image data");
 		else
-			OREAD(fivr->image_data, 1,
-			    fivr->length - FIVR_HEADER_LENGTH, fp);
+			OREAD(fivr->image_data, 1, fivr->image_length, fp);
 	}
 	return (READ_OK);
 eof_out:
@@ -98,8 +97,7 @@ write_fivr(FILE *fp, struct finger_image_view_record *fivr)
 	SWRITE(fivr->vertical_line_length, fp);
 	CWRITE(fivr->reserved, fp);
 	if (fivr->image_data != NULL) {
-		OWRITE(fivr->image_data, sizeof(char),
-			    fivr->length - FIVR_HEADER_LENGTH, fp);
+		OWRITE(fivr->image_data, sizeof(char), fivr->image_length, fp);
 	}
 	return (WRITE_OK);
 err_out:

@@ -21,6 +21,8 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <libgen.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -34,10 +36,62 @@
 static void
 usage()
 {
-	fprintf(stderr, "usage: prfir [-v] [-ti <type>] <datafile>\n"
+	fprintf(stderr, "usage: prfir [-s] [-v] [-ti <type>] <datafile>\n"
+			"\t -s Save the images to separate files\n"
 			"\t -v Validate the record\n"
 			"\t -ti <type> is one of ISO ANSI\n");
 	exit (EXIT_FAILURE);
+}
+
+static void
+save_images(FIR *fir, unsigned int fir_num, char *prefix)
+{
+	FIVR *fivr;
+	char fn[PATH_MAX];
+	char *ext;
+	unsigned int view_num;
+
+	switch (fir->image_compression_algorithm) {
+		case COMPRESSION_ALGORITHM_UNCOMPRESSED_NO_BIT_PACKED:
+			ext = "nobitp";
+			break;
+		case COMPRESSION_ALGORITHM_UNCOMPRESSED_BIT_PACKED:
+			ext = "bitp";
+			break;
+		case COMPRESSION_ALGORITHM_COMPRESSED_WSQ:
+			ext = "wsq";
+			break;
+		case COMPRESSION_ALGORITHM_COMPRESSED_JPEG:
+			ext = "jpg";
+			break;
+		case COMPRESSION_ALGORITHM_COMPRESSED_JPEG2000:
+			ext = "jpg2000";
+			break;
+		case COMPRESSION_ALGORITHM_COMPRESSED_PNG:
+			ext = "png";
+			break;
+		default:
+			ext = "unk";
+			break;
+	}
+
+	view_num = 0;
+	TAILQ_FOREACH(fivr, &fir->finger_views, list) {
+		view_num++;
+		sprintf(fn, "%s_fir%u-view%u.%s", prefix, fir_num, view_num,
+		    ext);
+		FILE *fp = fopen(fn, "w+");
+		if (fp == NULL) {
+			fprintf(stderr, "Could not create file %s: %s.\n",
+			    fn, strerror(errno));
+			fprintf(stderr, "Aborting image saves for this view.\n");
+			return;
+		}
+		OWRITE(fivr->image_data, sizeof(char), fivr->image_length, fp);
+err_out:
+		printf("Wrote file %s\n", fn);
+		return;
+	}
 }
 
 int main(int argc, char *argv[])
@@ -51,13 +105,14 @@ int main(int argc, char *argv[])
 	unsigned long long total_length;
 	int v_opt = 0;
 	int ti_opt = 0;
+	int s_opt = 0;
 	char pm;
 
-	if ((argc < 2) || (argc > 5))
+	if ((argc < 2) || (argc > 6))
 		usage();
 
 	in_type = FIR_STD_ANSI;	/* Default input type */
-	while ((ch = getopt(argc, argv, "vt:")) != -1) {
+	while ((ch = getopt(argc, argv, "svt:")) != -1) {
 		switch (ch) {
 			case 't':
 				pm = *(char *)optarg;
@@ -78,6 +133,9 @@ int main(int argc, char *argv[])
 			case 'v' :
 				v_opt = 1;
 				break;
+			case 's' :
+				s_opt = 1;
+				break;
 			default :
 				usage();
 				break;
@@ -87,7 +145,8 @@ int main(int argc, char *argv[])
 	if (argv[optind] == NULL)
 		usage();
 
-	fp = fopen(argv[optind], "rb");
+	char *fn = argv[optind];
+	fp = fopen(fn, "rb");
 	if (fp == NULL) {
 		fprintf(stderr, "open of %s failed: %s\n",
 			argv[optind], strerror(errno));
@@ -105,12 +164,14 @@ int main(int argc, char *argv[])
 	}
 
 	total_length = 0;
+	unsigned int fir_num = 0;
 	ret = READ_ERROR;
 	while (total_length < sb.st_size) {
 		ret = read_fir(fp, fir);
 		if (ret != READ_OK)
 			break;
 		total_length += fir->record_length;
+		fir_num++;
 
 		// Validate the FIR
 		if (v_opt) {
@@ -126,6 +187,10 @@ int main(int argc, char *argv[])
 
 		// Dump the entire FIR
 		print_fir(stdout, fir);
+
+		// Optionally save the images
+		if (s_opt)
+			save_images(fir, fir_num, basename(fn));
 
 		// Free the entire FIR
 		free_fir(fir);

@@ -71,6 +71,7 @@ struct finger_image_view_record {
 
 	// Pointer to the image data that is read from the record
 	char					*image_data;
+	unsigned int				image_length;
 #define fivr_endcopy
 	TAILQ_ENTRY(finger_image_view_record)	list;
 	struct finger_image_record		*fir;	// back pointer to the
