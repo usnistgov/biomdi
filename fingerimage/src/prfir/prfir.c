@@ -50,6 +50,7 @@ save_images(FIR *fir, unsigned int fir_num, char *prefix)
 	char fn[PATH_MAX];
 	char *ext;
 	unsigned int view_num;
+	FILE *fp;
 
 	switch (fir->image_compression_algorithm) {
 		case COMPRESSION_ALGORITHM_UNCOMPRESSED_NO_BIT_PACKED:
@@ -80,18 +81,21 @@ save_images(FIR *fir, unsigned int fir_num, char *prefix)
 		view_num++;
 		sprintf(fn, "%s_fir%u-view%u.%s", prefix, fir_num, view_num,
 		    ext);
-		FILE *fp = fopen(fn, "w+");
+		fp = fopen(fn, "w+");
 		if (fp == NULL) {
 			fprintf(stderr, "Could not create file %s: %s.\n",
 			    fn, strerror(errno));
-			fprintf(stderr, "Aborting image saves for this view.\n");
+			fprintf(stderr, "Aborting image saves for this record.\n");
 			return;
 		}
 		OWRITE(fivr->image_data, sizeof(char), fivr->image_length, fp);
-err_out:
+		fclose(fp);
 		printf("Wrote file %s\n", fn);
-		return;
 	}
+	return;
+err_out:
+	fclose(fp);
+	return;
 }
 
 int main(int argc, char *argv[])
