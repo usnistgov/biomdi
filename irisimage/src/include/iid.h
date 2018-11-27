@@ -9,7 +9,7 @@
 */
 /******************************************************************************/
 /* Header file for the Iris Image Data Record format, as specified in the     */
-/* Iris Exchange (IREX) Evaluation 2008 specification.                        */
+/* ISO/IEX 19794-6:2011 Iris image data specification.                        */
 /*                                                                            */
 /* Layout of the entire iris image biometric data block in memory:            */
 /*                                                                            */
