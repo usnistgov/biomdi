@@ -46,9 +46,11 @@ free_fivr(struct finger_image_view_record *fivr)
 }
 
 void
-add_image_to_fivr(char *image, struct finger_image_view_record *fivr)
+add_image_to_fivr(char *image, unsigned int length,
+    struct finger_image_view_record *fivr)
 {
 	fivr->image_data = image;
+	fivr->image_length = length;
 }
 
 /******************************************************************************/

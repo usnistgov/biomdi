@@ -158,7 +158,7 @@ load_fivr(FILE *fp, struct finger_image_record *fir)
 					    filename);
 				} else {
 					fivr->length += sb.st_size;
-					add_image_to_fivr(buf, fivr);
+					add_image_to_fivr(buf, sb.st_size, fivr);
 				}
 			}
 		}

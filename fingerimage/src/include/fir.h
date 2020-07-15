@@ -202,11 +202,13 @@ free_fivr(struct finger_image_view_record *fivr);
 /*                                                                            */
 /* Parameters:                                                                */
 /*   image  Pointer to the image data.                                        */
+/*   length Length of the image data.                                         */
 /*   fivr   Pointer to the Finger Image View Record.                          */
 /*                                                                            */
 /******************************************************************************/
 void
-add_image_to_fivr(char *image, struct finger_image_view_record *fivr);
+add_image_to_fivr(char *image, unsigned int length,
+    struct finger_image_view_record *fivr);
 
 /******************************************************************************/
 /* Read a complete Finger Image Record from a file, filling in the fields     */
